@@ -1,5 +1,5 @@
 bl_info = {
-    "name"        : "AssemblMe",
+    "name"        : "AssemblMe2",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
     "version"     : (1, 0, 0),
     "blender"     : (2, 78, 0),
