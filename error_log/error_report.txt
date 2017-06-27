@@ -1,0 +1,25 @@
+
+Please copy the following form and paste it into a new issue at https://github.com/bblanimation/lego_add_ons/issues
+
+Don't forget to include a description of your problem! The more information you provide (what you were trying to do, what action directly preceeded the error, etc.), the easier it will be for us to squash the bug.
+
+### COPY EVERYTHING BELOW THIS LINE ###
+
+Description of the Problem:
+
+Blender Version: 002.078.000
+Addon Version: 1.0.0
+Platform Info:
+   sysname = Darwin
+   release = 16.6.0
+   version = Darwin Kernel Version 16.6.0: Fri Apr 14 16:21:16 PDT 2017; root:xnu-3789.60.24~6/RELEASE_X86_64
+   machine = x86_64
+Error:
+EXCEPTION (<class 'TypeError'>): an integer is required (got type str)
+         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/functions/common_functions.py
+000 0072:insertKeyframes() obj.keyframe_insert(data_path=keyframeType, frame=frame, index=idx)
+         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/functions/__init__.py
+001 0294:animateObjects() insertKeyframes(bpy.context.selected_objects, "location", curFrame, locInterpolationMode)
+         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/buttons/createBuildAnimation.py
+002 0116:execute() animationReturnDict = animateObjects(props.objects_to_move, self.curFrame, scn.locInterpolationMode, scn.rotInterpolationMode)
+
