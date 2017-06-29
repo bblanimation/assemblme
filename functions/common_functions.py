@@ -68,7 +68,7 @@ def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default'):
     """ insert key frames for given objects to given frames """
     objList = confirmList(objList)
     for obj in objList:
-        obj.keyframe_insert(data_path=keyframeType, frame=frame)
+        obj.keyframe_insert(data_path=keyframeType, frame=frame, index=-1)
         if interpolationMode != "Default":
             fcurves = []
             for i in range(3): # increase if inserting keyframes for something that takes up more than three fcurves
@@ -76,8 +76,8 @@ def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default'):
                 if fc != None:
                     fcurves.append(fc)
             for fcurve in fcurves:
-                for kf in fcurve.keyframe_points:
-                    kf.interpolation = interpolationMode
+                kf = fcurve.keyframe_points[-1]
+                kf.interpolation = interpolationMode
 
 def deselectAll():
     bpy.ops.object.select_all(action='DESELECT')
@@ -93,18 +93,18 @@ def unhide(objList):
     for obj in objList:
         obj.hide = False
 
-def select(objList=[], active=None, action="select", exclusive=True):
+def select(objList=[], active=None, deselect=False, exclusive=True):
     """ selects objs in list and deselects the rest """
     objList = confirmList(objList)
     try:
-        if action == "select":
+        if not deselect:
             # deselect all if selection is exclusive
             if exclusive and len(objList) > 0:
                 deselectAll()
             # select objects in list
             for obj in objList:
                 obj.select = True
-        elif action == "deselect":
+        elif deselect:
             # deselect objects in list
             for obj in objList:
                 obj.select = False
@@ -121,10 +121,9 @@ def select(objList=[], active=None, action="select", exclusive=True):
 
 def delete(objList):
     objList = confirmList(objList)
-    if select(objList):
-        objs = bpy.data.objects
-        for obj in objList:
-            objs.remove(obj, True)
+    objs = bpy.data.objects
+    for obj in objList:
+        objs.remove(obj, True)
 
 def changeContext(context, areaType):
     """ Changes current context and returns previous area type """

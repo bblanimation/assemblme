@@ -28,6 +28,7 @@ import os
 import traceback
 from math import *
 from .common_functions import *
+from .mesh_generate import *
 props = bpy.props
 
 def getRandomizedOrient(orient):
@@ -175,25 +176,6 @@ def layers(l):
         sys.stderr.write("Argument passed to 'layers()' function not recognized")
     return all
 
-def createVisualizerObject():
-    """ creates a visualizer object with proper initial settings """
-
-    scn = bpy.context.scene
-    bpy.ops.object.add(type='LATTICE', location=(0,0,0), rotation=(0,0,0))
-    bpy.ops.group.create(name="AssemblMe_visualizer")
-    visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
-    visualizerObj.hide_render = True
-    visualizerObj.hide_select = True
-    # visualizerObj.layers = layers("all")
-    vs = scn.visualizerScale
-    nc = scn.visualizerNumCuts
-    bpy.ops.transform.resize(value=(vs,vs,vs))
-    bpy.ops.object.select_all(action='DESELECT')
-    visualizerObj.data.points_u = nc
-    visualizerObj.data.points_v = nc
-    visualizerObj.data.points_w = 1
-    return visualizerObj
-
 def setOrigin(objList, originToType):
     objList = confirmList(objList)
     select(objList)
@@ -224,7 +206,7 @@ def updateAnimType(self, context):
         scn.buildType = "Assemble"
         scn.invertBuild = False
         if groupExists("AssemblMe_visualizer"):
-            visualizer.disable(bpy.context)
+            visualizer.disable(visualizer, bpy.context)
     elif scn.animType == "Explode":
         scn.buildSpeed = 1
         scn.objectVelocity = 15
@@ -245,7 +227,7 @@ def updateAnimType(self, context):
         scn.buildType = "Disassemble"
         scn.invertBuild = False
         if groupExists("AssemblMe_visualizer"):
-            visualizer.disable(bpy.context)
+            visualizer.disable(visualizer, bpy.context)
 
     return None
 

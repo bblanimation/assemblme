@@ -15,9 +15,8 @@ Platform Info:
    version = Darwin Kernel Version 16.6.0: Fri Apr 14 16:21:16 PDT 2017; root:xnu-3789.60.24~6/RELEASE_X86_64
    machine = x86_64
 Error:
-EXCEPTION (<class 'TypeError'>): object of type 'NoneType' has no len()
-         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/functions/__init__.py
-000 0071:getAnimLength() numObjs = len(getNewSelection())
-         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/buttons/refreshBuildAnimationLength.py
-001 0067:execute() scn.animLength = getAnimLength()
+EXCEPTION (<class 'NameError'>): name 'scn' is not defined
+         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/buttons/visualizer.py
+000 0077:enable() visualizerBM = makeSimple2DLattice(scn.visualizerNumCuts, scn.visualizerScale)
+001 0139:execute() self.enable(context)
 

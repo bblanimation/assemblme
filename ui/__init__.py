@@ -160,7 +160,7 @@ class SettingsPanel(Panel):
             col = row.column(align=True)
             col.prop(scn, "yOrient")
             col = split.column(align=True)
-            if groupExists("AssemblMe_visualizer"):
+            if scn.visualizerLinked:
                 col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF")
             else:
                 col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_ON")

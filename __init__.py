@@ -229,7 +229,7 @@ def register():
     bpy.types.Scene.lastLayerVelocity = IntProperty(
         default=-1)
 
-    bpy.types.Scene.visualizerActive = BoolProperty(
+    bpy.types.Scene.visualizerLinked = BoolProperty(
         default=False)
 
     bpy.types.Scene.visualizerScale = FloatProperty(

@@ -33,13 +33,11 @@ class refreshBuildAnimationLength(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        print(0.33)
         if not groupExists("AssemblMe_all_objects_moved"):
             return 0 < len([
                 o for o in context.selected_objects if
                     o.type not in props.ignoredTypes                            # object not of ignored type
                 ])
-        print(0.66)
         return True
 
     def execute(self, context):
