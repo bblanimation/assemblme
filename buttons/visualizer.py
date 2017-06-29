@@ -25,7 +25,7 @@ import math
 from ..functions import *
 props = bpy.props
 
-class visualizeLayerOrientation(bpy.types.Operator):
+class visualizer(bpy.types.Operator):
     """Visualize the layer orientation with a plane"""                          # blender will use this as a tooltip for menu items and buttons.
     bl_idname = "scene.visualize_layer_orientation"                             # unique identifier for buttons and menu items to reference.
     bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
@@ -58,6 +58,12 @@ class visualizeLayerOrientation(bpy.types.Operator):
         for fcurve in fcurves:
             for kf in fcurve.keyframe_points:
                 kf.interpolation = 'LINEAR'
+
+    @classmethod
+    def disable(cls, context):
+        """ disables visualizer """
+        cls.visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
+        cls.cancel(cls, context)
 
     def modal(self, context, event):
         if event.type in {"ESC"}:
@@ -96,26 +102,21 @@ class visualizeLayerOrientation(bpy.types.Operator):
         scn = context.scene
 
         try:
+            # if visualizer is enabled, all we need to do is disable it
+            if groupExists("AssemblMe_visualizer"):
+                self.disable(context)
+                return{"FINISHED"}
+
             # store original_selection and original_active
             self.original_selection = context.selected_objects
             self.original_active = context.active_object
 
-            # if visualizer is enabled, all we need to do is disable it
-            if groupExists("AssemblMe_visualizer"):
-                # activeLayers = list(scn.layers)
-                # scn.layers = list(visualizerObj.layers)
-                self.visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
-                self.cancel(context)
-                for obj in self.original_selection:
-                    obj.select = True
-                scn.objects.active = self.original_active
-                # scn.layers = activeLayers
-                return{"FINISHED"}
-
+            # alert user that visualizer is running
             self.report({"INFO"}, "Running visualizer... ('ESC' to disable)")
 
             # add 'LATTICE' object with proper settings
             self.visualizerObj = createVisualizerObject()
+            self.layersIdx = list(self.visualizerObj.layers)
 
             # initialize self.zOrient for modal
             self.zOrient = None
@@ -125,9 +126,7 @@ class visualizeLayerOrientation(bpy.types.Operator):
                 self.createAnim()
             self.minAndMax = [props.objMinLoc, props.objMaxLoc]
 
-            for obj in self.original_selection:
-                obj.select = True
-            scn.objects.active = self.original_active
+            select(self.original_selection, active=self.original_active)
 
             # create timer for modal
             wm = context.window_manager
@@ -150,9 +149,24 @@ class visualizeLayerOrientation(bpy.types.Operator):
         showErrorMessage("Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the 'Advanced' dropdown menu of AssemblMe)", wrap=240)
 
     def cancel(self, context):
+        scn = context.scene
+        # go to layer with visualizer object
+        activeLayers = list(scn.layers)
+        scn.layers = list(self.visualizerObj.layers)
+
+        # store original_selection and original_active
+        self.original_selection = context.selected_objects
+        self.original_active = context.active_object
+
         # delete latticeRef
         self.visualizerObj.hide_select = False
         delete(self.visualizerObj)
 
         # delete visualizer group
         bpy.data.groups.remove(bpy.data.groups["AssemblMe_visualizer"], do_unlink=True)
+
+        # select original_selection and original_active
+        select(self.original_selection, active=self.original_active)
+
+        # reset to original active layers
+        scn.layers = activeLayers

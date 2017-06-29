@@ -1,23 +1,19 @@
-# README
+# 'AssemblMe':
 
-Blender add-on for automated generation of LEGO Brick Build animation (Blender version: 2.78b)
+AssemblMe is an add-on for Blender that makes layer-by-layer animation efficient and non-destructive. Blender offers excellent physics and particle simulation tools, but when you've got a final resting place for your objects, you'll find yourself keyframing each object individually. AssemblMe provides an intuitive and efficient workflow for creating (and adjusting) assembly and disassembly animations in seconds.
 
-## LEGO Frame-by-Frame Build Add-On:
-  * Features:
-      * Customizable layer size and orientation, build speed, brick velocity, and more.
-      * LEGO bricks can be assembled or disassembled
-      * LEGO brick location and rotation offset can be customized and/or randomized
-      * Convenient button for checking build animation duration before creating it
-      * Convenient 'Start Over' button to clear generated animation
-      * Auto-saves backup file before generating or deleting generated animation
-  * Instructions:
-      * Begin by selecting all LEGO bricks for which you wish to generate build (cameras, lights, and plain axes are ignored)
-      * Automate animation settings using a preset, or customize your animation for a specific result.
-      * Click 'Create Build Animation' (may take up to a few minutes; you can monitor progress in the terminal)
-      * If the animation settings were not to your liking, click 'Start Over' and repeat previous steps
-      * NOTE: Once an animation has been generated, the objects in the animation should only be controlled by their automatically generated 'PLAIN_AXES' parent object. If objects are moved or keyframes are added, these changes will be cleared by the 'Start Over' button.
-  * Future improvements:
-      * Improve calculations for layer orientation to improve visualization accuracy
-      * Add more presets (animating along curve, etc.)
-      * Break files down
-      * Clean and improve code readability
+## Getting AssemblMe
+
+You can purchase AssemblMe on the [Blender Market](https://www.blendermarket.com/products/assemblme)
+
+Purchasing a license entitles you to tool support and helps ensure AssemblMe's continued development.
+
+# Getting Support
+
+You can get support for tools by reading the documentation or posting on the forums.
+
+Support is granted to all customers whom have purchased a license.
+
+# Contributing
+
+We welcome your contributions! If you'd like to contribute then simply Fork the repo, work on your changes, and then submit a pull request. If you're unsure what to contribute, then look at the open issues for the current to-dos.

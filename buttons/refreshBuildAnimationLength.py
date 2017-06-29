@@ -30,6 +30,18 @@ class refreshBuildAnimationLength(bpy.types.Operator):
     bl_label = "Refresh Build Animation Length"                                 # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        print(0.33)
+        if not groupExists("AssemblMe_all_objects_moved"):
+            return 0 < len([
+                o for o in context.selected_objects if
+                    o.type not in props.ignoredTypes                            # object not of ignored type
+                ])
+        print(0.66)
+        return True
+
     def execute(self, context):
         try:
             # set up variables
@@ -38,13 +50,12 @@ class refreshBuildAnimationLength(bpy.types.Operator):
             if groupExists("AssemblMe_all_objects_moved"):
                 # if objects in 'AssemblMe_all_objects_moved', populate objects_to_move with them
                 props.objects_to_move = bpy.data.groups["AssemblMe_all_objects_moved"].objects
-            elif len(context.selected_objects) == 0:
-                    self.report({"WARNING"}, "No objects selected")
-                    return {"CANCELLED"}
+                # set current_frame to animation start frame
+                self.origFrame = scn.frame_current
+                bpy.context.scene.frame_set(scn.frameWithOrigLoc)
             else:
                 # else, populate objects_to_move with selected_objects
                 props.objects_to_move = context.selected_objects
-            self.original_selection = context.selected_objects
 
             # populate props.listZValues
             props.listZValues = getListZValues(props.objects_to_move)
@@ -52,21 +63,12 @@ class refreshBuildAnimationLength(bpy.types.Operator):
             # set props.objMinLoc and props.objMaxLoc
             setBoundsForVisualizer()
 
-            # set current_frame to animation start frame
-            self.origFrame = scn.frame_current
-            bpy.context.scene.frame_set(scn.frameWithOrigLoc)
-
             # calculate how many frames the animation will last (depletes props.listZValues)
             scn.animLength = getAnimLength()
 
-            # deselect all
-            bpy.ops.object.select_all(action='DESELECT')
-            # select original selection
-            for obj in self.original_selection:
-                obj.select = True
-
-            # set current_frame to original current_frame
-            bpy.context.scene.frame_set(self.origFrame)
+            if groupExists("AssemblMe_all_objects_moved"):
+                # set current_frame to original current_frame
+                bpy.context.scene.frame_set(self.origFrame)
 
             # reset upper and lower bound values
             props.z_upper_bound = None

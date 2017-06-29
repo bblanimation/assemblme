@@ -31,6 +31,13 @@ class updateBuildAnimation(bpy.types.Operator):
     bl_label = "Update Build Animation"                                         # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        if not groupExists("AssemblMe_all_objects_moved"):
+            return False
+        return True
+
     def execute(self, context):
         try:
             print("\nRunning 'Create Build Animation' operation")
@@ -45,11 +52,7 @@ class updateBuildAnimation(bpy.types.Operator):
 
             # set up aomGroup variable
             scn = context.scene
-            if not groupExists("AssemblMe_all_objects_moved"):
-                self.report({"WARNING"}, "Nothing to update")
-                return{"CANCELLED"}
-            else:
-                aomGroup = bpy.data.groups["AssemblMe_all_objects_moved"]
+            aomGroup = bpy.data.groups["AssemblMe_all_objects_moved"]
 
             # set current_frame to animation start frame
             self.origFrame = scn.frame_current

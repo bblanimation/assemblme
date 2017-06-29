@@ -31,6 +31,13 @@ class startOver(bpy.types.Operator):
     bl_label = "Start Over"                                                     # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        if not groupExists("AssemblMe_all_objects_moved"):
+            return False
+        return True
+
     def execute(self, context):
         try:
             # get start time
@@ -38,12 +45,8 @@ class startOver(bpy.types.Operator):
 
             # set up aomGroup variable
             scn = context.scene
-            if not groupExists("AssemblMe_all_objects_moved"):
-                self.report({"WARNING"}, "Nothing to start over")
-                return{"CANCELLED"}
-            else:
-                aomGroup = bpy.data.groups["AssemblMe_all_objects_moved"]
-                aoGroup = bpy.data.groups["AssemblMe_axis_obj"]
+            aomGroup = bpy.data.groups["AssemblMe_all_objects_moved"]
+            aoGroup = bpy.data.groups["AssemblMe_axis_obj"]
 
             # save backup of blender file
             if scn.autoSaveOnStartOver:

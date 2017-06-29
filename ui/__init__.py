@@ -49,13 +49,10 @@ class ActionsPanel(Panel):
             animCreated = False
         if not animCreated:
             row.operator("scene.create_build_animation", text="Create Build Animation", icon="EDIT")
-            row = col.row(align=True)
-            row.active = False
-            row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
         else:
             row.operator("scene.update_build_animation", text="Update Build Animation", icon="EDIT")
-            row = col.row(align=True)
-            row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
+        row = col.row(align=True)
+        row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:
             col = layout.column(align=True)
             row = col.row(align=True)
@@ -133,19 +130,23 @@ class SettingsPanel(Panel):
             row.label("Interpolation:")
             row = col.row(align=True)
             row.prop(scn, "locInterpolationMode", text="")
+            row = col.row(align=True)
+            row.label("Layer Height:")
+            row = col.row(align=True)
+            row.prop(scn, "layerHeight", text="Z")
         elif scn.animType == "Explode":
             row = col.row(align=True)
             row.label("Location Offset:")
             row = col.row(align=True)
             row.prop(scn, "locInterpolationMode", text="")
             row = col.row(align=True)
-            row.prop(scn, "locationRandom")
+            row.prop(scn, "locationRandom", text="Random Multiplier")
             row = col.row(align=True)
             row.label("Rotation Offset:")
             row = col.row(align=True)
             row.prop(scn, "rotInterpolationMode", text="")
             row = col.row(align=True)
-            row.prop(scn, "rotationRandom")
+            row.prop(scn, "rotationRandom", text="Random Multiplier")
 
         if scn.animType == "Custom":
             col1 = box.column(align=True)
@@ -167,7 +168,7 @@ class SettingsPanel(Panel):
             row.prop(scn, "orientRandom")
             col1 = box.column(align=True)
             row = col1.row(align=True)
-            row.prop(scn, "boundingBoxHeight")
+            row.prop(scn, "layerHeight")
 
             col = box.column(align=True)
             row = col.row(align=True)

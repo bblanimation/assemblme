@@ -1,5 +1,5 @@
 bl_info = {
-    "name"        : "AssemblMe2",
+    "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
     "version"     : (1, 0, 0),
     "blender"     : (2, 78, 0),
@@ -63,12 +63,12 @@ def register():
         precision=0,
         default=45)
 
-    bpy.types.Scene.boundingBoxHeight = FloatProperty(
+    bpy.types.Scene.layerHeight = FloatProperty(
         name="Layer Height",
         description="Height of the bounding box that selects objects for each frame in animation",
         unit="LENGTH",
         subtype="DISTANCE",
-        min=.0001, max=10,
+        min=.0001, max=50,
         precision=4,
         default=.1)
 
@@ -284,7 +284,7 @@ def unregister():
     del Scn.zLocOffset
     del Scn.yLocOffset
     del Scn.xLocOffset
-    del Scn.boundingBoxHeight
+    del Scn.layerHeight
     del Scn.objectVelocity
     del Scn.buildSpeed
     del Scn.firstFrame

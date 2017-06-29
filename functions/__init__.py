@@ -68,10 +68,10 @@ def getAnimLength():
     tempObjCount = 0
     numLayers = 0
     while len(props.objects_to_move) > tempObjCount:
-        getNewSelection()
-        if len(bpy.context.selected_objects) != 0:
+        numObjs = len(getNewSelection())
+        if numObjs != 0:
             numLayers += 1
-            tempObjCount += len(bpy.context.selected_objects)
+            tempObjCount += numObjs
         elif not scn.skipEmptySelections:
             numLayers += 1
     return (numLayers - 1) * getBuildSpeed() + getObjectVelocity() + 1
@@ -105,35 +105,28 @@ def getListZValues(objects):
     # return list of dictionaries
     return listZValues
 
-def SelectObjectsInBound():
+def getObjectsInBound():
     """ select objects in bounds from props.listZValues """
-
     scn = bpy.context.scene
-
-    # deselect all
-    bpy.ops.object.select_all(action='DESELECT')
-
+    objsInBound = []
     # iterate through objects in listZValues (breaks when outside range)
     for i,lst in enumerate(props.listZValues):
         # set obj and z_loc
         obj = lst["obj"]
         z_loc = lst["loc"]
-
         # if object is camera or lamp, remove from props.objects_to_move
         if obj.type in props.ignoredTypes:
             props.objects_to_move.remove(obj)
-            obj.select = False
             continue
-
         # check if object is in bounding z value
         if z_loc >= props.z_lower_bound and not scn.invertBuild or z_loc <= props.z_lower_bound and scn.invertBuild:
-            obj.select = True
-
+            objsInBound.append(obj)
         # if not, break for loop and pop previous objects from listZValues
         else:
             for j in range(i):
                 props.listZValues.pop(0)
             break
+    return objsInBound
 
 def getNewSelection():
     """ selects next layer of objects """
@@ -146,12 +139,14 @@ def getNewSelection():
     else:
         props.z_upper_bound = props.z_lower_bound
     if scn.invertBuild:
-        props.z_lower_bound = props.z_upper_bound + scn.boundingBoxHeight
+        props.z_lower_bound = props.z_upper_bound + scn.layerHeight
     else:
-        props.z_lower_bound = props.z_upper_bound - scn.boundingBoxHeight
+        props.z_lower_bound = props.z_upper_bound - scn.layerHeight
 
     # select objects in bounds
-    SelectObjectsInBound()
+    objsInBound = getObjectsInBound()
+
+    return objsInBound
 
 def setBoundsForVisualizer():
     for i in range(len(props.listZValues)):
@@ -189,7 +184,7 @@ def createVisualizerObject():
     visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
     visualizerObj.hide_render = True
     visualizerObj.hide_select = True
-    visualizerObj.layers = layers("all")
+    # visualizerObj.layers = layers("all")
     vs = scn.visualizerScale
     nc = scn.visualizerNumCuts
     bpy.ops.transform.resize(value=(vs,vs,vs))
@@ -199,14 +194,23 @@ def createVisualizerObject():
     visualizerObj.data.points_w = 1
     return visualizerObj
 
+def setOrigin(objList, originToType):
+    objList = confirmList(objList)
+    select(objList)
+    bpy.ops.object.origin_set(type=originToType)
+
 def updateAnimType(self, context):
     scn = bpy.context.scene
     if scn.animType == "Custom":
         pass
     elif scn.animType == "Standard Build":
+        from ..buttons.visualizer import visualizer
+        scn.buildSpeed = 1
+        scn.objectVelocity = 30
         scn.xLocOffset = 0
         scn.yLocOffset = 0
-        scn.locInterpolationMode = "LINEAR"
+        scn.zLocOffset = 20
+        scn.locInterpolationMode = "CUBIC"
         scn.locationRandom = 0
         scn.xRotOffset = 0
         scn.yRotOffset = 0
@@ -216,9 +220,14 @@ def updateAnimType(self, context):
         scn.xOrient = 0
         scn.yOrient = 0
         scn.orientRandom = 0.001
+        scn.layerHeight = 0.01
         scn.buildType = "Assemble"
         scn.invertBuild = False
+        if groupExists("AssemblMe_visualizer"):
+            visualizer.disable(bpy.context)
     elif scn.animType == "Explode":
+        scn.buildSpeed = 1
+        scn.objectVelocity = 15
         scn.xLocOffset = 0
         scn.yLocOffset = 0
         scn.zLocOffset = 0
@@ -228,15 +237,19 @@ def updateAnimType(self, context):
         scn.yRotOffset = 0
         scn.zRotOffset = 0
         scn.rotInterpolationMode = "LINEAR"
-        scn.rotationRandom = 25
+        scn.rotationRandom = 20
         scn.xOrient = 0
         scn.yOrient = 0
         scn.orientRandom = 50
+        scn.layerHeight = 15
         scn.buildType = "Disassemble"
         scn.invertBuild = False
+        if groupExists("AssemblMe_visualizer"):
+            visualizer.disable(bpy.context)
+
     return None
 
-def animateObjects(objectsToMove, curFrame, rotInterpolationMode='LINEAR', locInterpolationMode='LINEAR'):
+def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
 
     # initialize variables for use in while loop
@@ -253,8 +266,12 @@ def animateObjects(objectsToMove, curFrame, rotInterpolationMode='LINEAR', locIn
         # iterate num times in while loop
         acc += 1
 
+        # deselect all
+        bpy.ops.object.select_all(action='DESELECT')
+
         # select next objects to animate
-        getNewSelection()
+        newSelection = getNewSelection()
+        select(newSelection)
 
         # print time remaining
         if scn.printStatus:

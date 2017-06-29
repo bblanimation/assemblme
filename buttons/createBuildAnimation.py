@@ -31,21 +31,16 @@ class createBuildAnimation(bpy.types.Operator):
     bl_label = "Create Build Animation"                                         # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
-    def isValid(self):
-        """ ensures operator can execute (if not, reports error) """
-
-        scn = bpy.context.scene
-        # make sure some objects are selected
-        if len(bpy.context.selected_objects) == 0:
-            self.report({"WARNING"}, "No objects selected")
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        if groupExists("AssemblMe_all_objects_moved"):
             return False
-        # make sure no build animation currently in effect
-        elif groupExists("AssemblMe_all_objects_moved"):
-            self.report({"WARNING"}, "Build animation already created. To create a new animation, press 'Start Over' and try again.")
-            return False
-        # else, is valid
         else:
-            return True
+            return 0 < len([
+                o for o in context.selected_objects if
+                    o.type not in props.ignoredTypes                            # object not of ignored type
+                ])
 
     def execute(self, context):
         try:
@@ -54,10 +49,6 @@ class createBuildAnimation(bpy.types.Operator):
             # get start time
             startTime = time.time()
             self.curTime = startTime
-
-            # Ensure operator can execute
-            if not self.isValid():
-                return{"CANCELLED"}
 
             # save backup of blender file
             if context.scene.autoSaveOnCreateAnim:
@@ -76,6 +67,10 @@ class createBuildAnimation(bpy.types.Operator):
             props.objects_to_move = context.selected_objects
             self.original_selection = context.selected_objects
             self.original_active = context.active_object
+
+            # NOTE: This was commented out for the sake of performance
+            # set origin to center of mass for selected objects
+            # setOrigin(props.objects_to_move, 'ORIGIN_CENTER_OF_MASS')
 
             # populate props.listZValues
             props.listZValues = getListZValues(props.objects_to_move)

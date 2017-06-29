@@ -64,15 +64,20 @@ def confirmList(objList):
         objList = [objList]
     return objList
 
-def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default', idx=-1):
+def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default'):
     """ insert key frames for given objects to given frames """
     objList = confirmList(objList)
     for obj in objList:
-        obj.keyframe_insert(data_path=keyframeType, frame=frame, index=idx)
+        obj.keyframe_insert(data_path=keyframeType, frame=frame)
         if interpolationMode != "Default":
-            for fcurve in obj.animation_data.action.fcurves:
-                kf = fcurve.keyframe_points[idx]
-                kf.interpolation = interpolationMode
+            fcurves = []
+            for i in range(3): # increase if inserting keyframes for something that takes up more than three fcurves
+                fc = obj.animation_data.action.fcurves.find(keyframeType, index=i)
+                if fc != None:
+                    fcurves.append(fc)
+            for fcurve in fcurves:
+                for kf in fcurve.keyframe_points:
+                    kf.interpolation = interpolationMode
 
 def deselectAll():
     bpy.ops.object.select_all(action='DESELECT')
@@ -117,8 +122,9 @@ def select(objList=[], active=None, action="select", exclusive=True):
 def delete(objList):
     objList = confirmList(objList)
     if select(objList):
-        unhide(objList)
-        bpy.ops.object.delete()
+        objs = bpy.data.objects
+        for obj in objList:
+            objs.remove(obj, True)
 
 def changeContext(context, areaType):
     """ Changes current context and returns previous area type """
