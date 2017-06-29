@@ -1,7 +1,7 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 0, 0),
+    "version"     : (1, 0, 1),
     "blender"     : (2, 78, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
@@ -41,7 +41,7 @@ props = bpy.props
 def register():
     bpy.utils.register_module(__name__)
 
-    props.addonVersion = "1.0.0"
+    props.addonVersion = "1.0.1"
 
     bpy.types.Scene.firstFrame = IntProperty(
         name="Start",
