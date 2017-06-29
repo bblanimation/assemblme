@@ -54,9 +54,13 @@ class ActionsPanel(Panel):
         row = col.row(align=True)
         row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:
-            col = layout.column(align=True)
+            split = layout.split(align=True, percentage = 0.9)
+            col = split.column(align=True)
             row = col.row(align=True)
             row.operator("scene.report_error", text="Report Error", icon="URL")
+            col = split.column(align=True)
+            row = col.row(align=True)
+            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE")
 
 class SettingsPanel(Panel):
     bl_space_type  = "VIEW_3D"

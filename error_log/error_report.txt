@@ -8,15 +8,18 @@ Don't forget to include a description of your problem! The more information you 
 Description of the Problem:
 
 Blender Version: 002.078.000
-Addon Version: 1.0.0
+Addon Version: 1.0.1
 Platform Info:
    sysname = Darwin
    release = 16.6.0
    version = Darwin Kernel Version 16.6.0: Fri Apr 14 16:21:16 PDT 2017; root:xnu-3789.60.24~6/RELEASE_X86_64
    machine = x86_64
 Error:
-EXCEPTION (<class 'NameError'>): name 'scn' is not defined
-         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/buttons/visualizer.py
-000 0077:enable() visualizerBM = makeSimple2DLattice(scn.visualizerNumCuts, scn.visualizerScale)
-001 0139:execute() self.enable(context)
+EXCEPTION (<class 'TypeError'>): 'idx' is an invalid keyword argument for this function
+         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/functions/common_functions.py
+000 0071:insertKeyframes() obj.keyframe_insert(data_path=keyframeType, frame=frame, idx=-1)
+         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/functions/__init__.py
+001 0291:animateObjects() insertKeyframes(bpy.context.selected_objects, "location", curFrame, locInterpolationMode)
+         /Users/cgear13/Library/Application Support/Blender/2.78/scripts/addons/assemblme/buttons/createBuildAnimation.py
+002 0111:execute() animationReturnDict = animateObjects(props.objects_to_move, self.curFrame, scn.locInterpolationMode, scn.rotInterpolationMode)
 

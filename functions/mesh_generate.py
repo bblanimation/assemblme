@@ -287,16 +287,14 @@ def makeSimple2DLattice(R, s):
     # TODO: Raise exception if R is less than 2
     # create new bmesh object
     bme = bmesh.new()
-
     # divide scale by 2
     s = s/2
     # convert R to integer
     R = int(R)
-
     # initialize incrementor and accumulator
     inc = (s/R)*2
     acc = -s
-    for i in range(R):
+    for i in range(R+1):
         # create and connect verts along x axis
         t = bme.verts.new(( acc,  s, 0))
         b = bme.verts.new(( acc, -s, 0))
@@ -307,129 +305,128 @@ def makeSimple2DLattice(R, s):
         e2 = bme.edges.new((r, l))
         # increment accumulator
         acc += inc
-
     # return bmesh
     return bme
 
-def newObjFromBmesh(layer, bme, meshName, objName=False):
-
-    # if only one name given, use it for both names
-    if not objName:
-        objName = meshName
-
-    # create mesh and object
-    me = bpy.data.meshes.new(meshName)
-    ob = bpy.data.objects.new(objName, me)
-
-    scn = bpy.context.scene # grab a reference to the scene
-    scn.objects.link(ob)    # link new object to scene
-    scn.objects.active = ob # make new object active
-    ob.select = True        # make new object selected (does not deselect
-                            # other objects)
-
-    obj = bme.to_mesh(me)         # push bmesh data into me
-
-    # move to appropriate layer
-    layerList = []
-    for i in range(20):
-        if i == layer-1:
-            layerList.append(True)
-        else:
-            layerList.append(False)
-    bpy.ops.object.move_to_layer(layers=layerList)
-    bpy.context.scene.layers = layerList
-    bpy.ops.object.select_all(action='TOGGLE')
-
-def deleteExisting():
-    # delete existing objects
-    tmpList = []
-    for x in range(20):
-        tmpList.append(True)
-    bpy.context.scene.layers = tmpList
-    for i in range(2):
-        bpy.ops.object.select_all(action='TOGGLE')
-        bpy.ops.object.delete(use_global=False)
-    bpy.context.scene.layers = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True]
-
-def main():
-    deleteExisting()
-
-    # create objects
-    newObjFromBmesh(1, makeSquare(), "square")
-    newObjFromBmesh(2, makeCircle(1, 10, 0), "circle")
-    newObjFromBmesh(3, makeCube(), "cube")
-    newObjFromBmesh(4, makeTetra(), "tetrahedron")
-    newObjFromBmesh(5, makeCylinder(1, 10, 5), "cylinder")
-    newObjFromBmesh(6, makeCone(1, 10), "cone")
-    newObjFromBmesh(7, makeOcta(), "octahedron")
-    newObjFromBmesh(8, makeDodec(), "dodecahedron")
-    newObjFromBmesh(9, makeUVSphere(1, 16, 10), "sphere")
-    newObjFromBmesh(10, makeIco(), "icosahedron")
-    makeTruncIco()
-    newObjFromBmesh(12, makeTorus(), "torus")
-    layerToOpen = 8
-
-    layerList = []
-    for i in range(20):
-        if i == layerToOpen-1: layerList.append(True)
-        else: layerList.append(False)
-    bpy.context.scene.layers = layerList
-
-def getBrickSettings():
-    """ returns dictionary containing brick detail settings """
-    scn = bpy.context.scene
-    settings = {}
-    settings["underside"] = scn.undersideDetail
-    settings["logo"] = scn.logoDetail
-    settings["numStudVerts"] = scn.studVerts
-    return settings
-
-def make1x1(dimensions, refLogo, name='brick1x1'):
-    """ create unlinked 1x1 LEGO Brick at origin """
-    settings = getBrickSettings()
-
-    bm = bmesh.new()
-    cubeBM = makeCube(sX=dimensions["width"], sY=dimensions["width"], sZ=dimensions["height"])
-    cylinderBM = makeCylinder(r=dimensions["stud_radius"], N=settings["numStudVerts"], h=dimensions["stud_height"], co=(0,0,dimensions["stud_offset"]))
-    if refLogo:
-        logoBM = bmesh.new()
-        logoBM.from_mesh(refLogo.data)
-        lw = dimensions["logo_width"]
-        bmesh.ops.scale(logoBM, vec=Vector((lw, lw, lw)), verts=logoBM.verts)
-        bmesh.ops.rotate(logoBM, verts=logoBM.verts, cent=(1.0, 0.0, 0.0), matrix=Matrix.Rotation(math.radians(90.0), 3, 'X'))
-        bmesh.ops.translate(logoBM, vec=Vector((0, 0, dimensions["logo_offset"])), verts=logoBM.verts)
-        # add logoBM mesh to bm mesh
-        logoMesh = bpy.data.meshes.new('LEGOizer_tempMesh')
-        logoObj = bpy.data.objects.new('LEGOizer_tempObj', logoMesh)
-        bpy.context.scene.objects.link(logoObj)
-        logoBM.to_mesh(logoMesh)
-        select(logoObj, active=logoObj)
-        if bpy.context.scene.logoResolution < 1:
-            bpy.ops.object.modifier_add(type='DECIMATE')
-            logoObj.modifiers['Decimate'].ratio = bpy.context.scene.logoResolution
-            bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
-        bm.from_mesh(logoMesh)
-        bpy.context.scene.objects.unlink(logoObj)
-        bpy.data.objects.remove(logoObj)
-        bpy.data.meshes.remove(logoMesh)
-
-    # add cubeBM and cylinderBM meshes to bm mesh
-    cube = bpy.data.meshes.new('legoizer_cube')
-    cylinder = bpy.data.meshes.new('legoizer_cylinder')
-    cubeBM.to_mesh(cube)
-    cylinderBM.to_mesh(cylinder)
-    bm.from_mesh(cube)
-    bm.from_mesh(cylinder)
-    bpy.data.meshes.remove(cube)
-    bpy.data.meshes.remove(cylinder)
-
-    # create apply mesh data to 'legoizer_brick1x1' data
-    if bpy.data.objects.find(name) == -1:
-        brick1x1Mesh = bpy.data.meshes.new(name + 'Mesh')
-        brick1x1 = bpy.data.objects.new(name, brick1x1Mesh)
-    else:
-        brick1x1 = bpy.data.objects[name]
-    bm.to_mesh(brick1x1.data)
-
-    # return 'legoizer_brick1x1' object
-    return brick1x1
+# def newObjFromBmesh(layer, bme, meshName, objName=False):
+#
+#     # if only one name given, use it for both names
+#     if not objName:
+#         objName = meshName
+#
+#     # create mesh and object
+#     me = bpy.data.meshes.new(meshName)
+#     ob = bpy.data.objects.new(objName, me)
+#
+#     scn = bpy.context.scene # grab a reference to the scene
+#     scn.objects.link(ob)    # link new object to scene
+#     scn.objects.active = ob # make new object active
+#     ob.select = True        # make new object selected (does not deselect
+#                             # other objects)
+#
+#     obj = bme.to_mesh(me)         # push bmesh data into me
+#
+#     # move to appropriate layer
+#     layerList = []
+#     for i in range(20):
+#         if i == layer-1:
+#             layerList.append(True)
+#         else:
+#             layerList.append(False)
+#     bpy.ops.object.move_to_layer(layers=layerList)
+#     bpy.context.scene.layers = layerList
+#     bpy.ops.object.select_all(action='TOGGLE')
+#
+# def deleteExisting():
+#     # delete existing objects
+#     tmpList = []
+#     for x in range(20):
+#         tmpList.append(True)
+#     bpy.context.scene.layers = tmpList
+#     for i in range(2):
+#         bpy.ops.object.select_all(action='TOGGLE')
+#         bpy.ops.object.delete(use_global=False)
+#     bpy.context.scene.layers = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True]
+#
+# def main():
+#     deleteExisting()
+#
+#     # create objects
+#     newObjFromBmesh(1, makeSquare(), "square")
+#     newObjFromBmesh(2, makeCircle(1, 10, 0), "circle")
+#     newObjFromBmesh(3, makeCube(), "cube")
+#     newObjFromBmesh(4, makeTetra(), "tetrahedron")
+#     newObjFromBmesh(5, makeCylinder(1, 10, 5), "cylinder")
+#     newObjFromBmesh(6, makeCone(1, 10), "cone")
+#     newObjFromBmesh(7, makeOcta(), "octahedron")
+#     newObjFromBmesh(8, makeDodec(), "dodecahedron")
+#     newObjFromBmesh(9, makeUVSphere(1, 16, 10), "sphere")
+#     newObjFromBmesh(10, makeIco(), "icosahedron")
+#     makeTruncIco()
+#     newObjFromBmesh(12, makeTorus(), "torus")
+#     layerToOpen = 8
+#
+#     layerList = []
+#     for i in range(20):
+#         if i == layerToOpen-1: layerList.append(True)
+#         else: layerList.append(False)
+#     bpy.context.scene.layers = layerList
+#
+# def getBrickSettings():
+#     """ returns dictionary containing brick detail settings """
+#     scn = bpy.context.scene
+#     settings = {}
+#     settings["underside"] = scn.undersideDetail
+#     settings["logo"] = scn.logoDetail
+#     settings["numStudVerts"] = scn.studVerts
+#     return settings
+#
+# def make1x1(dimensions, refLogo, name='brick1x1'):
+#     """ create unlinked 1x1 LEGO Brick at origin """
+#     settings = getBrickSettings()
+#
+#     bm = bmesh.new()
+#     cubeBM = makeCube(sX=dimensions["width"], sY=dimensions["width"], sZ=dimensions["height"])
+#     cylinderBM = makeCylinder(r=dimensions["stud_radius"], N=settings["numStudVerts"], h=dimensions["stud_height"], co=(0,0,dimensions["stud_offset"]))
+#     if refLogo:
+#         logoBM = bmesh.new()
+#         logoBM.from_mesh(refLogo.data)
+#         lw = dimensions["logo_width"]
+#         bmesh.ops.scale(logoBM, vec=Vector((lw, lw, lw)), verts=logoBM.verts)
+#         bmesh.ops.rotate(logoBM, verts=logoBM.verts, cent=(1.0, 0.0, 0.0), matrix=Matrix.Rotation(math.radians(90.0), 3, 'X'))
+#         bmesh.ops.translate(logoBM, vec=Vector((0, 0, dimensions["logo_offset"])), verts=logoBM.verts)
+#         # add logoBM mesh to bm mesh
+#         logoMesh = bpy.data.meshes.new('LEGOizer_tempMesh')
+#         logoObj = bpy.data.objects.new('LEGOizer_tempObj', logoMesh)
+#         bpy.context.scene.objects.link(logoObj)
+#         logoBM.to_mesh(logoMesh)
+#         select(logoObj, active=logoObj)
+#         if bpy.context.scene.logoResolution < 1:
+#             bpy.ops.object.modifier_add(type='DECIMATE')
+#             logoObj.modifiers['Decimate'].ratio = bpy.context.scene.logoResolution
+#             bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
+#         bm.from_mesh(logoMesh)
+#         bpy.context.scene.objects.unlink(logoObj)
+#         bpy.data.objects.remove(logoObj)
+#         bpy.data.meshes.remove(logoMesh)
+#
+#     # add cubeBM and cylinderBM meshes to bm mesh
+#     cube = bpy.data.meshes.new('legoizer_cube')
+#     cylinder = bpy.data.meshes.new('legoizer_cylinder')
+#     cubeBM.to_mesh(cube)
+#     cylinderBM.to_mesh(cylinder)
+#     bm.from_mesh(cube)
+#     bm.from_mesh(cylinder)
+#     bpy.data.meshes.remove(cube)
+#     bpy.data.meshes.remove(cylinder)
+#
+#     # create apply mesh data to 'legoizer_brick1x1' data
+#     if bpy.data.objects.find(name) == -1:
+#         brick1x1Mesh = bpy.data.meshes.new(name + 'Mesh')
+#         brick1x1 = bpy.data.objects.new(name, brick1x1Mesh)
+#     else:
+#         brick1x1 = bpy.data.objects[name]
+#     bm.to_mesh(brick1x1.data)
+#
+#     # return 'legoizer_brick1x1' object
+#     return brick1x1

@@ -33,14 +33,12 @@ class reportError(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        print("Functionality coming soon!")
         # set up file paths
         libraryServersPath = os.path.join(getLibraryPath(), "error_log")
         errorReportFilePath = os.path.join(libraryServersPath, "error_report.txt")
-
         # write necessary debugging information to text file
         writeErrorToFile(errorReportFilePath, 'AssemblMe_log', props.addonVersion)
-
+        # open error report in UI with text editor
         changeContext(context, "TEXT_EDITOR")
         try:
             bpy.ops.text.open(filepath=errorReportFilePath)

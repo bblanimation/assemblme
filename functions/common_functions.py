@@ -64,11 +64,11 @@ def confirmList(objList):
         objList = [objList]
     return objList
 
-def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default'):
+def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default', idx=-1):
     """ insert key frames for given objects to given frames """
     objList = confirmList(objList)
     for obj in objList:
-        obj.keyframe_insert(data_path=keyframeType, frame=frame, index=-1)
+        obj.keyframe_insert(data_path=keyframeType, frame=frame)
         if interpolationMode != "Default":
             fcurves = []
             for i in range(3): # increase if inserting keyframes for something that takes up more than three fcurves
@@ -76,7 +76,8 @@ def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default'):
                 if fc != None:
                     fcurves.append(fc)
             for fcurve in fcurves:
-                kf = fcurve.keyframe_points[-1]
+                # for kf in fcurve.keyframe_points:
+                kf = fcurve.keyframe_points[idx]
                 kf.interpolation = interpolationMode
 
 def deselectAll():
