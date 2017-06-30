@@ -5,8 +5,7 @@ bl_info = {
     "blender"     : (2, 78, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
-    # "warning"     : "Work in progress",
-    "wiki_url"    : "",
+    # "wiki_url"    : "",
     "tracker_url" : "https://github.com/bblanimation/lego_add_ons/issues",
     "category"    : "Animation"}
 
