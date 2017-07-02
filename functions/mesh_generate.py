@@ -332,6 +332,57 @@ def makeLattice(R, s, o=(0,0,0)):
     # return bmesh
     return bme
 
+def makeLowDetailBlock(sX=1, sY=1, sZ=1, thick=0.1, detail="Low Detail"):
+    # create new bmesh object
+    bme = bmesh.new()
+
+    # half scale inputs
+    sX = sX/2
+    sY = sY/2
+    sZ = sZ/2
+
+    # creating cube
+    v1 = bme.verts.new(( sX, sY, sZ))
+    v2 = bme.verts.new((-sX, sY, sZ))
+    v3 = bme.verts.new((-sX,-sY, sZ))
+    v4 = bme.verts.new(( sX,-sY, sZ))
+    bme.faces.new((v1, v2, v3, v4))
+    v5 = bme.verts.new(( sX, sY,-sZ))
+    v6 = bme.verts.new((-sX, sY,-sZ))
+    bme.faces.new((v2, v1, v5, v6))
+    v7 = bme.verts.new((-sX,-sY,-sZ))
+    bme.faces.new((v3, v2, v6, v7))
+    v8 = bme.verts.new(( sX,-sY,-sZ))
+    bme.faces.new((v1, v4, v8, v5))
+    bme.faces.new((v4, v3, v7, v8))
+    # making verts for hollow portion at bottom
+    v9 = bme.verts.new((v5.co.x-thick, v5.co.y-thick, v5.co.z))
+    v10 = bme.verts.new((v6.co.x+thick, v6.co.y-thick, v6.co.z))
+    bme.faces.new((v5, v9, v10, v6))
+    v11 = bme.verts.new((v7.co.x+thick, v7.co.y+thick, v7.co.z))
+    bme.faces.new((v6, v10, v11, v7))
+    v12 = bme.verts.new((v8.co.x-thick, v8.co.y+thick, v8.co.z))
+    bme.faces.new((v7, v11, v12, v8))
+    bme.faces.new((v8, v12, v9, v5))
+    # making verts for hollow portion at top
+    v13 = bme.verts.new((v9.co.x, v9.co.y, v1.co.z-thick))
+    v14 = bme.verts.new((v10.co.x, v10.co.y, v2.co.z-thick))
+    bme.faces.new((v9, v13, v14, v10))
+    v15 = bme.verts.new((v11.co.x, v11.co.y, v3.co.z-thick))
+    bme.faces.new((v10, v14, v15, v11))
+    v16 = bme.verts.new((v12.co.x, v12.co.y, v4.co.z-thick))
+    bme.faces.new((v11, v15, v16, v12))
+    bme.faces.new((v12,v16, v13, v9))
+    # make face at top
+    if detail == "Low Detail":
+        bme.faces.new((v16, v15, v14, v13))
+    # make small inner cylinder at top
+    elif detail == "Hight Detail":
+        pass
+
+    # return bmesh
+    return bme
+
 # def newObjFromBmesh(layer, bme, meshName, objName=False):
 #
 #     # if only one name given, use it for both names
