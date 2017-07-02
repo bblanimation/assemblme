@@ -1,8 +1,8 @@
 import bpy
 import bmesh
 import math
+import numpy as np
 from mathutils import Matrix, Vector
-from .__init__ import select
 
 def makeSquare():
     # create new bmesh object
@@ -259,8 +259,8 @@ def makeIco():
     # return bmesh
     return bme
 
-def makeTruncIco():
-    newObjFromBmesh(11, makeIco(), "truncated icosahedron")
+def makeTruncIco(layer):
+    newObjFromBmesh(layer, makeIco(), "truncated icosahedron")
     bpy.ops.object.editmode_toggle()
     bpy.ops.mesh.select_all(action='TOGGLE')
     bpy.ops.mesh.bevel(offset=0.35, vertex_only=True)
@@ -282,63 +282,53 @@ def makeTorus():
     # return bmesh
     return bme
 
-# R = resolution, s = scale
-def makeSimple2DLattice(R, s):
-    # TODO: Raise exception if R is less than 2
-    # create new bmesh object
-    bme = bmesh.new()
-    # divide scale by 2
-    s = s/2
-    # convert R to integer
-    R = int(R)
-    # initialize incrementor and accumulator
-    inc = (s/R)*2
-    acc = -s
-    for i in range(R+1):
-        # create and connect verts along x axis
-        t = bme.verts.new(( acc,  s, 0))
-        b = bme.verts.new(( acc, -s, 0))
-        e1 = bme.edges.new((t, b))
-        # create and connect verts along y axis
-        r = bme.verts.new((  s, acc, 0))
-        l = bme.verts.new(( -s, acc, 0))
-        e2 = bme.edges.new((r, l))
-        # increment accumulator
-        acc += inc
-    # return bmesh
-    return bme
-
 def tupleAdd(p1, p2):
     """ returns linear sum of two given tuples """
     return tuple(x+y for x,y in zip(p1, p2))
 
-# R = resolution, s = scale, o = offset lattice center from origin
-def make2DLattice(R, s, o=(0,0,0)):
+# R = resolution, s = 3D scale tuple, o = offset lattice center from origin
+def makeLattice(R, s, o=(0,0,0)):
     # TODO: Raise exception if R is less than 2
     bme = bmesh.new()
     # initialize variables
-    s = s/2
-    R = int(R)
-    inc = (s/R)*2
     vertMatrix = []
-    for i in range(R+1):
-        acc = -s
-        vertList = []
-        for j in range(R+1):
-            # create and connect verts along x axis
-            p = ( acc, (i * inc)-s, 0)
-            v = bme.verts.new(tupleAdd(p, o))
-            vertList.append(v)
-            # create new edge parallel x axis
-            if j != 0:
-                e = bme.edges.new((vertList[j], vertList[j-1]))
-            # increment accumulator
-            acc += inc
-        vertMatrix.append(vertList)
-        # create new edge parallel to y axis
-        if i != 0:
-            for k in range(R+1):
-                e = bme.edges.new((vertMatrix[i][k], vertMatrix[i-1][k]))
+    xR = R[0]
+    yR = R[1]
+    zR = R[2]
+    xS = s[0]
+    yS = s[1]
+    zS = s[2]
+    xL = int(round((xS)/xR))+1
+    if xL == 1: xL += 1
+    yL = int(round((yS)/yR))+1
+    if yL == 1: yL += 1
+    zL = int(round((zS)/zR))+1
+    if zL == 1: zL += 1
+    # iterate through x,y,z dimensions and create verts/connect with edges
+    for x in range(xL):
+        vertList1 = []
+        xCO = (x-(xS/(2*xR)))*xR
+        for y in range(yL):
+            vertList2 = []
+            yCO = (y-(yS/(2*yR)))*yR
+            for z in range(zL):
+                # create verts
+                zCO = (z-(zS/(2*zR)))*zR
+                p = (xCO, yCO, zCO)
+                v = bme.verts.new(tupleAdd(p, o))
+                vertList2.append(v)
+                # create new edge parallel x axis
+                if z != 0:
+                    e = bme.edges.new((vertList2[z], vertList2[z-1]))
+            vertList1.append(vertList2)
+            if y != 0:
+                for z in range(zL):
+                    e = bme.edges.new((vertList1[y][z], vertList1[y-1][z]))
+        vertMatrix.append(vertList1)
+        if x != 0:
+            for y in range(yL):
+                for z in range(zL):
+                    e = bme.edges.new((vertMatrix[x][y][z], vertMatrix[x-1][y][z]))
     # return bmesh
     return bme
 
@@ -394,9 +384,10 @@ def make2DLattice(R, s, o=(0,0,0)):
 #     newObjFromBmesh(8, makeDodec(), "dodecahedron")
 #     newObjFromBmesh(9, makeUVSphere(1, 16, 10), "sphere")
 #     newObjFromBmesh(10, makeIco(), "icosahedron")
-#     makeTruncIco()
+#     makeTruncIco(11)
 #     newObjFromBmesh(12, makeTorus(), "torus")
-#     layerToOpen = 8
+#     newObjFromBmesh(13, makeLattice((1,1,1), (10,20,10), (0,0,0)), "lattice")
+#     layerToOpen = 13
 #
 #     layerList = []
 #     for i in range(20):
@@ -404,61 +395,4 @@ def make2DLattice(R, s, o=(0,0,0)):
 #         else: layerList.append(False)
 #     bpy.context.scene.layers = layerList
 #
-def getBrickSettings():
-    """ returns dictionary containing brick detail settings """
-    scn = bpy.context.scene
-    settings = {}
-    settings["underside"] = scn.undersideDetail
-    settings["logo"] = scn.logoDetail
-    settings["numStudVerts"] = scn.studVerts
-    return settings
-
-def make1x1(dimensions, refLogo, name='brick1x1'):
-    """ create unlinked 1x1 LEGO Brick at origin """
-    settings = getBrickSettings()
-
-    bm = bmesh.new()
-    cubeBM = makeCube(sX=dimensions["width"], sY=dimensions["width"], sZ=dimensions["height"])
-    cylinderBM = makeCylinder(r=dimensions["stud_radius"], N=settings["numStudVerts"], h=dimensions["stud_height"], co=(0,0,dimensions["stud_offset"]))
-    if refLogo:
-        logoBM = bmesh.new()
-        logoBM.from_mesh(refLogo.data)
-        lw = dimensions["logo_width"]
-        bmesh.ops.scale(logoBM, vec=Vector((lw, lw, lw)), verts=logoBM.verts)
-        bmesh.ops.rotate(logoBM, verts=logoBM.verts, cent=(1.0, 0.0, 0.0), matrix=Matrix.Rotation(math.radians(90.0), 3, 'X'))
-        bmesh.ops.translate(logoBM, vec=Vector((0, 0, dimensions["logo_offset"])), verts=logoBM.verts)
-        # add logoBM mesh to bm mesh
-        logoMesh = bpy.data.meshes.new('LEGOizer_tempMesh')
-        logoObj = bpy.data.objects.new('LEGOizer_tempObj', logoMesh)
-        bpy.context.scene.objects.link(logoObj)
-        logoBM.to_mesh(logoMesh)
-        select(logoObj, active=logoObj)
-        if bpy.context.scene.logoResolution < 1:
-            bpy.ops.object.modifier_add(type='DECIMATE')
-            logoObj.modifiers['Decimate'].ratio = bpy.context.scene.logoResolution
-            bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
-        bm.from_mesh(logoMesh)
-        bpy.context.scene.objects.unlink(logoObj)
-        bpy.data.objects.remove(logoObj)
-        bpy.data.meshes.remove(logoMesh)
-
-    # add cubeBM and cylinderBM meshes to bm mesh
-    cube = bpy.data.meshes.new('legoizer_cube')
-    cylinder = bpy.data.meshes.new('legoizer_cylinder')
-    cubeBM.to_mesh(cube)
-    cylinderBM.to_mesh(cylinder)
-    bm.from_mesh(cube)
-    bm.from_mesh(cylinder)
-    bpy.data.meshes.remove(cube)
-    bpy.data.meshes.remove(cylinder)
-
-    # create apply mesh data to 'legoizer_brick1x1' data
-    if bpy.data.objects.find(name) == -1:
-        brick1x1Mesh = bpy.data.meshes.new(name + 'Mesh')
-        brick1x1 = bpy.data.objects.new(name, brick1x1Mesh)
-    else:
-        brick1x1 = bpy.data.objects[name]
-    bm.to_mesh(brick1x1.data)
-
-    # return 'legoizer_brick1x1' object
-    return brick1x1
+# main()
