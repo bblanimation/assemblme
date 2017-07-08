@@ -181,53 +181,20 @@ def setOrigin(objList, originToType):
     select(objList)
     bpy.ops.object.origin_set(type=originToType)
 
-def updateAnimType(self, context):
+def updateAnimPreset(self, context):
     scn = bpy.context.scene
-    if scn.animType == "Custom":
-        pass
-    elif scn.animType == "Standard Build":
-        from ..buttons.visualizer import visualizer
-        scn.buildSpeed = 1
-        scn.objectVelocity = 25
-        scn.xLocOffset = 0
-        scn.yLocOffset = 0
-        scn.zLocOffset = 5
-        scn.locInterpolationMode = "CUBIC"
-        scn.locationRandom = 0
-        scn.xRotOffset = 0
-        scn.yRotOffset = 0
-        scn.zRotOffset = 0
-        scn.rotInterpolationMode = "LINEAR"
-        scn.rotationRandom = 0
-        scn.xOrient = 0
-        scn.yOrient = 0
-        scn.orientRandom = 0.0025
-        scn.layerHeight = 0.01
-        scn.buildType = "Assemble"
-        scn.invertBuild = False
-        if groupExists("AssemblMe_visualizer"):
+    if scn.animPreset != "None":
+        import importlib.util
+        pathToFile = os.path.join(props.addon_prefs.presetsFilepath, scn.animPreset + ".py")
+        spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
+        foo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(foo)
+        foo.execute()
+    if groupExists("AssemblMe_visualizer"):
+        if scn.animPreset == "Standard Build" or scn.animPreset == "Explode":
             visualizer.disable(visualizer, bpy.context)
-    elif scn.animType == "Explode":
-        scn.buildSpeed = 1
-        scn.objectVelocity = 15
-        scn.xLocOffset = 0
-        scn.yLocOffset = 0
-        scn.zLocOffset = 0
-        scn.locInterpolationMode = "LINEAR"
-        scn.locationRandom = 20
-        scn.xRotOffset = 0
-        scn.yRotOffset = 0
-        scn.zRotOffset = 0
-        scn.rotInterpolationMode = "LINEAR"
-        scn.rotationRandom = 20
-        scn.xOrient = 0
-        scn.yOrient = 0
-        scn.orientRandom = 50
-        scn.layerHeight = 15
-        scn.buildType = "Disassemble"
-        scn.invertBuild = False
-        if groupExists("AssemblMe_visualizer"):
-            visualizer.disable(visualizer, bpy.context)
+
+    scn.animPresetToDelete = scn.animPreset
 
     return None
 

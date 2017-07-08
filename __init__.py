@@ -32,12 +32,63 @@ Created by Christopher Gearhart
 
 # system imports
 import bpy
+import os
 from bpy.props import *
 from .ui import *
 from .buttons import *
+from .buttons.presets import animPresets
+from bpy.types import Operator, AddonPreferences
 props = bpy.props
 
+class ExampleAddonPreferences(AddonPreferences):
+    bl_idname = __name__
+
+    addonPath = os.path.dirname(os.path.abspath(__file__))[:-10]
+    defaultPresetsFP = os.path.join(addonPath, "assemblMe", "lib", "presets")
+    presetsFilepath = StringProperty(
+            name="Path to assemblMe presets",
+            subtype='FILE_PATH',
+            default=defaultPresetsFP)
+    # number = IntProperty(
+    #         name="Example Number",
+    #         default=4,
+    #         )
+    # boolean = BoolProperty(
+    #         name="Example Boolean",
+    #         default=False,
+    #         )
+
+    # def draw(self, context):
+    #     layout = self.layout
+    #     layout.label(text="This is a preferences view for our addon")
+    #     layout.prop(self, "filepath")
+    #     layout.prop(self, "number")
+    #     layout.prop(self, "boolean")
+
+
+class OBJECT_OT_addon_prefs_example(Operator):
+    """Display example preferences"""
+    bl_idname = "object.addon_prefs_example"
+    bl_label = "Addon Preferences Example"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        user_preferences = context.user_preferences
+        addon_prefs = user_preferences.addons[__name__].preferences
+
+        info = ("Path: %s, Number: %d, Boolean %r" %
+                (addon_prefs.filepath, addon_prefs.number, addon_prefs.boolean))
+
+        self.report({'INFO'}, info)
+        print(info)
+
+        return {'FINISHED'}
+
 def register():
+    bpy.utils.register_class(OBJECT_OT_addon_prefs_example)
+    bpy.utils.register_class(ExampleAddonPreferences)
+    user_preferences = bpy.context.user_preferences
+    props.addon_prefs = user_preferences.addons[__name__].preferences
     bpy.utils.register_module(__name__)
 
     props.addonVersion = "1.0.1"
@@ -211,14 +262,24 @@ def register():
         min=1, max=1440,
         default=5)
 
-    bpy.types.Scene.animType = EnumProperty(
-        name="Animation Preset",
-        description="Choose the interpolation mode for each objects' animation",
-        items=[("Custom", "Custom", "Create your own fully customized animation!"),
-               ("Explode", "Explode", "Structure explodes; objects are sent off in random directions"),
-               ("Standard Build", "Standard Build", "Objects fall straight down, one by one")],
-        update=updateAnimType,
-        default="Standard Build")
+    bpy.types.Scene.newPresetName = StringProperty(
+        name="Name of New Preset",
+        description="Full name of new custom preset",
+        default="")
+
+    presetNames = animPresets.getPresetTuples()
+    bpy.types.Scene.animPreset = EnumProperty(
+        name="Presets",
+        description="Stored AssemblMe presets",
+        items=presetNames,
+        update=updateAnimPreset,
+        default="None")
+
+    bpy.types.Scene.animPresetToDelete = EnumProperty(
+        name="Preset to Delete",
+        description="Another list of stored AssemblMe presets",
+        items=bpy.types.Scene.animPreset[1]['items'],
+        default="None")
 
     bpy.types.Scene.frameWithOrigLoc = IntProperty(
         default=-1)

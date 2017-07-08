@@ -58,6 +58,12 @@ def groupExists(groupName):
             groupExists = True
     return groupExists
 
+def changeContext(context, areaType):
+    """ Changes current context and returns previous area type """
+    lastAreaType = context.area.type
+    context.area.type = areaType
+    return lastAreaType
+
 # USE EXAMPLE: idfun=(lambda x: x.lower()) so that it ignores case
 # https://www.peterbe.com/plog/uniqifiers-benchmark
 def uniquify(seq, idfun=None):
