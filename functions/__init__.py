@@ -28,7 +28,7 @@ import os
 import traceback
 from math import *
 from .common_functions import *
-from .mesh_generate import *
+from .common_mesh_generate import *
 props = bpy.props
 
 def getRandomizedOrient(orient):

@@ -224,9 +224,12 @@ def print_exception(txtName, showError=False):
 
     return errormsg
 
-def writeErrorToFile(errorReportFilePath, txtName, addonVersion):
+def writeErrorToFile(errorReportPath, txtName, addonVersion):
     # write error to log text object
-    f = open(errorReportFilePath, "w")
+    if not os.path.exists(errorReportPath):
+        os.makedirs(errorReportPath)
+    fullFilePath = os.path.join(errorReportPath, "error_report.txt")
+    f = open(fullFilePath, "w")
     f.write("\nPlease copy the following form and paste it into a new issue at https://github.com/bblanimation/lego_add_ons/issues")
     f.write("\n\nDon't forget to include a description of your problem! The more information you provide (what you were trying to do, what action directly preceeded the error, etc.), the easier it will be for us to squash the bug.")
     f.write("\n\n### COPY EVERYTHING BELOW THIS LINE ###\n")

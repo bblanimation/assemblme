@@ -35,13 +35,12 @@ class reportError(bpy.types.Operator):
     def execute(self, context):
         # set up file paths
         libraryServersPath = os.path.join(getLibraryPath(), "error_log")
-        errorReportFilePath = os.path.join(libraryServersPath, "error_report.txt")
         # write necessary debugging information to text file
-        writeErrorToFile(errorReportFilePath, 'AssemblMe_log', props.addonVersion)
+        writeErrorToFile(libraryServersPath, 'AssemblMe_log', props.addonVersion)
         # open error report in UI with text editor
         changeContext(context, "TEXT_EDITOR")
         try:
-            bpy.ops.text.open(filepath=errorReportFilePath)
+            bpy.ops.text.open(filepath=os.path.join(libraryServersPath, "error_report.txt"))
             bpy.context.space_data.show_word_wrap = True
             self.report({"INFO"}, "Opened 'error_report.txt'")
             bpy.props.needsUpdating = True
