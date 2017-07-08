@@ -58,37 +58,13 @@ def groupExists(groupName):
             groupExists = True
     return groupExists
 
-# USE EXAMPLE: idfun=(lambda x: x.lower()) so that it ignores case
-# https://www.peterbe.com/plog/uniqifiers-benchmark
-def uniquify(seq, idfun=None):
-    # order preserving
-    if idfun is None:
-        def idfun(x): return x
-    seen = {}
-    result = []
-    for item in seq:
-        marker = idfun(item)
-        # in old Python versions:
-        # if seen.has_key(marker)
-        # but in new ones:
-        if marker in seen: continue
-        seen[marker] = 1
-        result.append(item)
-    return result
-def uniquify1(seq):
-   # Not order preserving
-   keys = {}
-   for e in seq:
-       keys[e] = 1
-   return keys.keys()
-
 def confirmList(objList):
     """ if single object passed, convert to list """
     if type(objList) != list:
         objList = [objList]
     return objList
 
-def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default', idx=-1):
+def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default'):
     """ insert key frames for given objects to given frames """
     objList = confirmList(objList)
     for obj in objList:
@@ -100,9 +76,8 @@ def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default', i
                 if fc != None:
                     fcurves.append(fc)
             for fcurve in fcurves:
-                # for kf in fcurve.keyframe_points:
-                kf = fcurve.keyframe_points[idx]
-                kf.interpolation = interpolationMode
+                for kf in fcurve.keyframe_points:
+                    kf.interpolation = interpolationMode
 
 def deselectAll():
     bpy.ops.object.select_all(action='DESELECT')
@@ -118,18 +93,18 @@ def unhide(objList):
     for obj in objList:
         obj.hide = False
 
-def select(objList=[], active=None, deselect=False, exclusive=True):
+def select(objList=[], active=None, action="select", exclusive=True):
     """ selects objs in list and deselects the rest """
     objList = confirmList(objList)
     try:
-        if not deselect:
+        if action == "select":
             # deselect all if selection is exclusive
             if exclusive and len(objList) > 0:
                 deselectAll()
             # select objects in list
             for obj in objList:
                 obj.select = True
-        elif deselect:
+        elif action == "deselect":
             # deselect objects in list
             for obj in objList:
                 obj.select = False
@@ -146,9 +121,10 @@ def select(objList=[], active=None, deselect=False, exclusive=True):
 
 def delete(objList):
     objList = confirmList(objList)
-    objs = bpy.data.objects
-    for obj in objList:
-        objs.remove(obj, True)
+    if select(objList):
+        objs = bpy.data.objects
+        for obj in objList:
+            objs.remove(obj, True)
 
 def changeContext(context, areaType):
     """ Changes current context and returns previous area type """

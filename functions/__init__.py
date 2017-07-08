@@ -28,7 +28,6 @@ import os
 import traceback
 from math import *
 from .common_functions import *
-from .mesh_generate import *
 props = bpy.props
 
 def getRandomizedOrient(orient):
@@ -176,6 +175,25 @@ def layers(l):
         sys.stderr.write("Argument passed to 'layers()' function not recognized")
     return all
 
+def createVisualizerObject():
+    """ creates a visualizer object with proper initial settings """
+
+    scn = bpy.context.scene
+    bpy.ops.object.add(type='LATTICE', location=(0,0,0), rotation=(0,0,0))
+    bpy.ops.group.create(name="AssemblMe_visualizer")
+    visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
+    visualizerObj.hide_render = True
+    visualizerObj.hide_select = True
+    # visualizerObj.layers = layers("all")
+    vs = scn.visualizerScale
+    nc = scn.visualizerNumCuts
+    bpy.ops.transform.resize(value=(vs,vs,vs))
+    bpy.ops.object.select_all(action='DESELECT')
+    visualizerObj.data.points_u = nc
+    visualizerObj.data.points_v = nc
+    visualizerObj.data.points_w = 1
+    return visualizerObj
+
 def setOrigin(objList, originToType):
     objList = confirmList(objList)
     select(objList)
@@ -206,7 +224,7 @@ def updateAnimType(self, context):
         scn.buildType = "Assemble"
         scn.invertBuild = False
         if groupExists("AssemblMe_visualizer"):
-            visualizer.disable(visualizer, bpy.context)
+            visualizer.disable(bpy.context)
     elif scn.animType == "Explode":
         scn.buildSpeed = 1
         scn.objectVelocity = 15
@@ -227,7 +245,7 @@ def updateAnimType(self, context):
         scn.buildType = "Disassemble"
         scn.invertBuild = False
         if groupExists("AssemblMe_visualizer"):
-            visualizer.disable(visualizer, bpy.context)
+            visualizer.disable(bpy.context)
 
     return None
 
@@ -248,8 +266,12 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
         # iterate num times in while loop
         acc += 1
 
-        # get next objects to animate
+        # deselect all
+        bpy.ops.object.select_all(action='DESELECT')
+
+        # select next objects to animate
         newSelection = getNewSelection()
+        select(newSelection)
 
         # print time remaining
         if scn.printStatus:
@@ -263,20 +285,16 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
                     framesRemaining = curFrame - scn.firstFrame - getObjectVelocity() - getBuildSpeed()
                 else:
                     framesRemaining = scn.animLength - curFrame - getObjectVelocity()
-                if len(newSelection) > 0:
-                    # append instant time to time remaining average
-                    estTimeRemaining.append(0)
-                else:
-                    # calculate and print time remaining
-                    timeElapsed = curTime-lastTime
-                    estTimeRemaining.append(timeElapsed * framesRemaining)
-                    if curTime - lastUpdated >= scn.updateFrequency:
-                        stopWatch("Time Remaining", sum(estTimeRemaining)/len(estTimeRemaining))
-                        estTimeRemaining = []
-                        lastUpdated = curTime
+                # calculate and print time remaining
+                timeElapsed = curTime-lastTime
+                estTimeRemaining.append(timeElapsed * framesRemaining)
+                if curTime - lastUpdated >= scn.updateFrequency:
+                    stopWatch("Time Remaining", sum(estTimeRemaining)/len(estTimeRemaining))
+                    estTimeRemaining = []
+                    lastUpdated = curTime
 
         # iterate through selected objects
-        for obj in newSelection:
+        for obj in bpy.context.selected_objects:
             # set object parent to axisObj
             obj.parent = axisObj
             # put selected objects in 'objects_moved'
@@ -285,19 +303,13 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
             objectsToMove.remove(obj)
 
         # move selected objects and add keyframes
-        kfIdxLoc = -1
-        kfIdxRot = -1
-        if len(newSelection) != 0:
+        if len(bpy.context.selected_objects) != 0:
             # insert location keyframes
             if scn.xLocOffset != 0 or scn.yLocOffset != 0 or scn.zLocOffset != 0 or scn.locationRandom != 0:
-                insertKeyframes(newSelection, "location", curFrame, locInterpolationMode, kfIdxLoc)
-                if scn.buildType == "Assemble":
-                    kfIdxLoc -= 1
+                insertKeyframes(bpy.context.selected_objects, "location", curFrame, locInterpolationMode)
             # insert rotation keyframes
             if scn.xRotOffset != 0 or scn.yRotOffset != 0 or scn.zRotOffset != 0 or scn.rotationRandom != 0:
-                insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
-                if scn.buildType == "Assemble":
-                    kfIdxRot -= 1
+                insertKeyframes(bpy.context.selected_objects, "rotation_euler", curFrame, rotInterpolationMode)
 
             # set curFrame
             if scn.buildType == "Assemble":
@@ -307,17 +319,17 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
 
             # move object and insert location keyframes
             if scn.xLocOffset != 0 or scn.yLocOffset != 0 or scn.zLocOffset != 0 or scn.locationRandom != 0:
-                for obj in newSelection:
+                for obj in bpy.context.selected_objects:
                     obj.location = getOffsetLocation(obj.location)
-                insertKeyframes(newSelection, "location", curFrame, locInterpolationMode, kfIdxLoc)
+                insertKeyframes(bpy.context.selected_objects, "location", curFrame, locInterpolationMode)
             # rotate object and insert rotation keyframes
             if scn.xRotOffset != 0 or scn.yRotOffset != 0 or scn.zRotOffset != 0 or scn.rotationRandom != 0:
-                for obj in newSelection:
+                for obj in bpy.context.selected_objects:
                     offsetRotation = getOffsetRotation(obj.rotation_euler)
                     obj.rotation_euler.x = offsetRotation["X"]
                     obj.rotation_euler.y = offsetRotation["Y"]
                     obj.rotation_euler.z = offsetRotation["Z"]
-                insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
+                insertKeyframes(bpy.context.selected_objects, "rotation_euler", curFrame, rotInterpolationMode)
 
             # set curFrame
             if scn.buildType == "Assemble":

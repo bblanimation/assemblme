@@ -1,11 +1,12 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 0, 1),
+    "version"     : (1, 0, 0),
     "blender"     : (2, 78, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
-    # "wiki_url"    : "",
+    # "warning"     : "Work in progress",
+    "wiki_url"    : "",
     "tracker_url" : "https://github.com/bblanimation/lego_add_ons/issues",
     "category"    : "Animation"}
 
@@ -40,7 +41,7 @@ props = bpy.props
 def register():
     bpy.utils.register_module(__name__)
 
-    props.addonVersion = "1.0.1"
+    props.addonVersion = "1.0.0"
 
     bpy.types.Scene.firstFrame = IntProperty(
         name="Start",
@@ -228,7 +229,7 @@ def register():
     bpy.types.Scene.lastLayerVelocity = IntProperty(
         default=-1)
 
-    bpy.types.Scene.visualizerLinked = BoolProperty(
+    bpy.types.Scene.visualizerActive = BoolProperty(
         default=False)
 
     bpy.types.Scene.visualizerScale = FloatProperty(

@@ -22,7 +22,6 @@
 # system imports
 import bpy
 import math
-import bmesh
 from ..functions import *
 props = bpy.props
 
@@ -32,94 +31,61 @@ class visualizer(bpy.types.Operator):
     bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
-    def __init__(self):
-        """ sets up self.visualizerObj """
-        if groupExists("AssemblMe_visualizer"):
-            # set self.visualizer and self.m with existing data
-            self.visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
-            self.m = self.visualizerObj.data
-        else:
-            # create visualizer object
-            self.m = bpy.data.meshes.new('AssemblMe_visualizer_m')
-            self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
-            self.visualizerObj.hide_select = True
-            self.visualizerObj.hide_render = True
-            # put in new group
-            bpy.ops.group.create(name="AssemblMe_visualizer")
-            bpy.data.groups["AssemblMe_visualizer"].objects.link(self.visualizerObj)
-        # not sure what this does, to be honest
-        visualizer.instance = self
-
     def createAnim(self):
         scn = bpy.context.scene
-        # if first and last location are the same, keep visualizer stationary
+
         if props.objMinLoc == props.objMaxLoc:
             self.visualizerObj.animation_data_clear()
             if type(props.objMinLoc) == type(self.visualizerObj.location):
                 self.visualizerObj.location = props.objMinLoc
             else:
                 self.visualizerObj.location = (0,0,0)
-            return "static"
-        # else, create animation
+            return
+
+        self.visualizerObj.location = props.objMinLoc
+        curFrame = scn.frameWithOrigLoc
+
+        insertKeyframes(self.visualizerObj, "location", curFrame)
+        self.visualizerObj.location = props.objMaxLoc
+        if scn.buildType == "Assemble":
+            curFrame -= (scn.animLength - scn.lastLayerVelocity)
         else:
-            # set up vars
-            self.visualizerObj.location = props.objMinLoc
-            curFrame = scn.frameWithOrigLoc
-            idx = -1
-            # insert keyframe and iterate current frame, and set another
-            insertKeyframes(self.visualizerObj, "location", curFrame, 'LINEAR', idx)
-            self.visualizerObj.location = props.objMaxLoc
-            if scn.buildType == "Assemble":
-                curFrame -= (scn.animLength - scn.lastLayerVelocity)
-                idx -= 1
-            else:
-                curFrame += (scn.animLength - scn.lastLayerVelocity)
-            insertKeyframes(self.visualizerObj, "location", curFrame, 'LINEAR', idx)
-            return "animated"
+            curFrame += (scn.animLength - scn.lastLayerVelocity)
+        insertKeyframes(self.visualizerObj, "location", curFrame)
 
-    def enable(self, context):
-        """ enables visualizer """
-        scn = context.scene
-        # alert user that visualizer is enabled
-        self.report({"INFO"}, "Visualizer enabled... ('ESC' to disable)")
-        # add proper mesh data to visualizer object
-        visualizerBM = makeSimple2DLattice(scn.visualizerNumCuts, scn.visualizerScale)
-        visualizerBM.to_mesh(self.visualizerObj.data)
-        # link visualizer object to scene
-        scn.objects.link(self.visualizerObj)
-        scn.visualizerLinked = True
+        # set fcurves of lattice to constant interpolation
+        fcurves = self.visualizerObj.animation_data.action.fcurves
+        for fcurve in fcurves:
+            for kf in fcurve.keyframe_points:
+                kf.interpolation = 'LINEAR'
 
-    def disable(self, context):
+    @classmethod
+    def disable(cls, context):
         """ disables visualizer """
-        # alert user that visualizer is disabled
-        self.report({"INFO"}, "Visualizer disabled")
-        # unlink visualizer object to scene
-        context.scene.objects.unlink(self.visualizerObj)
-        context.scene.visualizerLinked = False
-
-    @staticmethod
-    def enabled():
-        """ returns boolean for visualizer linked to scene """
-        return bpy.context.scene.visualizerLinked
+        cls.visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
+        cls.cancel(cls, context)
 
     def modal(self, context, event):
-        """ runs as long as visualizer is active """
         if event.type in {"ESC"}:
             self.report({"INFO"}, "Visualizer disabled")
-            self.disable(context)
+            context.window_manager.event_timer_remove(self._timer) # remove timer
+            self.cancel(context)
             return{"CANCELLED"}
 
         if event.type == "TIMER":
             scn = context.scene
+
             try:
                 # if the visualizer is has been disabled, stop running modal
-                if not self.enabled():
+                if not groupExists("AssemblMe_visualizer"):
                     return{"CANCELLED"}
-                # if new build animation created, update visualizer animation
+
+                # if new build animation created, update lattice animation
                 if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
                     self.minAndMax = [props.objMinLoc, props.objMaxLoc]
                     self.createAnim()
-                # set visualizer object rotation
+
+                # set reference lattice rotation
                 if self.visualizerObj.rotation_euler.x != scn.xOrient:
                     self.visualizerObj.rotation_euler.x = scn.xOrient
                 if self.visualizerObj.rotation_euler.y != scn.yOrient:
@@ -134,24 +100,38 @@ class visualizer(bpy.types.Operator):
 
     def execute(self, context):
         scn = context.scene
+
         try:
-            # if enabled, all we do is disable it
-            if self.enabled():
+            # if visualizer is enabled, all we need to do is disable it
+            if groupExists("AssemblMe_visualizer"):
                 self.disable(context)
                 return{"FINISHED"}
-            else:
-                # enable visualizer
-                self.enable(context)
-                # create animation for visualizer if build animation exists
-                if groupExists("AssemblMe_all_objects_moved"):
-                    self.createAnim()
-                self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                # initialize self.zOrient for modal
-                self.zOrient = None
-                # create timer for modal
-                wm = context.window_manager
-                self._timer = wm.event_timer_add(.02, context.window)
-                wm.modal_handler_add(self)
+
+            # store original_selection and original_active
+            self.original_selection = context.selected_objects
+            self.original_active = context.active_object
+
+            # alert user that visualizer is running
+            self.report({"INFO"}, "Running visualizer... ('ESC' to disable)")
+
+            # add 'LATTICE' object with proper settings
+            self.visualizerObj = createVisualizerObject()
+            self.layersIdx = list(self.visualizerObj.layers)
+
+            # initialize self.zOrient for modal
+            self.zOrient = None
+
+            # test if build animation created
+            if groupExists("AssemblMe_all_objects_moved"):
+                self.createAnim()
+            self.minAndMax = [props.objMinLoc, props.objMaxLoc]
+
+            select(self.original_selection, active=self.original_active)
+
+            # create timer for modal
+            wm = context.window_manager
+            self._timer = wm.event_timer_add(.02, context.window)
+            wm.modal_handler_add(self)
         except:
             self.handle_exception()
 
@@ -170,12 +150,23 @@ class visualizer(bpy.types.Operator):
 
     def cancel(self, context):
         scn = context.scene
-        # remove timer
-        context.window_manager.event_timer_remove(self._timer)
-        # delete visualizer object and mesh
-        bpy.data.objects.remove(self.visualizerObj, True)
-        bpy.data.meshes.remove(self.m, True)
-        # remove visualizer group
-        if groupExists("AssemblMe_visualizer"):
-            vGroup = bpy.data.groups["AssemblMe_visualizer"]
-            bpy.data.groups.remove(vGroup, do_unlink=True)
+        # go to layer with visualizer object
+        activeLayers = list(scn.layers)
+        scn.layers = list(self.visualizerObj.layers)
+
+        # store original_selection and original_active
+        self.original_selection = context.selected_objects
+        self.original_active = context.active_object
+
+        # delete latticeRef
+        self.visualizerObj.hide_select = False
+        delete(self.visualizerObj)
+
+        # delete visualizer group
+        bpy.data.groups.remove(bpy.data.groups["AssemblMe_visualizer"], do_unlink=True)
+
+        # select original_selection and original_active
+        select(self.original_selection, active=self.original_active)
+
+        # reset to original active layers
+        scn.layers = activeLayers

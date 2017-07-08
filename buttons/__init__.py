@@ -19,4 +19,4 @@
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
     """
 
-__all__ = [ "createBuildAnimation", "updateBuildAnimation", "startOver", "refreshBuildAnimationLength", "visualizer", "reportError", "closeReportError"]
+__all__ = [ "createBuildAnimation", "updateBuildAnimation", "startOver", "refreshBuildAnimationLength", "visualizer", "reportError"]

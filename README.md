@@ -8,12 +8,12 @@ You can purchase AssemblMe on the [Blender Market](https://www.blendermarket.com
 
 Purchasing a license entitles you to tool support and helps ensure AssemblMe's continued development.
 
-## Getting Support
+# Getting Support
 
 You can get support for tools by reading the documentation or posting on the forums.
 
 Support is granted to all customers whom have purchased a license.
 
-## Contributing
+# Contributing
 
 We welcome your contributions! If you'd like to contribute then simply Fork the repo, work on your changes, and then submit a pull request. If you're unsure what to contribute, then look at the open issues for the current to-dos.
