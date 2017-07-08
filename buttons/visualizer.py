@@ -40,28 +40,33 @@ class visualizer(bpy.types.Operator):
             self.m = self.visualizerObj.data
         else:
             # create visualizer object
+            scn = bpy.context.scene
             self.m = bpy.data.meshes.new('AssemblMe_visualizer_m')
             self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
             self.visualizerObj.hide_select = True
             self.visualizerObj.hide_render = True
             # put in new group
-            bpy.ops.group.create(name="AssemblMe_visualizer")
-            bpy.data.groups["AssemblMe_visualizer"].objects.link(self.visualizerObj)
+            vGroup = bpy.data.groups.new("AssemblMe_visualizer")
+            vGroup.objects.link(self.visualizerObj)
         # not sure what this does, to be honest
         visualizer.instance = self
 
     def createAnim(self):
         scn = bpy.context.scene
         # if first and last location are the same, keep visualizer stationary
-        if props.objMinLoc == props.objMaxLoc:
+        if props.objMinLoc == props.objMaxLoc or scn.orientRandom > 0.0025:
             self.visualizerObj.animation_data_clear()
             if type(props.objMinLoc) == type(self.visualizerObj.location):
                 self.visualizerObj.location = props.objMinLoc
             else:
                 self.visualizerObj.location = (0,0,0)
+            scn.visualizerAnimated = False
             return "static"
         # else, create animation
         else:
+            # if animation already created, clear it
+            if scn.visualizerAnimated:
+                self.visualizerObj.animation_data_clear()
             # set up vars
             self.visualizerObj.location = props.objMinLoc
             curFrame = scn.frameWithOrigLoc
@@ -75,6 +80,7 @@ class visualizer(bpy.types.Operator):
             else:
                 curFrame += (scn.animLength - scn.lastLayerVelocity)
             insertKeyframes(self.visualizerObj, "location", curFrame, 'LINEAR', idx)
+            scn.visualizerAnimated = True
             return "animated"
 
     def enable(self, context):
@@ -87,6 +93,7 @@ class visualizer(bpy.types.Operator):
         visualizerBM.to_mesh(self.visualizerObj.data)
         # link visualizer object to scene
         scn.objects.link(self.visualizerObj)
+        unhide(self.visualizerObj)
         scn.visualizerLinked = True
 
     def disable(self, context):
@@ -140,12 +147,12 @@ class visualizer(bpy.types.Operator):
                 self.disable(context)
                 return{"FINISHED"}
             else:
-                # enable visualizer
-                self.enable(context)
                 # create animation for visualizer if build animation exists
+                self.minAndMax = [props.objMinLoc, props.objMaxLoc]
                 if groupExists("AssemblMe_all_objects_moved"):
                     self.createAnim()
-                self.minAndMax = [props.objMinLoc, props.objMaxLoc]
+                # enable visualizer
+                self.enable(context)
                 # initialize self.zOrient for modal
                 self.zOrient = None
                 # create timer for modal

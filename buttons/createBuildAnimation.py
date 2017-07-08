@@ -96,8 +96,8 @@ class createBuildAnimation(bpy.types.Operator):
             # setOrientation("custom")
             # store that 'PLAIN_AXES' object to a group so it can be put in group later
             axisObj = context.active_object
-            select(axisObj)
-            bpy.ops.group.create(name="AssemblMe_axis_obj")
+            aoGroup = bpy.data.groups.new("AssemblMe_axis_obj")
+            aoGroup.objects.link(axisObj)
 
             # populate props.listZValues again
             props.listZValues = getListZValues(props.objects_to_move)
@@ -127,7 +127,9 @@ class createBuildAnimation(bpy.types.Operator):
 
             # select all objects moved and put in group
             select(list(animationReturnDict["moved"]))
-            bpy.ops.group.create(name="AssemblMe_all_objects_moved")
+            aomGroup = bpy.data.groups.new("AssemblMe_all_objects_moved")
+            for o in bpy.context.selected_objects:
+                aomGroup.objects.link(o)
 
             # reset upper and lower bound values
             props.z_upper_bound = None
@@ -135,7 +137,6 @@ class createBuildAnimation(bpy.types.Operator):
 
             # set 'PLAIN_AXES' as active (and selected) object
             select(axisObj, active=axisObj)
-            bpy.ops.group.create(name="AssemblMe_axis_obj")
 
             # set current frame to first frame of animation
             bpy.context.scene.frame_set(scn.firstFrame)

@@ -1,7 +1,7 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 0, 2),
+    "version"     : (1, 0, 1),
     "blender"     : (2, 78, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
@@ -227,6 +227,8 @@ def register():
         default=0)
     bpy.types.Scene.lastLayerVelocity = IntProperty(
         default=-1)
+    bpy.types.Scene.visualizerAnimated = BoolProperty(
+        default=False)
 
     bpy.types.Scene.visualizerLinked = BoolProperty(
         default=False)
