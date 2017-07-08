@@ -58,6 +58,30 @@ def groupExists(groupName):
             groupExists = True
     return groupExists
 
+# USE EXAMPLE: idfun=(lambda x: x.lower()) so that it ignores case
+# https://www.peterbe.com/plog/uniqifiers-benchmark
+def uniquify(seq, idfun=None):
+    # order preserving
+    if idfun is None:
+        def idfun(x): return x
+    seen = {}
+    result = []
+    for item in seq:
+        marker = idfun(item)
+        # in old Python versions:
+        # if seen.has_key(marker)
+        # but in new ones:
+        if marker in seen: continue
+        seen[marker] = 1
+        result.append(item)
+    return result
+def uniquify1(seq):
+   # Not order preserving
+   keys = {}
+   for e in seq:
+       keys[e] = 1
+   return keys.keys()
+
 def confirmList(objList):
     """ if single object passed, convert to list """
     if type(objList) != list:
