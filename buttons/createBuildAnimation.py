@@ -73,7 +73,7 @@ class createBuildAnimation(bpy.types.Operator):
             # setOrigin(props.objects_to_move, 'ORIGIN_CENTER_OF_MASS')
 
             # populate props.listZValues
-            props.listZValues,rotX,rotY = getListZValues(props.objects_to_move)
+            props.listZValues,rotXL,rotYL = getListZValues(props.objects_to_move)
 
             # set props.objMinLoc and props.objMaxLoc
             setBoundsForVisualizer()
@@ -100,7 +100,7 @@ class createBuildAnimation(bpy.types.Operator):
             aoGroup.objects.link(axisObj)
 
             # populate props.listZValues again
-            props.listZValues,_,_ = getListZValues(props.objects_to_move, rotX, rotY)
+            props.listZValues,_,_ = getListZValues(props.objects_to_move, rotXL, rotYL)
 
             # reset upper and lower bound values
             props.z_upper_bound = None

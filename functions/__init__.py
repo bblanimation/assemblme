@@ -84,18 +84,22 @@ def getAnimLength():
 #     else:
 #         bpy.ops.transform.select_orientation(orientation=orientation)
 
-def getListZValues(objects, rotX=False, rotY=False):
+def getListZValues(objects, rotXL=False, rotYL=False):
     """ returns list of dicts containing objects and ther z locations relative to layer orientation """
     scn = bpy.context.scene
 
     # assemble list of dictionaries into 'listZValues'
     listZValues = []
-    for obj in objects:
+    if not rotXL:
+        rotXL = []
+        rotYL = []
+        for i in range(len(objects)):
+            rotXL.append(getRandomizedOrient(scn.xOrient))
+            rotYL.append(getRandomizedOrient(scn.yOrient))
+    for i,obj in enumerate(objects):
         l = obj.location
-        if not rotX:
-            rotX = getRandomizedOrient(scn.xOrient)
-        if not rotY:
-            rotY = getRandomizedOrient(scn.yOrient)
+        rotX = rotXL[i]
+        rotY = rotYL[i]
         zLoc = (l.z * cos(rotX) * cos(rotY)) + (l.x * sin(rotY)) + (l.y * -sin(rotX))
         listZValues.append({"loc":zLoc, "obj":obj})
 
@@ -106,7 +110,7 @@ def getListZValues(objects, rotX=False, rotY=False):
         listZValues.sort(key=lambda x: x["loc"], reverse=True)
 
     # return list of dictionaries
-    return listZValues,rotX,rotY
+    return listZValues,rotXL,rotYL
 
 def getObjectsInBound():
     """ select objects in bounds from props.listZValues """
