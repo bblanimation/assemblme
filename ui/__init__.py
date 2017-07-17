@@ -39,6 +39,12 @@ class ActionsPanel(Panel):
         layout = self.layout
         scn = context.scene
 
+        if bversion() < '002.078.00':
+            col = layout.column(align=True)
+            col.label('ERROR: upgrade needed', icon='ERROR')
+            col.label('AssemblMe requires Blender 2.78+')
+            return
+
         col = layout.column(align=True)
         row = col.row(align=True)
         try:
@@ -71,9 +77,22 @@ class SettingsPanel(Panel):
     bl_category    = "AssemblMe"
     COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        if bversion() < '002.078.00':
+            return False
+        return True
+
     def draw(self, context):
         layout = self.layout
         scn = context.scene
+
+        if bversion() < '002.075.00':
+            col = layout.column(align=True)
+            col.label('ERROR: upgrade needed', icon='ERROR')
+            col.label('AssemblMe requires Blender 2.75+')
+            return
 
         col = layout.column(align=True)
         row = col.row(align=True)
@@ -85,7 +104,11 @@ class SettingsPanel(Panel):
         row = col.row(align=True)
         row.label("Animation:")
         row = col.row(align=True)
-        row.operator("scene.refresh_build_animation_length", text="Duration: " + str(scn.animLength) + " frames", icon="FILE_REFRESH")
+        if scn.orientRandom > 0.005:
+            approx = "~"
+        else:
+            approx = ""
+        row.operator("scene.refresh_build_animation_length", text="Duration: " + approx + str(scn.animLength) + " frames", icon="FILE_REFRESH")
         row = col.row(align=True)
         row.prop(scn, "firstFrame")
         row = col.row(align=True)
@@ -191,6 +214,13 @@ class AdvancedPanel(Panel):
     bl_options     = {"DEFAULT_CLOSED"}
     COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        if bversion() < '002.078.00':
+            return False
+        return True
+
     def draw(self, context):
         layout = self.layout
         scn = context.scene
@@ -230,13 +260,20 @@ class presetManager(Panel):
     bl_options     = {"DEFAULT_CLOSED"}
     COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        if bversion() < '002.078.00':
+            return False
+        return True
+
     def draw(self, context):
         layout = self.layout
         scn = context.scene
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label("Create New Preset")
+        row.label("Create New Preset:")
         row = col.row(align=True)
         split = row.split(align=True, percentage = 0.7)
         col = split.column(align=True)
@@ -246,7 +283,7 @@ class presetManager(Panel):
         col.operator("scene.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label("Remove Existing Preset")
+        row.label("Remove Existing Preset:")
         row = col.row(align=True)
         split = row.split(align=True, percentage = 0.7)
         col = split.column(align=True)

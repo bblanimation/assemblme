@@ -99,10 +99,10 @@ class animPresets(bpy.types.Operator):
                 self.report({"WARNING"}, "No preset name specified")
                 return False
         if self.action == "REMOVE":
-            if scn.animPreset == "None":
+            if scn.animPresetToDelete == "None":
                 self.report({"WARNING"}, "No preset name specified")
                 return False
-            elif scn.animPreset == "Standard Build" or scn.animPreset == "Explode":
+            elif scn.animPresetToDelete == "Standard Build" or scn.animPresetToDelete == "Explode":
                 self.report({"WARNING"}, "Cannot delete default plugins")
                 return False
         return True
@@ -123,6 +123,7 @@ class animPresets(bpy.types.Operator):
                 self.writeNewPreset(scn.newPresetName)
                 fileNames.append(scn.newPresetName + ".py")
                 selectedPreset = scn.newPresetName
+                scn.newPresetName = ""
                 self.report({"INFO"}, "Successfully added new preset '" + scn.newPresetName + "'")
             elif self.action == "REMOVE":
                 backupPath = os.path.join(path, "backups")

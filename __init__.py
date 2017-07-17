@@ -309,7 +309,6 @@ def register():
         default=50)
 
 
-
     # Session properties
     props.axisObj = None
     props.listZValues = []
@@ -322,10 +321,11 @@ def register():
 
 def unregister():
     Scn = bpy.types.Scene
-
+    
     del Scn.visualizerNumCuts
     del Scn.visualizerScale
-    del Scn.visualizerActive
+    del Scn.visualizerLinked
+    del Scn.visualizerAnimated
     del Scn.lastLayerVelocity
     del Scn.animLength
     del Scn.frameWithOrigLoc

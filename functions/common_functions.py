@@ -88,6 +88,12 @@ def uniquify1(seq):
        keys[e] = 1
    return keys.keys()
 
+def disableRelationshipLines():
+    # disable relationship lines
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.spaces[0].show_relationship_lines = False
+
 def confirmList(objList):
     """ if single object passed, convert to list """
     if type(objList) != list:

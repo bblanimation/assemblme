@@ -84,7 +84,7 @@ def getAnimLength():
 #     else:
 #         bpy.ops.transform.select_orientation(orientation=orientation)
 
-def getListZValues(objects):
+def getListZValues(objects, rotX=False, rotY=False):
     """ returns list of dicts containing objects and ther z locations relative to layer orientation """
     scn = bpy.context.scene
 
@@ -92,8 +92,10 @@ def getListZValues(objects):
     listZValues = []
     for obj in objects:
         l = obj.location
-        rotX = getRandomizedOrient(scn.xOrient)
-        rotY = getRandomizedOrient(scn.yOrient)
+        if not rotX:
+            rotX = getRandomizedOrient(scn.xOrient)
+        if not rotY:
+            rotY = getRandomizedOrient(scn.yOrient)
         zLoc = (l.z * cos(rotX) * cos(rotY)) + (l.x * sin(rotY)) + (l.y * -sin(rotX))
         listZValues.append({"loc":zLoc, "obj":obj})
 
@@ -104,7 +106,7 @@ def getListZValues(objects):
         listZValues.sort(key=lambda x: x["loc"], reverse=True)
 
     # return list of dictionaries
-    return listZValues
+    return listZValues,rotX,rotY
 
 def getObjectsInBound():
     """ select objects in bounds from props.listZValues """
@@ -150,6 +152,7 @@ def getNewSelection():
     return objsInBound
 
 def setBoundsForVisualizer():
+    print(props.listZValues)
     for i in range(len(props.listZValues)):
         if props.listZValues[i]["obj"].type not in props.ignoredTypes:
             props.objMinLoc = props.listZValues[i]["obj"].location.copy()
@@ -302,7 +305,7 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
                 curFrame += getBuildSpeed()
         # handle case where 'scn.skipEmptySelections' == True and empty selection is grabbed
         else:
-            self.report({"ERROR"}, "Grabbed empty selection. This shouldn't happen!")
+            os.stderr.write("Grabbed empty selection. This shouldn't happen!")
 
     return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
 

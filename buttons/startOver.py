@@ -76,8 +76,8 @@ class startOver(bpy.types.Operator):
                 obj.select = True
 
             # remove 'AssemblMe_all_objects_moved' group
-            bpy.data.groups.remove(aomGroup, do_unlink=True)
-            bpy.data.groups.remove(aoGroup, do_unlink=True)
+            bpy.data.groups.remove(aomGroup, True)
+            bpy.data.groups.remove(aoGroup, True)
 
             # set current_frame to original current_frame
             bpy.context.scene.frame_set(self.origFrame)

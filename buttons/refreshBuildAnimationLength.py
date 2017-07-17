@@ -56,7 +56,7 @@ class refreshBuildAnimationLength(bpy.types.Operator):
                 props.objects_to_move = context.selected_objects
 
             # populate props.listZValues
-            props.listZValues = getListZValues(props.objects_to_move)
+            props.listZValues,_,_ = getListZValues(props.objects_to_move)
 
             # set props.objMinLoc and props.objMaxLoc
             setBoundsForVisualizer()

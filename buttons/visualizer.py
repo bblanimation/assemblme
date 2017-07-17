@@ -185,4 +185,4 @@ class visualizer(bpy.types.Operator):
         # remove visualizer group
         if groupExists("AssemblMe_visualizer"):
             vGroup = bpy.data.groups["AssemblMe_visualizer"]
-            bpy.data.groups.remove(vGroup, do_unlink=True)
+            bpy.data.groups.remove(vGroup, True)

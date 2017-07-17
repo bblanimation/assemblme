@@ -69,7 +69,7 @@ class updateBuildAnimation(bpy.types.Operator):
             props.objects_to_move = list(aomGroup.objects)
 
             # populate props.listZValues
-            props.listZValues = getListZValues(props.objects_to_move)
+            props.listZValues,rotX,rotY = getListZValues(props.objects_to_move)
 
             # set props.objMinLoc and props.objMaxLoc
             setBoundsForVisualizer()
@@ -87,7 +87,7 @@ class updateBuildAnimation(bpy.types.Operator):
             scn.frameWithOrigLoc = self.curFrame
 
             # populate props.listZValues again
-            props.listZValues = getListZValues(props.objects_to_move)
+            props.listZValues,_,_ = getListZValues(props.objects_to_move, rotX, rotY)
 
             # reset upper and lower bound values
             props.z_upper_bound = None
