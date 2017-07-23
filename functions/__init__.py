@@ -156,7 +156,6 @@ def getNewSelection():
     return objsInBound
 
 def setBoundsForVisualizer():
-    print(props.listZValues)
     for i in range(len(props.listZValues)):
         if props.listZValues[i]["obj"].type not in props.ignoredTypes:
             props.objMinLoc = props.listZValues[i]["obj"].location.copy()
