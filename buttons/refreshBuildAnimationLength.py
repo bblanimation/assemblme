@@ -33,38 +33,40 @@ class refreshBuildAnimationLength(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if not groupExists("AssemblMe_all_objects_moved"):
-            return 0 < len([
-                o for o in context.selected_objects if
-                    o.type not in props.ignoredTypes                            # object not of ignored type
-                ])
+        scn = bpy.context.scene
+        if scn.aglist_index == -1:
+            return False
+        ag = scn.aglist[scn.aglist_index]
+        if not groupExists(ag.group_name):
+            return False
         return True
 
     def execute(self, context):
         try:
             # set up variables
             scn = context.scene
+            ag = scn.aglist[scn.aglist_index]
 
-            if groupExists("AssemblMe_all_objects_moved"):
-                # if objects in 'AssemblMe_all_objects_moved', populate objects_to_move with them
-                props.objects_to_move = bpy.data.groups["AssemblMe_all_objects_moved"].objects
+            if groupExists(ag.group_name):
+                # if objects in ag.group_name, populate objects_to_move with them
+                self.objects_to_move = bpy.data.groups[ag.group_name].objects
                 # set current_frame to animation start frame
                 self.origFrame = scn.frame_current
-                bpy.context.scene.frame_set(scn.frameWithOrigLoc)
+                bpy.context.scene.frame_set(ag.frameWithOrigLoc)
             else:
                 # else, populate objects_to_move with selected_objects
-                props.objects_to_move = context.selected_objects
+                self.objects_to_move = context.selected_objects
 
-            # populate props.listZValues
-            props.listZValues,_,_ = getListZValues(props.objects_to_move)
+            # populate self.listZValues
+            self.listZValues,_,_ = getListZValues(self.objects_to_move)
 
             # set props.objMinLoc and props.objMaxLoc
-            setBoundsForVisualizer()
+            setBoundsForVisualizer(self.listZValues)
 
-            # calculate how many frames the animation will last (depletes props.listZValues)
-            scn.animLength = getAnimLength()
+            # calculate how many frames the animation will last (depletes self.listZValues)
+            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues)
 
-            if groupExists("AssemblMe_all_objects_moved"):
+            if groupExists(ag.group_name):
                 # set current_frame to original current_frame
                 bpy.context.scene.frame_set(self.origFrame)
 

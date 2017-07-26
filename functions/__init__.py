@@ -34,22 +34,25 @@ props = bpy.props
 def getRandomizedOrient(orient):
     """ returns randomized orientation based on user settings """
     scn = bpy.context.scene
-    return (orient + random.uniform(-scn.orientRandom, scn.orientRandom))
+    ag = scn.aglist[scn.aglist_index]
+    return (orient + random.uniform(-ag.orientRandom, ag.orientRandom))
 
 def getOffsetLocation(location):
     """ returns randomized location offset """
     scn = bpy.context.scene
-    X = location.x + random.uniform(-scn.locationRandom, scn.locationRandom) + scn.xLocOffset
-    Y = location.y + random.uniform(-scn.locationRandom, scn.locationRandom) + scn.yLocOffset
-    Z = location.z + random.uniform(-scn.locationRandom, scn.locationRandom) + scn.zLocOffset
+    ag = scn.aglist[scn.aglist_index]
+    X = location.x + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.xLocOffset
+    Y = location.y + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.yLocOffset
+    Z = location.z + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.zLocOffset
     return (X, Y, Z)
 
 def getOffsetRotation(rotation):
     """ returns randomized rotation offset """
     scn = bpy.context.scene
-    X = rotation.x + random.uniform(-scn.rotationRandom, scn.rotationRandom) + scn.xRotOffset
-    Y = rotation.y + random.uniform(-scn.rotationRandom, scn.rotationRandom) + scn.yRotOffset
-    Z = rotation.z + random.uniform(-scn.rotationRandom, scn.rotationRandom) + scn.zRotOffset
+    ag = scn.aglist[scn.aglist_index]
+    X = rotation.x + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset
+    Y = rotation.y + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset
+    Z = rotation.z + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset
     return {"X":X, "Y":Y, "Z":Z}
 
 # def toDegrees(degreeValue):
@@ -58,18 +61,23 @@ def getOffsetRotation(rotation):
 
 def getBuildSpeed():
     """ calculates and returns build speed """
-    return floor(bpy.context.scene.buildSpeed)
+    scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
+    return floor(ag.buildSpeed)
 
 def getObjectVelocity():
     """ calculates and returns brick velocity """
-    return floor(51-(bpy.context.scene.objectVelocity))
-
-def getAnimLength():
     scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
+    return floor(51-(ag.objectVelocity))
+
+def getAnimLength(objectsToMove, listZValues):
+    scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
     tempObjCount = 0
     numLayers = 0
-    while len(props.objects_to_move) > tempObjCount:
-        numObjs = len(getNewSelection())
+    while len(objectsToMove) > tempObjCount:
+        numObjs = len(getNewSelection(objectsToMove, listZValues))
         if numObjs != 0:
             numLayers += 1
             tempObjCount += numObjs
@@ -87,6 +95,7 @@ def getAnimLength():
 def getListZValues(objects, rotXL=False, rotYL=False):
     """ returns list of dicts containing objects and ther z locations relative to layer orientation """
     scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
 
     # assemble list of dictionaries into 'listZValues'
     listZValues = []
@@ -94,8 +103,8 @@ def getListZValues(objects, rotXL=False, rotYL=False):
         rotXL = []
         rotYL = []
         for i in range(len(objects)):
-            rotXL.append(getRandomizedOrient(scn.xOrient))
-            rotYL.append(getRandomizedOrient(scn.yOrient))
+            rotXL.append(getRandomizedOrient(ag.xOrient))
+            rotYL.append(getRandomizedOrient(ag.yOrient))
     for i,obj in enumerate(objects):
         l = obj.location
         rotX = rotXL[i]
@@ -104,7 +113,7 @@ def getListZValues(objects, rotXL=False, rotYL=False):
         listZValues.append({"loc":zLoc, "obj":obj})
 
     # sort list by "loc" key (relative z values)
-    if scn.invertBuild:
+    if ag.invertBuild:
         listZValues.sort(key=lambda x: x["loc"])
     else:
         listZValues.sort(key=lambda x: x["loc"], reverse=True)
@@ -112,57 +121,58 @@ def getListZValues(objects, rotXL=False, rotYL=False):
     # return list of dictionaries
     return listZValues,rotXL,rotYL
 
-def getObjectsInBound():
-    """ select objects in bounds from props.listZValues """
+def getObjectsInBound(objectsToMove, listZValues, z_lower_bound):
+    """ select objects in bounds from listZValues """
     scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
     objsInBound = []
     # iterate through objects in listZValues (breaks when outside range)
-    for i,lst in enumerate(props.listZValues):
+    for i,lst in enumerate(listZValues):
         # set obj and z_loc
         obj = lst["obj"]
         z_loc = lst["loc"]
-        # if object is camera or lamp, remove from props.objects_to_move
+        # if object is camera or lamp, remove from objectsToMove
         if obj.type in props.ignoredTypes:
-            props.objects_to_move.remove(obj)
+            objectsToMove.remove(obj)
             continue
         # check if object is in bounding z value
-        if z_loc >= props.z_lower_bound and not scn.invertBuild or z_loc <= props.z_lower_bound and scn.invertBuild:
+        if z_loc >= z_lower_bound and not ag.invertBuild or z_loc <= z_lower_bound and ag.invertBuild:
             objsInBound.append(obj)
         # if not, break for loop and pop previous objects from listZValues
         else:
             for j in range(i):
-                props.listZValues.pop(0)
+                listZValues.pop(0)
             break
     return objsInBound
 
-def getNewSelection():
+def getNewSelection(objectsToMove, listZValues):
     """ selects next layer of objects """
-
     scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
 
     # get new upper and lower bounds
     if scn.skipEmptySelections or props.z_upper_bound == None:
-        props.z_upper_bound = props.listZValues[0]["loc"]
+        props.z_upper_bound = listZValues[0]["loc"]
     else:
         props.z_upper_bound = props.z_lower_bound
-    if scn.invertBuild:
-        props.z_lower_bound = props.z_upper_bound + scn.layerHeight
+    if ag.invertBuild:
+        props.z_lower_bound = props.z_upper_bound + ag.layerHeight
     else:
-        props.z_lower_bound = props.z_upper_bound - scn.layerHeight
+        props.z_lower_bound = props.z_upper_bound - ag.layerHeight
 
     # select objects in bounds
-    objsInBound = getObjectsInBound()
+    objsInBound = getObjectsInBound(objectsToMove, listZValues, props.z_lower_bound)
 
     return objsInBound
 
-def setBoundsForVisualizer():
-    for i in range(len(props.listZValues)):
-        if props.listZValues[i]["obj"].type not in props.ignoredTypes:
-            props.objMinLoc = props.listZValues[i]["obj"].location.copy()
+def setBoundsForVisualizer(listZValues):
+    for i in range(len(listZValues)):
+        if listZValues[i]["obj"].type not in props.ignoredTypes:
+            props.objMinLoc = listZValues[i]["obj"].location.copy()
             break
-    for i in range(len(props.listZValues)-1,-1,-1):
-        if props.listZValues[i]["obj"].type not in props.ignoredTypes:
-            props.objMaxLoc = props.listZValues[i]["obj"].location.copy()
+    for i in range(len(listZValues)-1,-1,-1):
+        if listZValues[i]["obj"].type not in props.ignoredTypes:
+            props.objMaxLoc = listZValues[i]["obj"].location.copy()
             break
 
 def layers(l):
@@ -204,25 +214,25 @@ def updateAnimPreset(self, context):
 
     return None
 
-def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
+def animateObjects(objectsToMove, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
 
     # initialize variables for use in while loop
     scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
     acc = 0
     lastUpdated = time.time()
     curTime = lastUpdated
     estTimeRemaining = []
     objects_moved = []
-    axisObj = bpy.data.groups['AssemblMe_axis_obj'].objects[0]
-
+    # axisObj = bpy.data.groups['AssemblMe_axis_obj'].objects[0]
 
     while len(objectsToMove) > 0:
         # iterate num times in while loop
         acc += 1
 
         # get next objects to animate
-        newSelection = getNewSelection()
+        newSelection = getNewSelection(objectsToMove, listZValues)
 
         # print time remaining
         if scn.printStatus:
@@ -232,10 +242,10 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
             # ignore first value
             if acc > 1:
                 # calculate remaining frames
-                if scn.buildType == "Assemble":
-                    framesRemaining = curFrame - scn.firstFrame - getObjectVelocity() - getBuildSpeed()
+                if ag.buildType == "Assemble":
+                    framesRemaining = curFrame - ag.firstFrame - getObjectVelocity() - getBuildSpeed()
                 else:
-                    framesRemaining = scn.animLength - curFrame - getObjectVelocity()
+                    framesRemaining = ag.animLength - curFrame - getObjectVelocity()
                 if len(newSelection) > 0:
                     # append instant time to time remaining average
                     estTimeRemaining.append(0)
@@ -250,11 +260,11 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
 
         # iterate through selected objects
         for obj in newSelection:
-            # set object parent to axisObj
-            obj.parent = axisObj
+            # # set object parent to axisObj
+            # obj.parent = axisObj
             # put selected objects in 'objects_moved'
             objects_moved.append(obj)
-            # obj no longer needs to be moved, so remove from 'objects_to_move'
+            # obj no longer needs to be moved, so remove from 'objectsToMove'
             objectsToMove.remove(obj)
 
         # move selected objects and add keyframes
@@ -262,29 +272,29 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
         kfIdxRot = -1
         if len(newSelection) != 0:
             # insert location keyframes
-            if scn.xLocOffset != 0 or scn.yLocOffset != 0 or scn.zLocOffset != 0 or scn.locationRandom != 0:
+            if ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0:
                 insertKeyframes(newSelection, "location", curFrame, locInterpolationMode, kfIdxLoc)
-                if scn.buildType == "Assemble":
+                if ag.buildType == "Assemble":
                     kfIdxLoc -= 1
             # insert rotation keyframes
-            if scn.xRotOffset != 0 or scn.yRotOffset != 0 or scn.zRotOffset != 0 or scn.rotationRandom != 0:
+            if ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0:
                 insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
-                if scn.buildType == "Assemble":
+                if ag.buildType == "Assemble":
                     kfIdxRot -= 1
 
             # set curFrame
-            if scn.buildType == "Assemble":
+            if ag.buildType == "Assemble":
                 curFrame -= getObjectVelocity()
             else:
                 curFrame += getObjectVelocity()
 
             # move object and insert location keyframes
-            if scn.xLocOffset != 0 or scn.yLocOffset != 0 or scn.zLocOffset != 0 or scn.locationRandom != 0:
+            if ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0:
                 for obj in newSelection:
                     obj.location = getOffsetLocation(obj.location)
                 insertKeyframes(newSelection, "location", curFrame, locInterpolationMode, kfIdxLoc)
             # rotate object and insert rotation keyframes
-            if scn.xRotOffset != 0 or scn.yRotOffset != 0 or scn.zRotOffset != 0 or scn.rotationRandom != 0:
+            if ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0:
                 for obj in newSelection:
                     offsetRotation = getOffsetRotation(obj.rotation_euler)
                     obj.rotation_euler.x = offsetRotation["X"]
@@ -293,7 +303,7 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
                 insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
 
             # set curFrame
-            if scn.buildType == "Assemble":
+            if ag.buildType == "Assemble":
                 curFrame += getObjectVelocity() - getBuildSpeed()
             else:
                 curFrame += getBuildSpeed() - getObjectVelocity()
@@ -302,7 +312,7 @@ def animateObjects(objectsToMove, curFrame, locInterpolationMode='LINEAR', rotIn
         # handle case where 'scn.skipEmptySelections' == False and empty selection is grabbed
         elif not scn.skipEmptySelections:
             # skip frame if nothing selected
-            if scn.buildType == "Assemble":
+            if ag.buildType == "Assemble":
                 curFrame -= getBuildSpeed()
             else:
                 curFrame += getBuildSpeed()

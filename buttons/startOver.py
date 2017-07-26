@@ -34,7 +34,9 @@ class startOver(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if not groupExists("AssemblMe_all_objects_moved"):
+        scn = bpy.context.scene
+        ag = scn.aglist[scn.aglist_index]
+        if not groupExists(ag.group_name):
             return False
         return True
 
@@ -43,10 +45,11 @@ class startOver(bpy.types.Operator):
             # get start time
             startTime = time.time()
 
-            # set up aomGroup variable
+            # set up origGroup variable
             scn = context.scene
-            aomGroup = bpy.data.groups["AssemblMe_all_objects_moved"]
-            aoGroup = bpy.data.groups["AssemblMe_axis_obj"]
+            ag = scn.aglist[scn.aglist_index]
+            origGroup = bpy.data.groups[ag.group_name]
+            # aoGroup = bpy.data.groups["AssemblMe_axis_obj"]
 
             # save backup of blender file
             if scn.autoSaveOnStartOver:
@@ -58,29 +61,28 @@ class startOver(bpy.types.Operator):
 
             # set current_frame to animation start frame
             self.origFrame = scn.frame_current
-            bpy.context.scene.frame_set(scn.frameWithOrigLoc)
+            bpy.context.scene.frame_set(ag.frameWithOrigLoc)
 
-            print("\nClearing animation data from " + str(len(aomGroup.objects)) + " objects.")
+            print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
 
             # clear objMinLoc and objMaxLoc
             props.objMinLoc = 0
             props.objMaxLoc = 0
 
-            # delete axis reference object
-            if groupExists("AssemblMe_axis_obj"):
-                delete(aoGroup.objects[0])
+            # # delete axis reference object
+            # if groupExists("AssemblMe_axis_obj"):
+            #     delete(aoGroup.objects[0])
+            # # remove axis obj group
+            # bpy.data.groups.remove(aoGroup, True)
 
             # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
-            for obj in aomGroup.objects:
+            for obj in origGroup.objects:
                 obj.animation_data_clear()
-                obj.select = True
-
-            # remove 'AssemblMe_all_objects_moved' group
-            bpy.data.groups.remove(aomGroup, True)
-            bpy.data.groups.remove(aoGroup, True)
 
             # set current_frame to original current_frame
             bpy.context.scene.frame_set(self.origFrame)
+
+            ag.animated = False
 
             # STOPWATCH CHECK
             stopWatch("Time Elapsed", time.time()-startTime)

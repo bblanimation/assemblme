@@ -23,8 +23,58 @@ Created by Christopher Gearhart
 import bpy
 from bpy.types import Panel
 from bpy.props import *
+from .animated_groups import *
 from ..functions import *
 props = bpy.props
+
+class AnimationsPanel(Panel):
+    bl_space_type  = "VIEW_3D"
+    bl_region_type = "TOOLS"
+    bl_label       = "AssemblMe Animations"
+    bl_idname      = "VIEW3D_PT_tools_AssemblMe_animations"
+    bl_context     = "objectmode"
+    bl_category    = "AssemblMe"
+    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
+
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        return True
+
+    def draw(self, context):
+        layout = self.layout
+        scn = bpy.context.scene
+
+        if bversion() < '002.078.00':
+            col = layout.column(align=True)
+            col.label('ERROR: upgrade needed', icon='ERROR')
+            col.label('AssemblMe requires Blender 2.78+')
+            return
+
+        # draw UI list and list actions
+        rows = 3
+        row = layout.row()
+        row.template_list("AssemblMe_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
+
+        col = row.column(align=True)
+        col.operator("aglist.list_action", icon='ZOOMIN', text="").action = 'ADD'
+        col.operator("aglist.list_action", icon='ZOOMOUT', text="").action = 'REMOVE'
+        col.separator()
+        col.operator("aglist.list_action", icon='TRIA_UP', text="").action = 'UP'
+        col.operator("aglist.list_action", icon='TRIA_DOWN', text="").action = 'DOWN'
+
+        col = layout.column(align=True)
+        if scn.aglist_index == -1:
+            row = col.row(align=True)
+            row.operator("aglist.list_action", icon='ZOOMIN', text="Create New Animation").action = 'ADD'
+        else:
+            col.label("Group Name:")
+            split = col.split(align=True, percentage=0.85)
+            col = split.column(align=True)
+            ag = scn.aglist[scn.aglist_index]
+            col.prop_search(ag, "group_name", bpy.data, "groups", text="")
+            col = split.column(align=True)
+            col.operator("aglist.set_to_active", icon="EDIT", text="")
 
 class ActionsPanel(Panel):
     bl_space_type  = "VIEW_3D"
@@ -35,28 +85,28 @@ class ActionsPanel(Panel):
     bl_category    = "AssemblMe"
     COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        if bversion() < '002.078.00':
+            return False
+        scn = bpy.context.scene
+        if scn.aglist_index == -1:
+            return False
+        return True
+
     def draw(self, context):
         layout = self.layout
-        scn = context.scene
-
-        if bversion() < '002.078.00':
-            col = layout.column(align=True)
-            col.label('ERROR: upgrade needed', icon='ERROR')
-            col.label('AssemblMe requires Blender 2.78+')
-            return
+        scn = bpy.context.scene
+        ag = scn.aglist[scn.aglist_index]
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        try:
-            # if objects in 'AssemblMe_all_objects_moved' group set row to inactive (else set to active)
-            animCreated = len(bpy.data.groups["AssemblMe_all_objects_moved"].objects) != 0
-        except:
-            # if 'AssemblMe_all_objects_moved' group does not exist, set row to active
-            animCreated = False
-        if not animCreated:
-            row.operator("scene.create_build_animation", text="Create Build Animation", icon="EDIT")
+        if not ag.animated:
+            row.active = groupExists(ag.group_name)
+            row.operator("scene.create_build_animation", text="Create Build Animation", icon="EDIT").action = "CREATE"
         else:
-            row.operator("scene.update_build_animation", text="Update Build Animation", icon="EDIT")
+            row.operator("scene.create_build_animation", text="Update Build Animation", icon="EDIT").action = "UPDATE"
         row = col.row(align=True)
         row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:
@@ -82,11 +132,15 @@ class SettingsPanel(Panel):
         """ ensures operator can execute (if not, returns false) """
         if bversion() < '002.078.00':
             return False
+        scn = bpy.context.scene
+        if scn.aglist_index == -1:
+            return False
         return True
 
     def draw(self, context):
         layout = self.layout
         scn = context.scene
+        ag = scn.aglist[scn.aglist_index]
 
         if bversion() < '002.075.00':
             col = layout.column(align=True)
@@ -104,76 +158,55 @@ class SettingsPanel(Panel):
         row = col.row(align=True)
         row.label("Animation:")
         row = col.row(align=True)
-        if scn.orientRandom > 0.005:
+        if ag.orientRandom > 0.005:
             approx = "~"
         else:
             approx = ""
-        row.operator("scene.refresh_build_animation_length", text="Duration: " + approx + str(scn.animLength) + " frames", icon="FILE_REFRESH")
+        row.operator("scene.refresh_build_animation_length", text="Duration: " + approx + str(ag.animLength) + " frames", icon="FILE_REFRESH")
         row = col.row(align=True)
-        row.prop(scn, "firstFrame")
+        row.prop(ag, "firstFrame")
         row = col.row(align=True)
-        row.prop(scn, "buildSpeed")
+        row.prop(ag, "buildSpeed")
         row = col.row(align=True)
-        row.prop(scn, "objectVelocity")
-        row = col.row(align=True)
-
-
-        # if scn.animPreset == "Standard Build":
-        #     row = col.row(align=True)
-        #     row.label("Location Offset:")
-        #     row = col.row(align=True)
-        #     row.prop(scn, "zLocOffset", text="Z")
-        #     row = col.row(align=True)
-        #     row.label("Interpolation:")
-        #     row = col.row(align=True)
-        #     row.prop(scn, "locInterpolationMode", text="")
-        #     row = col.row(align=True)
-        #     row.label("Layer Height:")
-        #     row = col.row(align=True)
-        #     row.prop(scn, "layerHeight", text="Z")
-        # elif scn.animPreset == "Explode":
-        #     row = col.row(align=True)
-        #     row.label("Location Offset:")
-        #     row = col.row(align=True)
-        #     row.prop(scn, "locInterpolationMode", text="")
-        #     row = col.row(align=True)
-        #     row.prop(scn, "locationRandom", text="Random Multiplier")
-        #     row = col.row(align=True)
-        #     row.label("Rotation Offset:")
-        #     row = col.row(align=True)
-        #     row.prop(scn, "rotInterpolationMode", text="")
-        #     row = col.row(align=True)
-        #     row.prop(scn, "rotationRandom", text="Random Multiplier")
-        # else:
-        split = box.split(align=False, percentage = 0.5)
-        col = split.column(align=True)
-        row = col.row(align=True)
-        row.label("Location Offset:")
-        row = col.row(align=True)
-        row.prop(scn, "xLocOffset")
-        row = col.row(align=True)
-        row.prop(scn, "yLocOffset")
-        row = col.row(align=True)
-        row.prop(scn, "zLocOffset")
-        row = col.row(align=True)
-        row.prop(scn, "locInterpolationMode", text="")
-        row = col.row(align=True)
-        row.prop(scn, "locationRandom")
+        row.prop(ag, "objectVelocity")
         row = col.row(align=True)
 
-        col = split.column(align=True)
-        row = col.row(align=True)
-        row.label("Rotation Offset:")
-        row = col.row(align=True)
-        row.prop(scn, "xRotOffset")
-        row = col.row(align=True)
-        row.prop(scn, "yRotOffset")
-        row = col.row(align=True)
-        row.prop(scn, "zRotOffset")
-        row = col.row(align=True)
-        row.prop(scn, "rotInterpolationMode", text="")
-        row = col.row(align=True)
-        row.prop(scn, "rotationRandom")
+        if scn.animPreset == "Follow Curve":
+            col = layout.column(align=True)
+            row = col.row(align=True)
+            row.label("Path Object:")
+            row = col.row(align=True)
+            row.prop(ag, "pathObject")
+        else:
+            split = box.split(align=False, percentage = 0.5)
+            col = split.column(align=True)
+            row = col.row(align=True)
+            row.label("Location Offset:")
+            row = col.row(align=True)
+            row.prop(ag, "xLocOffset")
+            row = col.row(align=True)
+            row.prop(ag, "yLocOffset")
+            row = col.row(align=True)
+            row.prop(ag, "zLocOffset")
+            row = col.row(align=True)
+            row.prop(ag, "locInterpolationMode", text="")
+            row = col.row(align=True)
+            row.prop(ag, "locationRandom")
+            row = col.row(align=True)
+
+            col = split.column(align=True)
+            row = col.row(align=True)
+            row.label("Rotation Offset:")
+            row = col.row(align=True)
+            row.prop(ag, "xRotOffset")
+            row = col.row(align=True)
+            row.prop(ag, "yRotOffset")
+            row = col.row(align=True)
+            row.prop(ag, "zRotOffset")
+            row = col.row(align=True)
+            row.prop(ag, "rotInterpolationMode", text="")
+            row = col.row(align=True)
+            row.prop(ag, "rotationRandom")
 
         col1 = box.column(align=True)
         row = col1.row(align=True)
@@ -182,27 +215,27 @@ class SettingsPanel(Panel):
         split = row.split(align=True, percentage=0.9)
         row = split.row(align=True)
         col = row.column(align=True)
-        col.prop(scn, "xOrient")
+        col.prop(ag, "xOrient")
         col = row.column(align=True)
-        col.prop(scn, "yOrient")
+        col.prop(ag, "yOrient")
         col = split.column(align=True)
-        if scn.visualizerLinked:
+        if ag.visualizerLinked:
             col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF")
         else:
             col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_ON")
         row = col1.row(align=True)
-        row.prop(scn, "orientRandom")
+        row.prop(ag, "orientRandom")
         col1 = box.column(align=True)
         row = col1.row(align=True)
-        row.prop(scn, "layerHeight")
+        row.prop(ag, "layerHeight")
 
         col = box.column(align=True)
         row = col.row(align=True)
         row.label("Build Type:")
         row = col.row(align=True)
-        row.prop(scn, "buildType", text="")
+        row.prop(ag, "buildType", text="")
         row = col.row(align=True)
-        row.prop(scn, "invertBuild")
+        row.prop(ag, "invertBuild")
 
 class AdvancedPanel(Panel):
     bl_space_type  = "VIEW_3D"
@@ -218,6 +251,9 @@ class AdvancedPanel(Panel):
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
         if bversion() < '002.078.00':
+            return False
+        scn = bpy.context.scene
+        if scn.aglist_index == -1:
             return False
         return True
 

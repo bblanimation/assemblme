@@ -1,22 +1,23 @@
 import bpy
 def execute():
     scn = bpy.context.scene
-    scn.buildSpeed = 1
-    scn.objectVelocity = 15
-    scn.xLocOffset = 0
-    scn.yLocOffset = 0
-    scn.zLocOffset = 0
-    scn.locInterpolationMode = "LINEAR"
-    scn.locationRandom = 20
-    scn.xRotOffset = 0
-    scn.yRotOffset = 0
-    scn.zRotOffset = 0
-    scn.rotInterpolationMode = "LINEAR"
-    scn.rotationRandom = 20
-    scn.xOrient = 0
-    scn.yOrient = 0
-    scn.orientRandom = 50
-    scn.layerHeight = 15
-    scn.buildType = "Disassemble"
-    scn.invertBuild = False
+    ag = scn.aglist[scn.aglist_index]
+    ag.buildSpeed = 1
+    ag.objectVelocity = 15
+    ag.xLocOffset = 0
+    ag.yLocOffset = 0
+    ag.zLocOffset = 0
+    ag.locInterpolationMode = "LINEAR"
+    ag.locationRandom = 20
+    ag.xRotOffset = 0
+    ag.yRotOffset = 0
+    ag.zRotOffset = 0
+    ag.rotInterpolationMode = "LINEAR"
+    ag.rotationRandom = 20
+    ag.xOrient = 0
+    ag.yOrient = 0
+    ag.orientRandom = 50
+    ag.layerHeight = 15
+    ag.buildType = "Disassemble"
+    ag.invertBuild = False
     return None

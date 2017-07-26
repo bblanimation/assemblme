@@ -47,3 +47,14 @@ class reportError(bpy.types.Operator):
         except:
             self.report({"ERROR"}, "ERROR: Could not open 'error_report.txt'. If the problem persists, try reinstalling the add-on.")
         return{"FINISHED"}
+
+class closeReportError(bpy.types.Operator):
+    """Deletes error report from blender's memory (still exists in file system)"""    # blender will use this as a tooltip for menu items and buttons.
+    bl_idname = "scene.close_report_error"                                            # unique identifier for buttons and menu items to reference.
+    bl_label = "Close Report Error"                                                   # display name in the interface.
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        txt = bpy.data.texts['AssemblMe_log']
+        bpy.data.texts.remove(txt, True)
+        return{"FINISHED"}

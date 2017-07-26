@@ -34,13 +34,18 @@ class createBuildAnimation(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if groupExists("AssemblMe_all_objects_moved"):
+        scn = bpy.context.scene
+        if scn.aglist_index == -1:
             return False
-        else:
-            return 0 < len([
-                o for o in context.selected_objects if
-                    o.type not in props.ignoredTypes                            # object not of ignored type
-                ])
+        return True
+
+    action = bpy.props.EnumProperty(
+        items=(
+            ("CREATE", "Create", ""),
+            ("UPDATE", "Update", ""),
+            ("GET_LEN", "Get Length", ""),
+        )
+    )
 
     def execute(self, context):
         try:
@@ -50,8 +55,21 @@ class createBuildAnimation(bpy.types.Operator):
             startTime = time.time()
             self.curTime = startTime
 
+            scn = context.scene
+            ag = scn.aglist[scn.aglist_index]
+
+            if ag.group_name == "":
+                self.report({"WARNING"}, "No group name specified")
+                return {"CANCELLED"}
+            if not groupExists(ag.group_name):
+                self.report({"WARNING"}, "Group '%(n)s' does not exist.")
+                return {"CANCELLED"}
+            if len(bpy.data.groups[ag.group_name].objects) == 0:
+                self.report({"WARNING"}, "Group contains no objects!")
+                return {"CANCELLED"}
+
             # save backup of blender file
-            if context.scene.autoSaveOnCreateAnim:
+            if context.scene.autoSaveOnCreateAnim and self.action == "CREATE":
                 if bpy.data.filepath == '':
                     self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
                     return{"CANCELLED"}
@@ -61,46 +79,58 @@ class createBuildAnimation(bpy.types.Operator):
 
             # set up other variables
             print("initializing...")
-            scn = context.scene
             self.curFrame = scn.frame_current
-            scn.lastLayerVelocity = getObjectVelocity()
-            props.objects_to_move = context.selected_objects
+            ag.lastLayerVelocity = getObjectVelocity()
             self.original_selection = context.selected_objects
             self.original_active = context.active_object
+            origGroup = bpy.data.groups[ag.group_name]
+            # set up origGroup variable
+            self.objects_to_move = list(bpy.data.groups[ag.group_name].objects)
+            if self.action == "UPDATE":
+                # set current_frame to animation start frame
+                self.origFrame = scn.frame_current
+                bpy.context.scene.frame_set(ag.frameWithOrigLoc)
+                # clear animation data from all objects in ag.group_name group
+                for obj in origGroup.objects:
+                    obj.animation_data_clear()
+                # set up other variables
+                self.objects_moved = []
 
             # NOTE: This was commented out for the sake of performance
             # set origin to center of mass for selected objects
-            # setOrigin(props.objects_to_move, 'ORIGIN_CENTER_OF_MASS')
+            # setOrigin(self.objects_to_move, 'ORIGIN_CENTER_OF_MASS')
 
-            # populate props.listZValues
-            props.listZValues,rotXL,rotYL = getListZValues(props.objects_to_move)
+            ### BEGIN ANIMATION GENERATION ###
+            # populate self.listZValues
+            self.listZValues,rotXL,rotYL = getListZValues(self.objects_to_move)
 
             # set props.objMinLoc and props.objMaxLoc
-            setBoundsForVisualizer()
+            setBoundsForVisualizer(self.listZValues)
 
-            # calculate how many frames the animation will last (depletes props.listZValues)
-            scn.animLength = getAnimLength()
+            # calculate how many frames the animation will last (depletes self.listZValues)
+            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues)
 
             # set first frame to animate from
-            if scn.buildType == "Assemble":
-                self.curFrame = scn.firstFrame + scn.animLength
+            if ag.buildType == "Assemble":
+                self.curFrame = ag.firstFrame + ag.animLength
             else:
-                self.curFrame = scn.firstFrame
+                self.curFrame = ag.firstFrame
 
             # set frameWithOrigLoc for 'Start Over' operation
-            scn.frameWithOrigLoc = self.curFrame
+            ag.frameWithOrigLoc = self.curFrame
 
-            # Create 'PLAIN_AXES' object (will be parent for animated objects)
-            bpy.ops.object.empty_add(type='PLAIN_AXES', view_align=False, location=(0, 0, 0), rotation=(0, 0, 0))
-            # # Set custom orientation with active 'ARROWS' object
-            # setOrientation("custom")
-            # store that 'PLAIN_AXES' object to a group so it can be put in group later
-            axisObj = context.active_object
-            aoGroup = bpy.data.groups.new("AssemblMe_axis_obj")
-            aoGroup.objects.link(axisObj)
+            # if self.action == "CREATE":
+            #     # Create 'PLAIN_AXES' object (will be parent for animated objects)
+            #     bpy.ops.object.empty_add(type='PLAIN_AXES', view_align=False, location=(0, 0, 0), rotation=(0, 0, 0))
+            #     # # Set custom orientation with active 'ARROWS' object
+            #     # setOrientation("custom")
+            #     # store that 'PLAIN_AXES' object to a group so it can be put in group later
+            #     axisObj = context.active_object
+            #     aoGroup = bpy.data.groups.new("AssemblMe_axis_obj")
+            #     aoGroup.objects.link(axisObj)
 
-            # populate props.listZValues again
-            props.listZValues,_,_ = getListZValues(props.objects_to_move, rotXL, rotYL)
+            # populate self.listZValues again
+            self.listZValues,_,_ = getListZValues(self.objects_to_move, rotXL, rotYL)
 
             # reset upper and lower bound values
             props.z_upper_bound = None
@@ -108,43 +138,41 @@ class createBuildAnimation(bpy.types.Operator):
 
             # animate the objects
             print("creating animation...")
-            animationReturnDict = animateObjects(props.objects_to_move, self.curFrame, scn.locInterpolationMode, scn.rotInterpolationMode)
+            animationReturnDict = animateObjects(self.objects_to_move, self.listZValues, self.curFrame, ag.locInterpolationMode, ag.rotInterpolationMode)
 
             # verify animateObjects() ran correctly
-            if animationReturnDict["errorMsg"] == None:
-                props.objects_to_move = []
-            else:
+            if animationReturnDict["errorMsg"] != None:
                 self.report({"ERROR"}, animationReturnDict["errorMsg"])
                 return{"CANCELLED"}
 
-            # handle case where no object was ever selected (e.g. only camera passed to function).
-            if scn.frameWithOrigLoc == animationReturnDict["lastFrame"]:
-                ignoredTypes = str(props.ignoredTypes).replace("[","").replace("]","")
-                self.report({"WARNING"}, "No valid objects selected! (igored types: {})".format(ignoredTypes))
-                delete(axisObj)
-                select(self.original_selection, active=self.original_active)
-                return{"FINISHED"}
+            if self.action == "CREATE":
+                # handle case where no object was ever selected (e.g. only camera passed to function).
+                if ag.frameWithOrigLoc == animationReturnDict["lastFrame"]:
+                    ignoredTypes = str(props.ignoredTypes).replace("[","").replace("]","")
+                    self.report({"WARNING"}, "No valid objects selected! (igored types: {})".format(ignoredTypes))
+                    return{"FINISHED"}
 
-            # select all objects moved and put in group
-            select(list(animationReturnDict["moved"]))
-            aomGroup = bpy.data.groups.new("AssemblMe_all_objects_moved")
-            for o in bpy.context.selected_objects:
-                aomGroup.objects.link(o)
+                # select all objects moved and put in group
+                select(list(animationReturnDict["moved"]))
 
             # reset upper and lower bound values
             props.z_upper_bound = None
             props.z_lower_bound = None
 
-            # set 'PLAIN_AXES' as active (and selected) object
-            select(axisObj, active=axisObj)
-
-            # set current frame to first frame of animation
-            bpy.context.scene.frame_set(scn.firstFrame)
-
-            disableRelationshipLines()
+            # set to original selection and active object
+            select(self.original_selection, active=self.original_active)
+            if self.action == "UPDATE":
+                # set current_frame to original current_frame
+                bpy.context.scene.frame_set(self.origFrame)
+            elif self.action == "CREATE":
+                # set current frame to first frame of animation
+                bpy.context.scene.frame_set(ag.firstFrame)
+                disableRelationshipLines()
+                ag.animated = True
 
             # STOPWATCH CHECK
             stopWatch("Time Elapsed", time.time()-startTime)
+
         except:
             self.handle_exception()
             return{"CANCELLED"}

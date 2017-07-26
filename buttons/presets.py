@@ -64,6 +64,7 @@ class animPresets(bpy.types.Operator):
 
     def writeNewPreset(self, presetName):
         scn = bpy.context.scene
+        ag = scn.aglist[scn.aglist_index]
         presetsFilepath = props.addon_prefs.presetsFilepath
         if not os.path.exists(presetsFilepath):
             os.makedirs(presetsFilepath)
@@ -72,24 +73,25 @@ class animPresets(bpy.types.Operator):
         f.write("import bpy")
         f.write("\ndef execute():")
         f.write("\n    scn = bpy.context.scene")
-        f.write("\n    scn.buildSpeed = " + str(scn.buildSpeed))
-        f.write("\n    scn.objectVelocity = " + str(scn.objectVelocity))
-        f.write("\n    scn.xLocOffset = " + str(scn.xLocOffset))
-        f.write("\n    scn.yLocOffset = " + str(scn.yLocOffset))
-        f.write("\n    scn.zLocOffset = " + str(scn.zLocOffset))
-        f.write("\n    scn.locInterpolationMode = '" + scn.locInterpolationMode + "'")
-        f.write("\n    scn.locationRandom = " + str(scn.locationRandom))
-        f.write("\n    scn.xRotOffset = " + str(scn.xRotOffset))
-        f.write("\n    scn.yRotOffset = " + str(scn.yRotOffset))
-        f.write("\n    scn.zRotOffset = " + str(scn.zRotOffset))
-        f.write("\n    scn.rotInterpolationMode = '" + scn.rotInterpolationMode + "'")
-        f.write("\n    scn.rotationRandom = " + str(scn.rotationRandom))
-        f.write("\n    scn.xOrient = " + str(scn.xOrient))
-        f.write("\n    scn.yOrient = " + str(scn.yOrient))
-        f.write("\n    scn.orientRandom = " + str(scn.orientRandom))
-        f.write("\n    scn.layerHeight = " + str(scn.layerHeight))
-        f.write("\n    scn.buildType = '" + scn.buildType + "'")
-        f.write("\n    scn.invertBuild = " + str(scn.invertBuild))
+        f.write("\n    ag = scn.aglist[scn.aglist_index]")
+        f.write("\n    ag.buildSpeed = " + str(ag.buildSpeed))
+        f.write("\n    ag.objectVelocity = " + str(ag.objectVelocity))
+        f.write("\n    ag.xLocOffset = " + str(ag.xLocOffset))
+        f.write("\n    ag.yLocOffset = " + str(ag.yLocOffset))
+        f.write("\n    ag.zLocOffset = " + str(ag.zLocOffset))
+        f.write("\n    ag.locInterpolationMode = '" + ag.locInterpolationMode + "'")
+        f.write("\n    ag.locationRandom = " + str(ag.locationRandom))
+        f.write("\n    ag.xRotOffset = " + str(ag.xRotOffset))
+        f.write("\n    ag.yRotOffset = " + str(ag.yRotOffset))
+        f.write("\n    ag.zRotOffset = " + str(ag.zRotOffset))
+        f.write("\n    ag.rotInterpolationMode = '" + ag.rotInterpolationMode + "'")
+        f.write("\n    ag.rotationRandom = " + str(ag.rotationRandom))
+        f.write("\n    ag.xOrient = " + str(ag.xOrient))
+        f.write("\n    ag.yOrient = " + str(ag.yOrient))
+        f.write("\n    ag.orientRandom = " + str(ag.orientRandom))
+        f.write("\n    ag.layerHeight = " + str(ag.layerHeight))
+        f.write("\n    ag.buildType = '" + ag.buildType + "'")
+        f.write("\n    ag.invertBuild = " + str(ag.invertBuild))
         f.write("\n    return None")
 
     def canRun(self):

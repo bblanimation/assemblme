@@ -40,7 +40,6 @@ class visualizer(bpy.types.Operator):
             self.m = self.visualizerObj.data
         else:
             # create visualizer object
-            scn = bpy.context.scene
             self.m = bpy.data.meshes.new('AssemblMe_visualizer_m')
             self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
             self.visualizerObj.hide_select = True
@@ -53,39 +52,41 @@ class visualizer(bpy.types.Operator):
 
     def createAnim(self):
         scn = bpy.context.scene
+        ag = scn.aglist[scn.aglist_index]
         # if first and last location are the same, keep visualizer stationary
-        if props.objMinLoc == props.objMaxLoc or scn.orientRandom > 0.0025:
+        if props.objMinLoc == props.objMaxLoc or ag.orientRandom > 0.0025:
             self.visualizerObj.animation_data_clear()
             if type(props.objMinLoc) == type(self.visualizerObj.location):
                 self.visualizerObj.location = props.objMinLoc
             else:
                 self.visualizerObj.location = (0,0,0)
-            scn.visualizerAnimated = False
+            ag.visualizerAnimated = False
             return "static"
         # else, create animation
         else:
             # if animation already created, clear it
-            if scn.visualizerAnimated:
+            if ag.visualizerAnimated:
                 self.visualizerObj.animation_data_clear()
             # set up vars
             self.visualizerObj.location = props.objMinLoc
-            curFrame = scn.frameWithOrigLoc
+            curFrame = ag.frameWithOrigLoc
             idx = -1
             # insert keyframe and iterate current frame, and set another
             insertKeyframes(self.visualizerObj, "location", curFrame, 'LINEAR', idx)
             self.visualizerObj.location = props.objMaxLoc
-            if scn.buildType == "Assemble":
-                curFrame -= (scn.animLength - scn.lastLayerVelocity)
+            if ag.buildType == "Assemble":
+                curFrame -= (ag.animLength - ag.lastLayerVelocity)
                 idx -= 1
             else:
-                curFrame += (scn.animLength - scn.lastLayerVelocity)
+                curFrame += (ag.animLength - ag.lastLayerVelocity)
             insertKeyframes(self.visualizerObj, "location", curFrame, 'LINEAR', idx)
-            scn.visualizerAnimated = True
+            ag.visualizerAnimated = True
             return "animated"
 
     def enable(self, context):
         """ enables visualizer """
         scn = context.scene
+        ag = scn.aglist[scn.aglist_index]
         # alert user that visualizer is enabled
         self.report({"INFO"}, "Visualizer enabled... ('ESC' to disable)")
         # add proper mesh data to visualizer object
@@ -94,7 +95,7 @@ class visualizer(bpy.types.Operator):
         # link visualizer object to scene
         scn.objects.link(self.visualizerObj)
         unhide(self.visualizerObj)
-        scn.visualizerLinked = True
+        ag.visualizerLinked = True
 
     def disable(self, context):
         """ disables visualizer """
@@ -118,6 +119,7 @@ class visualizer(bpy.types.Operator):
 
         if event.type == "TIMER":
             scn = context.scene
+            ag = scn.aglist[scn.aglist_index]
             try:
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
@@ -127,12 +129,12 @@ class visualizer(bpy.types.Operator):
                     self.minAndMax = [props.objMinLoc, props.objMaxLoc]
                     self.createAnim()
                 # set visualizer object rotation
-                if self.visualizerObj.rotation_euler.x != scn.xOrient:
-                    self.visualizerObj.rotation_euler.x = scn.xOrient
-                if self.visualizerObj.rotation_euler.y != scn.yOrient:
-                    self.visualizerObj.rotation_euler.y = scn.yOrient
+                if self.visualizerObj.rotation_euler.x != ag.xOrient:
+                    self.visualizerObj.rotation_euler.x = ag.xOrient
+                if self.visualizerObj.rotation_euler.y != ag.yOrient:
+                    self.visualizerObj.rotation_euler.y = ag.yOrient
                 if self.visualizerObj.rotation_euler.z != self.zOrient:
-                    self.visualizerObj.rotation_euler.z = scn.xOrient * (cos(scn.yOrient) * sin(scn.yOrient))
+                    self.visualizerObj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
                     self.zOrient = self.visualizerObj.rotation_euler.z
             except:
                 self.handle_exception()
@@ -140,8 +142,9 @@ class visualizer(bpy.types.Operator):
         return{"PASS_THROUGH"}
 
     def execute(self, context):
-        scn = context.scene
         try:
+            scn = bpy.context.scene
+            ag = scn.aglist[scn.aglist_index]
             # if enabled, all we do is disable it
             if self.enabled():
                 self.disable(context)
@@ -149,7 +152,7 @@ class visualizer(bpy.types.Operator):
             else:
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                if groupExists("AssemblMe_all_objects_moved"):
+                if groupExists(ag.group_name):
                     self.createAnim()
                 # enable visualizer
                 self.enable(context)
@@ -176,7 +179,6 @@ class visualizer(bpy.types.Operator):
         showErrorMessage("Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the 'Advanced' dropdown menu of AssemblMe)", wrap=240)
 
     def cancel(self, context):
-        scn = context.scene
         # remove timer
         context.window_manager.event_timer_remove(self._timer)
         # delete visualizer object and mesh
