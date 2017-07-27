@@ -63,18 +63,22 @@ class AnimationsPanel(Panel):
         col.operator("aglist.list_action", icon='TRIA_UP', text="").action = 'UP'
         col.operator("aglist.list_action", icon='TRIA_DOWN', text="").action = 'DOWN'
 
-        col = layout.column(align=True)
+        col1 = layout.column(align=True)
         if scn.aglist_index == -1:
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.operator("aglist.list_action", icon='ZOOMIN', text="Create New Animation").action = 'ADD'
         else:
-            col.label("Group Name:")
-            split = col.split(align=True, percentage=0.85)
+            col1.label("Group Name:")
+            split = col1.split(align=True, percentage=0.85)
             col = split.column(align=True)
             ag = scn.aglist[scn.aglist_index]
             col.prop_search(ag, "group_name", bpy.data, "groups", text="")
             col = split.column(align=True)
             col.operator("aglist.set_to_active", icon="EDIT", text="")
+            if ag.group_name == "":
+                row = col1.row(align=True)
+                row.active = len(bpy.context.selected_objects) != 0
+                row.operator("scene.new_group_from_selection", icon='ZOOMIN', text="From Selection")
 
 class ActionsPanel(Panel):
     bl_space_type  = "VIEW_3D"
@@ -104,9 +108,9 @@ class ActionsPanel(Panel):
         row = col.row(align=True)
         if not ag.animated:
             row.active = groupExists(ag.group_name)
-            row.operator("scene.create_build_animation", text="Create Build Animation", icon="EDIT").action = "CREATE"
+            row.operator("scene.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
         else:
-            row.operator("scene.create_build_animation", text="Update Build Animation", icon="EDIT").action = "UPDATE"
+            row.operator("scene.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
         row = col.row(align=True)
         row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:

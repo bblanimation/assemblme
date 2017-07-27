@@ -109,7 +109,7 @@ def register():
     bpy.types.Scene.printStatus = BoolProperty(
         name="Print Status in Terminal",
         description="Print out time remaining in terminal (disable for slight speed boost)",
-        default=True)
+        default=False)
     bpy.types.Scene.updateFrequency = IntProperty(
         name="Update Frequency",
         description="Minimum number of seconds to wait before printing status to terminal (increasing number may improve accuracy)",
