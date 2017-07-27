@@ -59,6 +59,7 @@ class animPresets(bpy.types.Operator):
                 n = fileNames[i][:-3]
                 if n != "None" and n != "__init__":
                     presetNames.append((n, n, "Select this preset!")) # get rid of the '.py' at the end of the file name
+        presetNames.append(("Follow Curve", "Follow Curve", "Animate objects along the path of a curve"))
         presetNames.append(("None", "None", "Don't use a preset"))
         return presetNames
 

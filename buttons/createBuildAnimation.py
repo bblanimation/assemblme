@@ -67,6 +67,17 @@ class createBuildAnimation(bpy.types.Operator):
             if len(bpy.data.groups[ag.group_name].objects) == 0:
                 self.report({"WARNING"}, "Group contains no objects!")
                 return {"CANCELLED"}
+            objIndex = bpy.data.objects.find(ag.pathObject)
+            if scn.animPreset == "Follow Curve":
+                if ag.pathObject == "":
+                    self.report({"WARNING"}, "No path object specified")
+                    return {"CANCELLED"}
+                elif objIndex == -1:
+                    self.report({"WARNING"}, "Path object specified doesn't exist")
+                    return {"CANCELLED"}
+                elif bpy.data.objects[objIndex].type != "CURVE":
+                    self.report({"WARNING"}, "Path object specified isn't of type 'CURVE'")
+                    return {"CANCELLED"}
 
             # save backup of blender file
             if context.scene.autoSaveOnCreateAnim and self.action == "CREATE":
@@ -138,7 +149,10 @@ class createBuildAnimation(bpy.types.Operator):
 
             # animate the objects
             print("creating animation...")
-            animationReturnDict = animateObjects(self.objects_to_move, self.listZValues, self.curFrame, ag.locInterpolationMode, ag.rotInterpolationMode)
+            if scn.animPreset == "Follow Curve":
+                animationReturnDict = animateObjectsAlongCurve(self.objects_to_move, self.curFrame)
+            else:
+                animationReturnDict = animateObjects(self.objects_to_move, self.listZValues, self.curFrame, ag.locInterpolationMode, ag.rotInterpolationMode)
 
             # verify animateObjects() ran correctly
             if animationReturnDict["errorMsg"] != None:

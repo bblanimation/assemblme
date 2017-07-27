@@ -214,6 +214,29 @@ def updateAnimPreset(self, context):
 
     return None
 
+def animateObjectsAlongCurve(objectsToMove, curFrame):
+    scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
+    objects_moved = []
+
+    pathObj = bpy.data.objects[ag.pathObject]
+    for obj in objectsToMove:
+        if obj.type != "MESH":
+            continue
+        select(pathObj)
+        constraint = obj.constraints.new('FOLLOW_PATH')
+        bpy.ops.object.duplicate()
+        pathDup = scn.objects.active
+        scn.objects.unlink(pathDup)
+        objects_moved.append(obj)
+
+        pathDup.location = obj.location
+        obj.location = (0,0,0)
+        obj.select = True
+        bpy.ops.object.parent_set(type='FOLLOW')
+
+    return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
+
 def animateObjects(objectsToMove, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
 

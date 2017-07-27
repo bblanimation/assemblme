@@ -172,11 +172,9 @@ class SettingsPanel(Panel):
         row = col.row(align=True)
 
         if scn.animPreset == "Follow Curve":
-            col = layout.column(align=True)
+            col = box.column(align=True)
             row = col.row(align=True)
-            row.label("Path Object:")
-            row = col.row(align=True)
-            row.prop(ag, "pathObject")
+            row.prop_search(ag, "pathObject", scn, "objects")
         else:
             split = box.split(align=False, percentage = 0.5)
             col = split.column(align=True)
