@@ -310,16 +310,17 @@ class presetManager(Panel):
         layout = self.layout
         scn = context.scene
 
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        row.label("Create New Preset:")
-        row = col.row(align=True)
-        split = row.split(align=True, percentage = 0.7)
-        col = split.column(align=True)
-        col.prop(scn, "newPresetName", text="")
-        col = split.column(align=True)
-        col.active = scn.newPresetName != ""
-        col.operator("scene.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
+        if scn.aglist_index != -1:
+            col = layout.column(align=True)
+            row = col.row(align=True)
+            row.label("Create New Preset:")
+            row = col.row(align=True)
+            split = row.split(align=True, percentage = 0.7)
+            col = split.column(align=True)
+            col.prop(scn, "newPresetName", text="")
+            col = split.column(align=True)
+            col.active = scn.newPresetName != ""
+            col.operator("scene.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
         row.label("Remove Existing Preset:")

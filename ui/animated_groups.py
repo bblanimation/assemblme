@@ -66,6 +66,9 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
         if self.action == 'REMOVE':
             ag = scn.aglist[scn.aglist_index]
             if not ag.animated:
+                if "AssemblMe_animated_group_" in ag.group_name:
+                    bpy.data.groups.remove(bpy.data.groups[ag.group_name], True)
+                    bpy.context.area.tag_redraw()
                 scn.aglist_index -= 1
                 scn.aglist.remove(idx)
                 if scn.aglist_index == -1 and len(scn.aglist) > 0:
