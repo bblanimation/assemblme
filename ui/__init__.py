@@ -68,17 +68,22 @@ class AnimationsPanel(Panel):
             row = col1.row(align=True)
             row.operator("aglist.list_action", icon='ZOOMIN', text="Create New Animation").action = 'ADD'
         else:
-            col1.label("Group Name:")
-            split = col1.split(align=True, percentage=0.85)
-            col = split.column(align=True)
             ag = scn.aglist[scn.aglist_index]
-            col.prop_search(ag, "group_name", bpy.data, "groups", text="")
-            col = split.column(align=True)
-            col.operator("aglist.set_to_active", icon="EDIT", text="")
-            if ag.group_name == "":
-                row = col1.row(align=True)
-                row.active = len(bpy.context.selected_objects) != 0
-                row.operator("scene.new_group_from_selection", icon='ZOOMIN', text="From Selection")
+            if ag.animated:
+                n = ag.group_name
+                col1.label("Group Name:")
+                col1.label("%(n)s" % locals())
+            else:
+                col1.label("Group Name:")
+                split = col1.split(align=True, percentage=0.85)
+                col = split.column(align=True)
+                col.prop_search(ag, "group_name", bpy.data, "groups", text="")
+                col = split.column(align=True)
+                col.operator("aglist.set_to_active", icon="EDIT", text="")
+                if not bpy.data.groups.get(ag.group_name):
+                    row = col1.row(align=True)
+                    row.active = len(bpy.context.selected_objects) != 0
+                    row.operator("scene.new_group_from_selection", icon='ZOOMIN', text="From Selection")
 
 class ActionsPanel(Panel):
     bl_space_type  = "VIEW_3D"

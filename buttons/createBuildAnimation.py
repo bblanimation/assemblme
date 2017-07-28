@@ -96,6 +96,16 @@ class createBuildAnimation(bpy.types.Operator):
                 # set up other variables
                 self.objects_moved = []
 
+            # make sure no objects in this group are part of another AssemblMe animation
+            for obj in self.objects_to_move:
+                for i in range(scn.aglist_index):
+                    ag0 = scn.aglist[i]
+                    if ag0.animated:
+                        g = bpy.data.groups.get(ag0.group_name)
+                        if g in obj.users_group:
+                            self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")
+                            return{"CANCELLED"}
+
             # NOTE: This was commented out for the sake of performance
             # set origin to center of mass for selected objects
             # setOrigin(self.objects_to_move, 'ORIGIN_CENTER_OF_MASS')

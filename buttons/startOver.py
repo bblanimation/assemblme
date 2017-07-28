@@ -36,9 +36,9 @@ class startOver(bpy.types.Operator):
         """ ensures operator can execute (if not, returns false) """
         scn = bpy.context.scene
         ag = scn.aglist[scn.aglist_index]
-        if not groupExists(ag.group_name):
-            return False
-        return True
+        if ag.animated:
+            return True
+        return False
 
     def execute(self, context):
         try:
@@ -78,6 +78,11 @@ class startOver(bpy.types.Operator):
             # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
             for obj in origGroup.objects:
                 obj.animation_data_clear()
+            select(list(origGroup.objects))
+
+            if "AssemblMe_animated_group_" in ag.group_name:
+                bpy.data.groups.remove(origGroup, True)
+                ag.group_name = ""
 
             # set current_frame to original current_frame
             bpy.context.scene.frame_set(self.origFrame)

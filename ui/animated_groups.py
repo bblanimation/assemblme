@@ -71,7 +71,7 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
                 if scn.aglist_index == -1 and len(scn.aglist) > 0:
                     scn.aglist_index = 0
             else:
-                self.report({"WARNING"}, 'Please delete the LEGOized model before attempting to remove this item.' % locals())
+                self.report({"WARNING"}, "Please press 'Start Over' to clear the animation before removing this item.")
 
         if self.action == 'ADD':
             item = scn.aglist.add()
@@ -142,8 +142,6 @@ class AssemblMe_Uilist_setSourceGroupToActive(bpy.types.Operator):
             return False
         if context.scene.objects.active == None:
             return False
-        if len(context.scene.objects.active.users_group) == 0:
-            return False
         # ag = scn.aglist[scn.aglist_index]
         # n = ag.source_name
         # LEGOizer_source = "LEGOizer_%(n)s" % locals()
@@ -160,6 +158,9 @@ class AssemblMe_Uilist_setSourceGroupToActive(bpy.types.Operator):
         scn = context.scene
         ag = scn.aglist[scn.aglist_index]
         active_object = context.scene.objects.active
+        if len(active_object.users_group) == 0:
+            self.report({"INFO"}, "Active object has no linked groups.")
+            return {"CANCELLED"}
         if ag.lastActiveObjectName == active_object.name:
             ag.activeGroupIndex = (ag.activeGroupIndex + 1) % len(active_object.users_group)
         else:
@@ -273,6 +274,26 @@ def uniquifyName(self, context):
     if ag.name != name:
         ag.name = name
 
+def groupNameUpdate(self, context):
+    scn = context.scene
+    ag0 = scn.aglist[scn.aglist_index]
+    # verify model doesn't exist with that name
+    if ag0.group_name != "":
+        for i,ag1 in enumerate(scn.aglist):
+            if ag1 != ag0 and ag1.group_name == ag0.group_name:
+                ag0.group_name = ""
+                scn.aglist_index = i
+    # get rid of unused groups created by AssemblMe
+    for g in bpy.data.groups.keys():
+        if "AssemblMe_animated_group_" in g:
+            success = False
+            for i in range(len(scn.aglist)):
+                ag0 = scn.aglist[i]
+                if g == ag0.group_name:
+                    success = True
+            if not success:
+                bpy.data.groups.remove(bpy.data.groups[g], True)
+
 # Create custom property group
 class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
     name = StringProperty(update=uniquifyName)
@@ -281,7 +302,8 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
 
     group_name = StringProperty(
         name="Object Group Name",
-        description="Name of the source object to legoize (defaults to active object)",
+        description="Group name of objects to animate",
+        update=groupNameUpdate,
         default="")
 
     firstFrame = IntProperty(
