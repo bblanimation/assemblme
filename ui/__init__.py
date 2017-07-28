@@ -273,12 +273,6 @@ class AdvancedPanel(Panel):
         col = layout.column(align=True)
         row = col.row(align=True)
         row.prop(scn, "skipEmptySelections")
-        row = col.row(align=True)
-        row.prop(scn, "printStatus")
-        if scn.printStatus:
-            row = col.row(align=True)
-            row.prop(scn, "updateFrequency")
-            # layout.split()
 
         col = layout.column(align=True)
         row = col.row(align=True)

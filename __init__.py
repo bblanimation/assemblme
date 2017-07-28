@@ -106,15 +106,6 @@ def register():
         name="Before 'Start Over'",
         description="Save backup .blend file to project directory before executing 'Start Over' actions",
         default=True)
-    bpy.types.Scene.printStatus = BoolProperty(
-        name="Print Status in Terminal",
-        description="Print out time remaining in terminal (disable for slight speed boost)",
-        default=False)
-    bpy.types.Scene.updateFrequency = IntProperty(
-        name="Update Frequency",
-        description="Minimum number of seconds to wait before printing status to terminal (increasing number may improve accuracy)",
-        min=1, max=1440,
-        default=5)
 
     bpy.types.Scene.newPresetName = StringProperty(
         name="Name of New Preset",
@@ -176,8 +167,6 @@ def unregister():
 
     del Scn.visualizerNumCuts
     del Scn.visualizerScale
-    del Scn.updateFrequency
-    del Scn.printStatus
     del Scn.skipEmptySelections
     del Scn.aglist
     del Scn.aglist_index

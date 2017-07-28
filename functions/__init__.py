@@ -234,30 +234,6 @@ def animateObjects(objectsToMove, listZValues, curFrame, locInterpolationMode='L
         # get next objects to animate
         newSelection = getNewSelection(objectsToMove, listZValues)
 
-        # print time remaining
-        if scn.printStatus:
-            # update timekeeper variables
-            lastTime = curTime
-            curTime = time.time()
-            # ignore first value
-            if acc > 1:
-                # calculate remaining frames
-                if ag.buildType == "Assemble":
-                    framesRemaining = curFrame - ag.firstFrame - getObjectVelocity() - getBuildSpeed()
-                else:
-                    framesRemaining = ag.animLength - curFrame - getObjectVelocity()
-                if len(newSelection) > 0:
-                    # append instant time to time remaining average
-                    estTimeRemaining.append(0)
-                else:
-                    # calculate and print time remaining
-                    timeElapsed = curTime-lastTime
-                    estTimeRemaining.append(timeElapsed * framesRemaining)
-                    if curTime - lastUpdated >= scn.updateFrequency:
-                        stopWatch("Time Remaining", sum(estTimeRemaining)/len(estTimeRemaining))
-                        estTimeRemaining = []
-                        lastUpdated = curTime
-
         # iterate through selected objects
         for obj in newSelection:
             # # set object parent to axisObj
