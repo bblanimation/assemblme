@@ -62,7 +62,7 @@ class createBuildAnimation(bpy.types.Operator):
                 self.report({"WARNING"}, "No group name specified")
                 return {"CANCELLED"}
             if not groupExists(ag.group_name):
-                self.report({"WARNING"}, "Group '%(n)s' does not exist.")
+                self.report({"WARNING"}, "Group '%(n)s' does not exist." % locals())
                 return {"CANCELLED"}
             if len(bpy.data.groups[ag.group_name].objects) == 0:
                 self.report({"WARNING"}, "Group contains no objects!")

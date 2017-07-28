@@ -48,8 +48,7 @@ class startOver(bpy.types.Operator):
             # set up origGroup variable
             scn = context.scene
             ag = scn.aglist[scn.aglist_index]
-            origGroup = bpy.data.groups[ag.group_name]
-            # aoGroup = bpy.data.groups["AssemblMe_axis_obj"]
+            origGroup = bpy.data.groups.get(ag.group_name)
 
             # save backup of blender file
             if scn.autoSaveOnStartOver:
@@ -63,7 +62,8 @@ class startOver(bpy.types.Operator):
             self.origFrame = scn.frame_current
             bpy.context.scene.frame_set(ag.frameWithOrigLoc)
 
-            print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
+            if origGroup is not None:
+                print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
 
             # clear objMinLoc and objMaxLoc
             props.objMinLoc = 0
@@ -76,13 +76,14 @@ class startOver(bpy.types.Operator):
             # bpy.data.groups.remove(aoGroup, True)
 
             # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
-            for obj in origGroup.objects:
-                obj.animation_data_clear()
-            select(list(origGroup.objects))
+            if origGroup is not None:
+                for obj in origGroup.objects:
+                    obj.animation_data_clear()
+                select(list(origGroup.objects))
 
-            if "AssemblMe_animated_group_" in ag.group_name:
-                bpy.data.groups.remove(origGroup, True)
-                ag.group_name = ""
+                if "AssemblMe_animated_group_" in ag.group_name:
+                    bpy.data.groups.remove(origGroup, True)
+                    ag.group_name = ""
 
             # set current_frame to original current_frame
             bpy.context.scene.frame_set(self.origFrame)
