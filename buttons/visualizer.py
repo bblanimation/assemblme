@@ -83,6 +83,13 @@ class visualizer(bpy.types.Operator):
             ag.visualizerAnimated = True
             return "animated"
 
+    def loadLatticeMesh(self, context):
+        scn = bpy.context.scene
+        visualizerBM = makeSimple2DLattice(scn.visualizerNumCuts, scn.visualizerScale)
+        self.visualizerNumCuts = scn.visualizerNumCuts
+        self.visualizerScale = scn.visualizerScale
+        visualizerBM.to_mesh(self.visualizerObj.data)
+
     def enable(self, context):
         """ enables visualizer """
         scn = context.scene
@@ -90,8 +97,7 @@ class visualizer(bpy.types.Operator):
         # alert user that visualizer is enabled
         self.report({"INFO"}, "Visualizer enabled... ('ESC' to disable)")
         # add proper mesh data to visualizer object
-        visualizerBM = makeSimple2DLattice(scn.visualizerNumCuts, scn.visualizerScale)
-        visualizerBM.to_mesh(self.visualizerObj.data)
+        self.loadLatticeMesh(context)
         # link visualizer object to scene
         scn.objects.link(self.visualizerObj)
         unhide(self.visualizerObj)
@@ -99,16 +105,20 @@ class visualizer(bpy.types.Operator):
 
     def disable(self, context):
         """ disables visualizer """
+        scn = bpy.context.scene
+        ag = scn.aglist[scn.aglist_index]
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
         # unlink visualizer object to scene
-        context.scene.objects.unlink(self.visualizerObj)
-        context.scene.visualizerLinked = False
+        scn.objects.unlink(self.visualizerObj)
+        ag.visualizerLinked = False
 
     @staticmethod
     def enabled():
         """ returns boolean for visualizer linked to scene """
-        return bpy.context.scene.visualizerLinked
+        scn = bpy.context.scene
+        ag = scn.aglist[scn.aglist_index]
+        return ag.visualizerLinked
 
     def modal(self, context, event):
         """ runs as long as visualizer is active """
@@ -136,6 +146,8 @@ class visualizer(bpy.types.Operator):
                 if self.visualizerObj.rotation_euler.z != self.zOrient:
                     self.visualizerObj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
                     self.zOrient = self.visualizerObj.rotation_euler.z
+                if scn.visualizerScale != self.visualizerScale or scn.visualizerNumCuts != self.visualizerNumCuts:
+                    self.loadLatticeMesh(context)
             except:
                 self.handle_exception()
 
