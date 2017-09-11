@@ -41,48 +41,46 @@ def isGroupVisible(scn, ag):
 @persistent
 def handle_selections(scene):
     scn = bpy.context.scene
-    # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
-    if scn.assemblMe_last_layers != str(list(scn.layers)):
-        scn.assemblMe_last_layers = str(list(scn.layers))
-        curGroupVisible = False
-        if scn.aglist_index != -1:
-            ag0 = scn.aglist[scn.aglist_index]
-            curGroupVisible,_ = isGroupVisible(scn, ag0)
-        if not curGroupVisible or scn.aglist_index == -1:
-            setIndex = False
-            for i,ag in enumerate(scn.aglist):
-                if i != scn.aglist_index:
-                    nextGroupVisible,obj = isGroupVisible(scn, ag)
-                    print(nextGroupVisible,obj)
-                    if nextGroupVisible and bpy.context.active_object == obj:
-                        scn.aglist_index = i
-                        setIndex = True
-                        break
-            if not setIndex:
-                scn.aglist_index = -1
-    # select and make source or LEGO model active if scn.aglist_index changes
-    elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
-        scn.assemblMe_last_aglist_index = scn.aglist_index
-        ag = scn.aglist[scn.aglist_index]
-        n = ag.group_name
-        group = bpy.data.groups.get(n)
-        if group is not None and len(group.objects) > 0:
-            select(list(group.objects), active=group.objects[0])
+    if 'AssemblMe' in bpy.context.user_preferences.addons.keys():
+        # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
+        if scn.assemblMe_last_layers != str(list(scn.layers)):
+            scn.assemblMe_last_layers = str(list(scn.layers))
+            curGroupVisible = False
+            if scn.aglist_index != -1:
+                ag0 = scn.aglist[scn.aglist_index]
+                curGroupVisible,_ = isGroupVisible(scn, ag0)
+            if not curGroupVisible or scn.aglist_index == -1:
+                setIndex = False
+                for i,ag in enumerate(scn.aglist):
+                    if i != scn.aglist_index:
+                        nextGroupVisible,obj = isGroupVisible(scn, ag)
+                        if nextGroupVisible and bpy.context.active_object == obj:
+                            scn.aglist_index = i
+                            setIndex = True
+                            break
+                if not setIndex:
+                    scn.aglist_index = -1
+        # select and make source or LEGO model active if scn.aglist_index changes
+        elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
+            scn.assemblMe_last_aglist_index = scn.aglist_index
+            ag = scn.aglist[scn.aglist_index]
+            n = ag.group_name
+            group = bpy.data.groups.get(n)
+            if group is not None and len(group.objects) > 0:
+                select(list(group.objects), active=group.objects[0])
+                scn.assemblMe_last_active_object_name = scn.objects.active.name
+        # open LEGO model settings for active object if active object changes
+        elif scn.objects.active and scn.assemblMe_last_active_object_name != scn.objects.active.name and ( scn.aglist_index == -1 or scn.aglist[scn.aglist_index].group_name != ""):# and scn.objects.active.type == "MESH":
             scn.assemblMe_last_active_object_name = scn.objects.active.name
-    # open LEGO model settings for active object if active object changes
-    elif scn.objects.active and scn.assemblMe_last_active_object_name != scn.objects.active.name and ( scn.aglist_index == -1 or scn.aglist[scn.aglist_index].group_name != ""):# and scn.objects.active.type == "MESH":
-        scn.assemblMe_last_active_object_name = scn.objects.active.name
-        groups = []
-        for g in scn.objects.active.users_group:
-            groups.append(g.name)
-        print(groups)
-        for i in range(len(scn.aglist)):
-            ag = scn.aglist[i]
-            print(ag.group_name)
-            if ag.group_name in groups:
-                scn.aglist_index = i
-                scn.assemblMe_last_aglist_index = scn.aglist_index
-                return
-        scn.aglist_index = -1
+            groups = []
+            for g in scn.objects.active.users_group:
+                groups.append(g.name)
+            for i in range(len(scn.aglist)):
+                ag = scn.aglist[i]
+                if ag.group_name in groups:
+                    scn.aglist_index = i
+                    scn.assemblMe_last_aglist_index = scn.aglist_index
+                    return
+            scn.aglist_index = -1
 
 bpy.app.handlers.scene_update_pre.append(handle_selections)

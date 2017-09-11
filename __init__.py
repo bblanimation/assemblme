@@ -1,7 +1,7 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 0, 1),
+    "version"     : (1, 1, 0),
     "blender"     : (2, 78, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
@@ -40,61 +40,67 @@ from .buttons.presets import animPresets
 from bpy.types import Operator, AddonPreferences
 props = bpy.props
 
-class ExampleAddonPreferences(AddonPreferences):
+class AssemblMePreferences(AddonPreferences):
     bl_idname = __name__
 
-    addonPath = os.path.dirname(os.path.abspath(__file__))[:-10]
+    # file path to assemblMe presets (non-user-editable)
+    addonPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     defaultPresetsFP = os.path.join(addonPath, "assemblMe", "lib", "presets")
     presetsFilepath = StringProperty(
             name="Path to assemblMe presets",
             subtype='FILE_PATH',
             default=defaultPresetsFP)
-    # number = IntProperty(
-    #         name="Example Number",
-    #         default=4,
-    #         )
-    # boolean = BoolProperty(
-    #         name="Example Boolean",
-    #         default=False,
-    #         )
 
-    # def draw(self, context):
-    #     layout = self.layout
-    #     layout.label(text="This is a preferences view for our addon")
-    #     layout.prop(self, "filepath")
-    #     layout.prop(self, "number")
-    #     layout.prop(self, "boolean")
+    # auto save preferences
+    autoSaveOnCreateAnim = BoolProperty(
+            name="Before 'Create Build Animation'",
+            description="Save backup .blend file to project directory before executing 'Create Build Animation' actions",
+            default=False)
+    autoSaveOnStartOver = BoolProperty(
+            name="Before 'Start Over'",
+            description="Save backup .blend file to project directory before executing 'Start Over' actions",
+            default=False)
 
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column(align=True)
+        row = col.row(align=True)
+        row.label(text="Auto-Save:")
+        row = col.row(align=True)
+        row.prop(self, "autoSaveOnCreateAnim")
+        row = col.row(align=True)
+        row.prop(self, "autoSaveOnStartOver")
 
-class OBJECT_OT_addon_prefs_example(Operator):
-    """Display example preferences"""
-    bl_idname = "object.addon_prefs_example"
-    bl_label = "Addon Preferences Example"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        user_preferences = context.user_preferences
-        addon_prefs = user_preferences.addons[__name__].preferences
-
-        info = ("Path: %s, Number: %d, Boolean %r" %
-                (addon_prefs.filepath, addon_prefs.number, addon_prefs.boolean))
-
-        self.report({'INFO'}, info)
-        print(info)
-
-        return {'FINISHED'}
+# class OBJECT_OT_addon_prefs_example(Operator):
+#     """Display example preferences"""
+#     bl_idname = "object.addon_prefs_example"
+#     bl_label = "Addon Preferences Example"
+#     bl_options = {'REGISTER', 'UNDO'}
+#
+#     def execute(self, context):
+#         user_preferences = context.user_preferences
+#         addon_prefs = user_preferences.addons[__name__].preferences
+#
+#         info = ("Path: %s, Number: %d, Boolean %r" %
+#                 (addon_prefs.filepath, addon_prefs.number, addon_prefs.boolean))
+#
+#         self.report({'INFO'}, info)
+#         print(info)
+#
+#         return {'FINISHED'}
 
 def register():
-    bpy.utils.register_class(OBJECT_OT_addon_prefs_example)
-    bpy.utils.register_class(ExampleAddonPreferences)
+    # bpy.utils.register_class(OBJECT_OT_addon_prefs_example)
+    bpy.utils.register_class(AssemblMePreferences)
     user_preferences = bpy.context.user_preferences
     props.addon_prefs = user_preferences.addons[__name__].preferences
     bpy.utils.register_module(__name__)
 
-    props.addonVersion = "1.0.1"
+    props.addonVersion = "1.1.0"
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
+    # items used by selection app handler
     bpy.types.Scene.assemblMe_runningOperation = BoolProperty(default=False)
     bpy.types.Scene.assemblMe_last_layers = StringProperty(default="")
     bpy.types.Scene.assemblMe_last_aglist_index = IntProperty(default=-2)
@@ -106,20 +112,10 @@ def register():
         description="Skip frames where nothing is selected if checked",
         default=True)
 
-    bpy.types.Scene.autoSaveOnCreateAnim = BoolProperty(
-        name="Before 'Create Build Animation'",
-        description="Save backup .blend file to project directory before executing 'Create Build Animation' actions",
-        default=True)
-    bpy.types.Scene.autoSaveOnStartOver = BoolProperty(
-        name="Before 'Start Over'",
-        description="Save backup .blend file to project directory before executing 'Start Over' actions",
-        default=True)
-
     bpy.types.Scene.newPresetName = StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
-
     presetNames = animPresets.getPresetTuples()
     bpy.types.Scene.animPreset = EnumProperty(
         name="Presets",
@@ -127,23 +123,11 @@ def register():
         items=presetNames,
         update=updateAnimPreset,
         default="None")
-
     bpy.types.Scene.animPresetToDelete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
         items=bpy.types.Scene.animPreset[1]['items'],
         default="None")
-
-    # bpy.types.Scene.frameWithOrigLoc = IntProperty(
-    #     default=-1)
-    # bpy.types.Scene.animLength = IntProperty(
-    #     default=0)
-    # bpy.types.Scene.lastLayerVelocity = IntProperty(
-    #     default=-1)
-    # bpy.types.Scene.visualizerAnimated = BoolProperty(
-    #     default=False)
-    # bpy.types.Scene.visualizerLinked = BoolProperty(
-    #     default=False)
 
     bpy.types.Scene.visualizerScale = FloatProperty(
         name="Scale",
@@ -151,7 +135,6 @@ def register():
         precision=1,
         min=0.1, max=100,
         default=10)
-
     bpy.types.Scene.visualizerNumCuts = FloatProperty(
         name="Num Cuts",
         description="Scale of layer orientation visualizer",
@@ -173,14 +156,27 @@ def register():
 def unregister():
     Scn = bpy.types.Scene
 
+    del Scn.aglist_index
+    del Scn.aglist
+
     del Scn.visualizerNumCuts
     del Scn.visualizerScale
+
+    del Scn.animPresetToDelete
+    del Scn.animPreset
+    del Scn.newPresetName
+
     del Scn.skipEmptySelections
-    del Scn.aglist
-    del Scn.aglist_index
+
+    del Scn.assemblMe_last_active_object_name
+    del Scn.assemblMe_active_object_name
+    del Scn.assemblMe_last_aglist_index
+    del Scn.assemblMe_last_layers
+    del Scn.assemblMe_runningOperation
+
+    del Scn.assemblme_copy_from_id
 
     bpy.utils.unregister_module(__name__)
-
 
 if __name__ == "__main__":
     register()

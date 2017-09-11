@@ -291,15 +291,6 @@ class AdvancedPanel(Panel):
         row = col.row(align=True)
         row.prop(scn, "skipEmptySelections")
 
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        row.label("Auto Save:")
-        row = col.row(align=True)
-        row.prop(scn, "autoSaveOnCreateAnim")
-        row = col.row(align=True)
-        row.prop(scn, "autoSaveOnStartOver")
-
-        col = layout.column(align=True)
         row = col.row(align=True)
         row.label("Visualizer:")
         row = col.row(align=True)
