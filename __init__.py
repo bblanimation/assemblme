@@ -96,7 +96,7 @@ def register():
     props.addon_prefs = user_preferences.addons[__name__].preferences
     bpy.utils.register_module(__name__)
 
-    props.addonVersion = "1.1.0" 
+    props.addonVersion = "1.1.0"
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
