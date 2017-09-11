@@ -93,6 +93,14 @@ def register():
 
     props.addonVersion = "1.0.1"
 
+    bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
+
+    bpy.types.Scene.assemblMe_runningOperation = BoolProperty(default=False)
+    bpy.types.Scene.assemblMe_last_layers = StringProperty(default="")
+    bpy.types.Scene.assemblMe_last_aglist_index = IntProperty(default=-2)
+    bpy.types.Scene.assemblMe_active_object_name = StringProperty(default="")
+    bpy.types.Scene.assemblMe_last_active_object_name = StringProperty(default="")
+
     bpy.types.Scene.skipEmptySelections = BoolProperty(
         name="Skip Empty Selections",
         description="Skip frames where nothing is selected if checked",

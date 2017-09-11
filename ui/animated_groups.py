@@ -30,6 +30,28 @@ import bpy
 from bpy.props import IntProperty, CollectionProperty #, StringProperty
 from bpy.types import Panel, UIList
 
+def matchProperties(agNew, agOld):
+    agNew.firstFrame = agOld.firstFrame
+    agNew.buildSpeed = agOld.buildSpeed
+    agNew.objectVelocity = agOld.objectVelocity
+    agNew.layerHeight = agOld.layerHeight
+    agNew.pathObject = agOld.pathObject
+    agNew.xLocOffset = agOld.xLocOffset
+    agNew.yLocOffset = agOld.yLocOffset
+    agNew.zLocOffset = agOld.zLocOffset
+    agNew.locationRandom = agOld.locationRandom
+    agNew.xRotOffset = agOld.xRotOffset
+    agNew.yRotOffset = agOld.yRotOffset
+    agNew.zRotOffset = agOld.zRotOffset
+    agNew.rotationRandom = agOld.rotationRandom
+    agNew.locInterpolationMode = agOld.locInterpolationMode
+    agNew.rotInterpolationMode = agOld.rotInterpolationMode
+    agNew.xOrient = agOld.xOrient
+    agNew.yOrient = agOld.yOrient
+    agNew.orientRandom = agOld.orientRandom
+    agNew.buildType = agOld.buildType
+    agNew.invertBuild = agOld.invertBuild
+
 # ui list item actions
 class AssemblMe_Uilist_actions(bpy.types.Operator):
     bl_idname = "aglist.list_action"
@@ -69,7 +91,8 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
                 if "AssemblMe_animated_group_" in ag.group_name:
                     bpy.data.groups.remove(bpy.data.groups[ag.group_name], True)
                     bpy.context.area.tag_redraw()
-                scn.aglist_index -= 1
+                if len(scn.aglist) - 1 == scn.aglist_index:
+                    scn.aglist_index -= 1
                 scn.aglist.remove(idx)
                 if scn.aglist_index == -1 and len(scn.aglist) > 0:
                     scn.aglist_index = 0
@@ -81,13 +104,19 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
             last_index = scn.aglist_index
             scn.aglist_index = len(scn.aglist)-1
             item.name = "<New Animation>"
-            item.id = len(scn.aglist)
+            # get all existing IDs
+            existingIDs = []
+            for ag in scn.aglist:
+                existingIDs.append(ag.id)
+            i = max(existingIDs) + 1
+            # protect against massive item IDs
+            if i > 9999:
+                i = 1
+                while i in existingIDs:
+                    i += 1
+            # set item ID to unique number
+            item.id = i
             item.idx = len(scn.aglist)-1
-            # if last_index == -1:
-            #     item.startFrame = scn.frame_start
-            #     item.stopFrame = min([scn.frame_start + 10, scn.frame_end])
-            # else:
-            #     matchProperties(scn.aglist[scn.aglist_index], scn.aglist[last_index])
 
         elif self.action == 'DOWN' and idx < len(scn.aglist) - 1:
             scn.aglist.move(scn.aglist_index, scn.aglist_index+1)
@@ -118,6 +147,72 @@ class AssemblMe_UL_items(UIList):
     def invoke(self, context, event):
         pass
 
+# copy settings from current index to all other indices
+class AssemblMe_Uilist_copySettingsToOthers(bpy.types.Operator):
+    bl_idname = "aglist.copy_to_others"
+    bl_label = "Copy Settings to Other Animations"
+    bl_description = "Copies the settings from the current animation to all other animations"
+
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        scn = context.scene
+        if scn.aglist_index == -1:
+            return False
+        if len(scn.aglist) == 1:
+            return False
+        return True
+
+    def execute(self, context):
+        scn = context.scene
+        ag0 = scn.aglist[scn.aglist_index]
+        for ag1 in scn.aglist:
+            if ag0 != ag1:
+                matchProperties(ag1, ag0)
+        return{'FINISHED'}
+
+# copy settings from current index to memory
+class AssemblMe_Uilist_copySettings(bpy.types.Operator):
+    bl_idname = "aglist.copy_settings"
+    bl_label = "Copy Settings from Current Animation"
+    bl_description = "Stores the ID of the current animation for pasting"
+
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        scn = context.scene
+        if scn.aglist_index == -1:
+            return False
+        return True
+
+    def execute(self, context):
+        scn = context.scene
+        ag = scn.aglist[scn.aglist_index]
+        scn.assemblme_copy_from_id = ag.id
+        return{'FINISHED'}
+
+# paste settings from index in memory to current index
+class AssemblMe_Uilist_pasteSettings(bpy.types.Operator):
+    bl_idname = "aglist.paste_settings"
+    bl_label = "Paste Settings to Current animation"
+    bl_description = "Pastes the settings from stored animation ID to the current index"
+
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        scn = context.scene
+        if scn.aglist_index == -1:
+            return False
+        return True
+
+    def execute(self, context):
+        scn = context.scene
+        ag0 = scn.aglist[scn.aglist_index]
+        for ag1 in scn.aglist:
+            if ag0 != ag1 and ag1.id == scn.assemblme_copy_from_id:
+                matchProperties(ag0, ag1)
+                break
+        return{'FINISHED'}
 
 # print button
 class AssemblMe_Uilist_printAllItems(bpy.types.Operator):

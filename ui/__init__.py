@@ -24,8 +24,20 @@ import bpy
 from bpy.types import Panel
 from bpy.props import *
 from .animated_groups import *
+from .app_handlers import *
 from ..functions import *
 props = bpy.props
+
+class BasicMenu(bpy.types.Menu):
+    bl_idname = "AssemblMe_specials_menu"
+    bl_label = "Select"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator("aglist.copy_to_others", icon="COPY_ID", text="Copy Settings to Others")
+        layout.operator("aglist.copy_settings", icon="COPYDOWN", text="Copy Settings")
+        layout.operator("aglist.paste_settings", icon="PASTEDOWN", text="Paste Settings")
 
 class AnimationsPanel(Panel):
     bl_space_type  = "VIEW_3D"
@@ -52,16 +64,21 @@ class AnimationsPanel(Panel):
             return
 
         # draw UI list and list actions
-        rows = 3
+        if len(scn.aglist) < 2:
+            rows = 2
+        else:
+            rows = 4
         row = layout.row()
         row.template_list("AssemblMe_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
 
         col = row.column(align=True)
         col.operator("aglist.list_action", icon='ZOOMIN', text="").action = 'ADD'
         col.operator("aglist.list_action", icon='ZOOMOUT', text="").action = 'REMOVE'
-        col.separator()
-        col.operator("aglist.list_action", icon='TRIA_UP', text="").action = 'UP'
-        col.operator("aglist.list_action", icon='TRIA_DOWN', text="").action = 'DOWN'
+        col.menu("AssemblMe_specials_menu", icon='DOWNARROW_HLT', text="")
+        if len(scn.aglist) > 1:
+            col.separator()
+            col.operator("aglist.list_action", icon='TRIA_UP', text="").action = 'UP'
+            col.operator("aglist.list_action", icon='TRIA_DOWN', text="").action = 'DOWN'
 
         col1 = layout.column(align=True)
         if scn.aglist_index == -1:
