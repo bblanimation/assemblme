@@ -51,7 +51,7 @@ class startOver(bpy.types.Operator):
             origGroup = bpy.data.groups.get(ag.group_name)
 
             # save backup of blender file
-            if scn.autoSaveOnStartOver:
+            if props.addon_prefs.autoSaveOnStartOver:
                 if bpy.data.filepath == '':
                     self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
                     return{"CANCELLED"}
