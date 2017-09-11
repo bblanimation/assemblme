@@ -41,7 +41,7 @@ def isGroupVisible(scn, ag):
 @persistent
 def handle_selections(scene):
     scn = bpy.context.scene
-    if 'AssemblMe' in bpy.context.user_preferences.addons.keys():
+    if 'assemblme' in bpy.context.user_preferences.addons.keys():
         # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
         if scn.assemblMe_last_layers != str(list(scn.layers)):
             scn.assemblMe_last_layers = str(list(scn.layers))
