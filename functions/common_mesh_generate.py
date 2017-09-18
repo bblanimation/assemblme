@@ -363,7 +363,7 @@ def makeSimple2DLattice(R, s):
         acc += inc
     # return bmesh
     return bme
-    
+
 # def newObjFromBmesh(layer, bme, meshName, objName=False):
 #
 #     # if only one name given, use it for both names
@@ -399,7 +399,7 @@ def makeSimple2DLattice(R, s):
 #     bpy.context.scene.layers = tmpList
 #     for i in range(2):
 #         bpy.ops.object.select_all(action='TOGGLE')
-#         bpy.ops.object.delete(use_global=False)
+#         bpy.ops.object.delete()
 #     bpy.context.scene.layers = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True]
 #
 # def main():

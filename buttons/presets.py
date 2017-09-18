@@ -125,8 +125,8 @@ class animPresets(bpy.types.Operator):
                 self.writeNewPreset(scn.newPresetName)
                 fileNames.append(scn.newPresetName + ".py")
                 selectedPreset = scn.newPresetName
-                scn.newPresetName = ""
                 self.report({"INFO"}, "Successfully added new preset '" + scn.newPresetName + "'")
+                scn.newPresetName = ""
             elif self.action == "REMOVE":
                 backupPath = os.path.join(path, "backups")
                 fileName = scn.animPresetToDelete + ".py"

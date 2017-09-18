@@ -418,11 +418,12 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         default=1)
     objectVelocity = FloatProperty(
         name="Velocity",
-        description="Speed of individual object layers (51 - Velocity = object animation duration in frames)",
+        description="Speed of individual object layers (2^(10 - Velocity) = object animation duration in frames)",
         unit="VELOCITY",
-        min=1, max=50,
-        precision=0,
-        default=45)
+        min=0.001, max=10,
+        precision=1,
+        step=1,
+        default=6)
 
     layerHeight = FloatProperty(
         name="Layer Height",

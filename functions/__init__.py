@@ -69,7 +69,8 @@ def getObjectVelocity():
     """ calculates and returns brick velocity """
     scn = bpy.context.scene
     ag = scn.aglist[scn.aglist_index]
-    return floor(51-(ag.objectVelocity))
+    frameVelocity = floor(2**(10-ag.objectVelocity))
+    return frameVelocity
 
 def getAnimLength(objectsToMove, listZValues):
     scn = bpy.context.scene

@@ -44,8 +44,8 @@ class AssemblMePreferences(AddonPreferences):
     bl_idname = __name__
 
     # file path to assemblMe presets (non-user-editable)
-    addonPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    defaultPresetsFP = os.path.join(addonPath, "assemblMe", "lib", "presets")
+    addonPath = os.path.dirname(os.path.abspath(__file__))
+    defaultPresetsFP = os.path.join(addonPath, "lib", "presets")
     presetsFilepath = StringProperty(
             name="Path to assemblMe presets",
             subtype='FILE_PATH',
@@ -95,6 +95,7 @@ def register():
     user_preferences = bpy.context.user_preferences
     props.addon_prefs = user_preferences.addons[__name__].preferences
     bpy.utils.register_module(__name__)
+    bpy.props.assemblme_module_name = __name__
 
     props.addonVersion = "1.1.0"
 
