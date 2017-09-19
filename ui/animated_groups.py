@@ -431,7 +431,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Height of the bounding box that selects objects for each frame in animation",
         unit="LENGTH",
         subtype="DISTANCE",
-        min=.0001, max=50,
+        min=0.0001, max=100,
         precision=4,
         default=.1)
 
@@ -470,7 +470,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Rotate objects by this x value",
         unit="ROTATION",
         subtype="ANGLE",
-        min=-360, max=360,
+        min=-1000, max=1000,
         precision=1, step=20,
         default=0)
     yRotOffset = FloatProperty(
@@ -478,7 +478,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Rotate objects by this y value",
         unit="ROTATION",
         subtype="ANGLE",
-        min=-360, max=360,
+        min=-1000, max=1000,
         precision=1, step=20,
         default=0)
     zRotOffset = FloatProperty(
@@ -486,7 +486,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Rotate objects by this z value",
         unit="ROTATION",
         subtype="ANGLE",
-        min=-360, max=360,
+        min=-1000, max=1000,
         precision=1, step=20,
         default=0)
     rotationRandom = FloatProperty(

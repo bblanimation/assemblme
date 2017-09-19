@@ -1,7 +1,7 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 1, 0),
+    "version"     : (1, 1, 1),
     "blender"     : (2, 78, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
@@ -97,7 +97,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.props.assemblme_module_name = __name__
 
-    props.addonVersion = "1.1.0"
+    props.addonVersion = "1.1.1"
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
@@ -135,13 +135,13 @@ def register():
         name="Scale",
         description="Scale of layer orientation visualizer",
         precision=1,
-        min=0.1, max=100,
+        min=0.1, max=1000,
         default=10)
     bpy.types.Scene.visualizerNumCuts = FloatProperty(
         name="Num Cuts",
         description="Scale of layer orientation visualizer",
         precision=0,
-        min=2, max=64,
+        min=2, max=128,
         default=50)
 
     # list properties

@@ -102,7 +102,7 @@ def convert_velocity_value(scene):
             if ag.objectVelocity != -1:
                 oldV = ag.objectVelocity
                 targetNumFrames = 51 - oldV
-                ag.velocity = 10 - (math.log(targetNumFrames, 2.0))
+                ag.velocity = 10 - (math.log(targetNumFrames, 2))
                 ag.objectVelocity = -1
 
 bpy.app.handlers.load_post.append(convert_velocity_value)
