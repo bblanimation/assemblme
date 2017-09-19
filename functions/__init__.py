@@ -69,7 +69,7 @@ def getObjectVelocity():
     """ calculates and returns brick velocity """
     scn = bpy.context.scene
     ag = scn.aglist[scn.aglist_index]
-    frameVelocity = floor(2**(10-ag.objectVelocity))
+    frameVelocity = floor(2**(10-ag.velocity))
     return frameVelocity
 
 def getAnimLength(objectsToMove, listZValues):
@@ -85,6 +85,22 @@ def getAnimLength(objectsToMove, listZValues):
         elif not scn.skipEmptySelections:
             numLayers += 1
     return (numLayers - 1) * getBuildSpeed() + getObjectVelocity() + 1
+
+def getPresetTuples(fileNames=None):
+    # get list of filenames in presets directory
+    if not fileNames:
+        path = props.addon_prefs.presetsFilepath
+        fileNames = os.listdir(path)
+    # refresh preset names
+    fileNames.sort()
+    presetNames = []
+    for i in range(len(fileNames)):
+        if fileNames[i][-3:] == ".py" and fileNames[i][0] != ".":
+            n = fileNames[i][:-3]
+            if n != "None" and n != "__init__":
+                presetNames.append((n, n, "Select this preset!")) # get rid of the '.py' at the end of the file name
+    presetNames.append(("None", "None", "Don't use a preset"))
+    return presetNames
 
 # def setOrientation(orientation):
 #     """ sets transform orientation """
@@ -203,10 +219,35 @@ def updateAnimPreset(self, context):
     if scn.animPreset != "None":
         import importlib.util
         pathToFile = os.path.join(props.addon_prefs.presetsFilepath, scn.animPreset + ".py")
-        spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
-        foo = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(foo)
-        foo.execute()
+        if os.path.isfile(pathToFile):
+            spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
+            foo = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(foo)
+            foo.execute()
+        else:
+            badPreset = str(scn.animPreset)
+            if badPreset in scn.assemblme_default_presets:
+                errorString = "Preset '%(badPreset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
+            else:
+                errorString = "Preset '%(badPreset)s' could not be found." % locals()
+            sys.stderr.write(errorString)
+            print(errorString)
+            presetNames = getPresetTuples()
+
+            bpy.types.Scene.animPreset = bpy.props.EnumProperty(
+                name="Presets",
+                description="Stored AssemblMe presets",
+                items=presetNames,
+                update=updateAnimPreset,
+                default="None")
+
+            bpy.types.Scene.animPresetToDelete = bpy.props.EnumProperty(
+                name="Preset to Delete",
+                description="Another list of stored AssemblMe presets",
+                items=presetNames,
+                default="None")
+            scn.animPreset = "None"
+
     if groupExists("AssemblMe_visualizer"):
         if scn.animPreset == "Standard Build" or scn.animPreset == "Explode":
             visualizer.disable(visualizer, bpy.context)

@@ -36,7 +36,7 @@ import os
 from bpy.props import *
 from .ui import *
 from .buttons import *
-from .buttons.presets import animPresets
+from .functions import getPresetTuples
 from bpy.types import Operator, AddonPreferences
 props = bpy.props
 
@@ -117,7 +117,8 @@ def register():
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
-    presetNames = animPresets.getPresetTuples()
+    bpy.types.Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
+    presetNames = getPresetTuples()
     bpy.types.Scene.animPreset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",

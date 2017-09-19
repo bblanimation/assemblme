@@ -45,23 +45,6 @@ class animPresets(bpy.types.Operator):
         )
     )
 
-    @classmethod
-    def getPresetTuples(cls, fileNames=None):
-        # get list of filenames in presets directory
-        if not fileNames:
-            path = props.addon_prefs.presetsFilepath
-            fileNames = os.listdir(path)
-        # refresh preset names
-        fileNames.sort()
-        presetNames = []
-        for i in range(len(fileNames)):
-            if fileNames[i][-3:] == ".py" and fileNames[i][0] != ".":
-                n = fileNames[i][:-3]
-                if n != "None" and n != "__init__":
-                    presetNames.append((n, n, "Select this preset!")) # get rid of the '.py' at the end of the file name
-        presetNames.append(("None", "None", "Don't use a preset"))
-        return presetNames
-
     def writeNewPreset(self, presetName):
         scn = bpy.context.scene
         ag = scn.aglist[scn.aglist_index]
@@ -75,23 +58,23 @@ class animPresets(bpy.types.Operator):
         f.write("\n    scn = bpy.context.scene")
         f.write("\n    ag = scn.aglist[scn.aglist_index]")
         f.write("\n    ag.buildSpeed = " + str(ag.buildSpeed))
-        f.write("\n    ag.objectVelocity = " + str(ag.objectVelocity))
-        f.write("\n    ag.xLocOffset = " + str(ag.xLocOffset))
-        f.write("\n    ag.yLocOffset = " + str(ag.yLocOffset))
-        f.write("\n    ag.zLocOffset = " + str(ag.zLocOffset))
+        f.write("\n    ag.velocity = " + str(round(ag.velocity, 6)))
+        f.write("\n    ag.xLocOffset = " + str(round(ag.xLocOffset, 6)))
+        f.write("\n    ag.yLocOffset = " + str(round(ag.yLocOffset, 6)))
+        f.write("\n    ag.zLocOffset = " + str(round(ag.zLocOffset, 6)))
         f.write("\n    ag.locInterpolationMode = '" + ag.locInterpolationMode + "'")
-        f.write("\n    ag.locationRandom = " + str(ag.locationRandom))
+        f.write("\n    ag.locationRandom = " + str(round(ag.locationRandom, 6)))
         f.write("\n    ag.xRotOffset = " + str(ag.xRotOffset))
         f.write("\n    ag.yRotOffset = " + str(ag.yRotOffset))
         f.write("\n    ag.zRotOffset = " + str(ag.zRotOffset))
         f.write("\n    ag.rotInterpolationMode = '" + ag.rotInterpolationMode + "'")
-        f.write("\n    ag.rotationRandom = " + str(ag.rotationRandom))
-        f.write("\n    ag.xOrient = " + str(ag.xOrient))
-        f.write("\n    ag.yOrient = " + str(ag.yOrient))
-        f.write("\n    ag.orientRandom = " + str(ag.orientRandom))
-        f.write("\n    ag.layerHeight = " + str(ag.layerHeight))
+        f.write("\n    ag.rotationRandom = " + str(round(ag.rotationRandom, 6)))
+        f.write("\n    ag.xOrient = " + str(round(ag.xOrient, 6)))
+        f.write("\n    ag.yOrient = " + str(round(ag.yOrient, 6)))
+        f.write("\n    ag.orientRandom = " + str(round(ag.orientRandom, 6)))
+        f.write("\n    ag.layerHeight = " + str(round(ag.layerHeight, 6)))
         f.write("\n    ag.buildType = '" + ag.buildType + "'")
-        f.write("\n    ag.invertBuild = " + str(ag.invertBuild))
+        f.write("\n    ag.invertBuild = " + str(round(ag.invertBuild, 6)))
         f.write("\n    return None")
 
     def canRun(self):
@@ -104,9 +87,10 @@ class animPresets(bpy.types.Operator):
             if scn.animPresetToDelete == "None":
                 self.report({"WARNING"}, "No preset name specified")
                 return False
-            elif scn.animPresetToDelete == "Standard Build" or scn.animPresetToDelete == "Explode":
-                self.report({"WARNING"}, "Cannot delete default plugins")
-                return False
+            # # prevent users from deleting default presets
+            # elif scn.animPresetToDelete in scn.assemblme_default_presets:
+            #     self.report({"WARNING"}, "Cannot delete default p")
+            #     return False
         return True
 
     def execute(self, context):
@@ -124,7 +108,7 @@ class animPresets(bpy.types.Operator):
                 # write new preset to file
                 self.writeNewPreset(scn.newPresetName)
                 fileNames.append(scn.newPresetName + ".py")
-                selectedPreset = scn.newPresetName
+                selectedPreset = str(scn.newPresetName)
                 self.report({"INFO"}, "Successfully added new preset '" + scn.newPresetName + "'")
                 scn.newPresetName = ""
             elif self.action == "REMOVE":
@@ -144,20 +128,21 @@ class animPresets(bpy.types.Operator):
                     self.report({"WARNING"}, "Preset '" + scn.animPresetToDelete + "' does not exist.")
                     return{"CANCELLED"}
 
-            presetNames = self.getPresetTuples(fileNames)
-
+            presetNames = getPresetTuples(fileNames)
             bpy.types.Scene.animPreset = bpy.props.EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
                 items=presetNames,
                 update=updateAnimPreset,
-                default=selectedPreset)
+                default="None")
+            scn.animPreset = selectedPreset
 
             bpy.types.Scene.animPresetToDelete = bpy.props.EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=presetNames,
                 default="None")
+            scn.animPresetToDelete = selectedPreset
         except:
             self.handle_exception()
 

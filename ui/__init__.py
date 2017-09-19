@@ -194,7 +194,7 @@ class SettingsPanel(Panel):
         row = col.row(align=True)
         row.prop(ag, "buildSpeed")
         row = col.row(align=True)
-        row.prop(ag, "objectVelocity")
+        row.prop(ag, "velocity")
         row = col.row(align=True)
 
         if scn.animPreset == "Follow Curve":

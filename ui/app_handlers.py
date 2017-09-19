@@ -21,6 +21,7 @@ Created by Christopher Gearhart
 
 # system imports
 import bpy
+import math
 from bpy.app.handlers import persistent
 from ..functions import *
 from mathutils import Vector, Euler
@@ -88,3 +89,20 @@ def handle_selections(scene):
             scn.aglist_index = -1
 
 bpy.app.handlers.scene_update_pre.append(handle_selections)
+
+@persistent
+def handle_selections(scene):
+    scn = bpy.context.scene
+    try:
+        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.user_preferences.addons.keys()
+    except:
+        assemblMeIsActive = False
+    if assemblMeIsActive:
+        for ag in scn.aglist:
+            if ag.objectVelocity != -1:
+                oldV = ag.objectVelocity
+                targetNumFrames = 51 - oldV
+                ag.velocity = 10 - (math.log(targetNumFrames, 2.0))
+                ag.objectVelocity = -1
+
+bpy.app.handlers.load_post.append(convert_velocity_value)

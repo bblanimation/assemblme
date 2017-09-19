@@ -33,7 +33,7 @@ from bpy.types import Panel, UIList
 def matchProperties(agNew, agOld):
     agNew.firstFrame = agOld.firstFrame
     agNew.buildSpeed = agOld.buildSpeed
-    agNew.objectVelocity = agOld.objectVelocity
+    agNew.velocity = agOld.velocity
     agNew.layerHeight = agOld.layerHeight
     agNew.pathObject = agOld.pathObject
     agNew.xLocOffset = agOld.xLocOffset
@@ -413,10 +413,10 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         name="Step",
         description="Number of frames to skip forward between each object selection",
         unit="TIME",
-        min=1, max=100,
+        min=1, max=1000,
         precision=0,
         default=1)
-    objectVelocity = FloatProperty(
+    velocity = FloatProperty(
         name="Velocity",
         description="Speed of individual object layers (2^(10 - Velocity) = object animation duration in frames)",
         unit="VELOCITY",
@@ -424,6 +424,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         precision=1,
         step=1,
         default=6)
+    objectVelocity = FloatProperty(default=-1)
 
     layerHeight = FloatProperty(
         name="Layer Height",
@@ -460,7 +461,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
     locationRandom = FloatProperty(
         name="Randomize",
         description="Randomize object location offset",
-        min=0.0, max=100.0,
+        min=0.0, max=1000.0,
         precision=1,
         default=0.0)
 
@@ -491,7 +492,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
     rotationRandom = FloatProperty(
         name="Randomize",
         description="Randomize object rotation offset",
-        min=0.0, max=100.0,
+        min=0.0, max=1000.0,
         precision=1,
         default=0.0)
 
