@@ -91,7 +91,7 @@ def handle_selections(scene):
 bpy.app.handlers.scene_update_pre.append(handle_selections)
 
 @persistent
-def handle_selections(scene):
+def convert_velocity_value(scene):
     scn = bpy.context.scene
     try:
         assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.user_preferences.addons.keys()
