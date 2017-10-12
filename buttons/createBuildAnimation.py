@@ -69,7 +69,7 @@ class createBuildAnimation(bpy.types.Operator):
                 return {"CANCELLED"}
 
             # save backup of blender file
-            if props.addon_prefs.autoSaveOnCreateAnim and self.action == "CREATE":
+            if bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.autoSaveOnCreateAnim and self.action == "CREATE":
                 if bpy.data.filepath == '':
                     self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
                     return{"CANCELLED"}

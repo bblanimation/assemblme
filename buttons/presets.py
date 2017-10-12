@@ -48,7 +48,7 @@ class animPresets(bpy.types.Operator):
     def writeNewPreset(self, presetName):
         scn = bpy.context.scene
         ag = scn.aglist[scn.aglist_index]
-        presetsFilepath = props.addon_prefs.presetsFilepath
+        presetsFilepath = bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath
         if not os.path.exists(presetsFilepath):
             os.makedirs(presetsFilepath)
         newPresetPath = os.path.join(presetsFilepath, presetName + ".py")
@@ -98,7 +98,7 @@ class animPresets(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn = bpy.context.scene
-            path = props.addon_prefs.presetsFilepath
+            path = bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath
             fileNames = os.listdir(path)
             selectedPreset = "None"
             if self.action == "CREATE":

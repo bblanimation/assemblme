@@ -89,7 +89,7 @@ def getAnimLength(objectsToMove, listZValues):
 def getPresetTuples(fileNames=None):
     # get list of filenames in presets directory
     if not fileNames:
-        path = props.addon_prefs.presetsFilepath
+        path = bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath
         fileNames = os.listdir(path)
     # refresh preset names
     fileNames.sort()
@@ -218,7 +218,7 @@ def updateAnimPreset(self, context):
     scn = bpy.context.scene
     if scn.animPreset != "None":
         import importlib.util
-        pathToFile = os.path.join(props.addon_prefs.presetsFilepath, scn.animPreset + ".py")
+        pathToFile = os.path.join(bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath, scn.animPreset + ".py")
         if os.path.isfile(pathToFile):
             spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
             foo = importlib.util.module_from_spec(spec)

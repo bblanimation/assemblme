@@ -5,8 +5,9 @@ bl_info = {
     "blender"     : (2, 78, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
-    # "wiki_url"    : "",
-    "tracker_url" : "https://github.com/bblanimation/lego_add_ons/issues",
+    "warning"     : "",  # used for warning icon and text in addons panel
+    "wiki_url"    : "https://www.blendermarket.com/products/assemblme--lego-animation-made-easy",
+    "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
     "category"    : "Animation"}
 
 """
@@ -92,8 +93,6 @@ class AssemblMePreferences(AddonPreferences):
 def register():
     # bpy.utils.register_class(OBJECT_OT_addon_prefs_example)
     bpy.utils.register_class(AssemblMePreferences)
-    user_preferences = bpy.context.user_preferences
-    props.addon_prefs = user_preferences.addons[__name__].preferences
     bpy.utils.register_module(__name__)
     bpy.props.assemblme_module_name = __name__
 
