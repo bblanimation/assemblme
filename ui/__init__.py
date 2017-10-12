@@ -28,6 +28,9 @@ from .app_handlers import *
 from ..functions import *
 props = bpy.props
 
+# updater import
+from .. import addon_updater_ops
+
 class BasicMenu(bpy.types.Menu):
     bl_idname = "AssemblMe_specials_menu"
     bl_label = "Select"
@@ -62,6 +65,9 @@ class AnimationsPanel(Panel):
             col.label('ERROR: upgrade needed', icon='ERROR')
             col.label('AssemblMe requires Blender 2.78+')
             return
+
+        # call built-in function with draw code/checks
+        addon_updater_ops.update_notice_box_ui(self, context)
 
         # draw UI list and list actions
         if len(scn.aglist) < 2:

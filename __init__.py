@@ -41,6 +41,9 @@ from .functions import getPresetTuples
 from bpy.types import Operator, AddonPreferences
 props = bpy.props
 
+# updater import
+from . import addon_updater_ops
+
 class AssemblMePreferences(AddonPreferences):
     bl_idname = __name__
 
@@ -62,6 +65,31 @@ class AssemblMePreferences(AddonPreferences):
             description="Save backup .blend file to project directory before executing 'Start Over' actions",
             default=False)
 
+	# addon updater preferences
+    auto_check_update = bpy.props.BoolProperty(
+        name = "Auto-check for Update",
+        description = "If enabled, auto-check for updates using an interval",
+        default = False)
+    updater_intrval_months = bpy.props.IntProperty(
+        name='Months',
+        description = "Number of months between checking for updates",
+        default=0, min=0)
+    updater_intrval_days = bpy.props.IntProperty(
+        name='Days',
+        description = "Number of days between checking for updates",
+        default=7, min=0)
+    updater_intrval_hours = bpy.props.IntProperty(
+        name='Hours',
+        description = "Number of hours between checking for updates",
+        min=0, max=23,
+        default=0)
+    updater_intrval_minutes = bpy.props.IntProperty(
+        name='Minutes',
+        description = "Number of minutes between checking for updates",
+        min=0, max=59,
+        default=0)
+
+
     def draw(self, context):
         layout = self.layout
         col = layout.column(align=True)
@@ -71,6 +99,9 @@ class AssemblMePreferences(AddonPreferences):
         row.prop(self, "autoSaveOnCreateAnim")
         row = col.row(align=True)
         row.prop(self, "autoSaveOnStartOver")
+
+        # updater draw function
+        addon_updater_ops.update_settings_ui(self,context)
 
 # class OBJECT_OT_addon_prefs_example(Operator):
 #     """Display example preferences"""
