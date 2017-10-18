@@ -829,7 +829,6 @@ def register(bl_info):
 	updater.website = "https://www.blendermarket.com/products/assemblme" # optional
 	updater.use_releases = False # ie use tags instead of releases, default True
 	updater.current_version = bl_info["version"]
-	print(updater.addon, updater.current_version)
 
 	# Below: ie  make users restart blender to load
 	# instead of auto-reload which can cause issues
