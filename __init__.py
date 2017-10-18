@@ -127,7 +127,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.props.assemblme_module_name = __name__
 
-    props.addonVersion = "1.1.1"
+    props.addonVersion = str(bl_info["version"])[1:-1]
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
@@ -185,8 +185,20 @@ def register():
     props.objMinLoc = 0
     props.objMaxLoc = 0
 
+    # addon updater code and configurations
+    addon_updater_ops.register(bl_info)
+
 def unregister():
     Scn = bpy.types.Scene
+
+    # addon updater unregister
+    addon_updater_ops.unregister()
+
+    del props.z_upper_bound
+    del props.z_lower_bound
+    del props.ignoredTypes
+    del props.objMinLoc
+    del props.objMaxLoc
 
     del Scn.aglist_index
     del Scn.aglist

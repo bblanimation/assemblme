@@ -19,12 +19,16 @@
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
     """
 
-# system imports
-import bpy
+# System imports
 import time
 import os
-from ..functions import *
+
+# Blender imports
+import bpy
 props = bpy.props
+
+# Addon imports
+from ..functions import *
 
 class reportError(bpy.types.Operator):
     """Report a bug via an automatically generated issue ticket"""              # blender will use this as a tooltip for menu items and buttons.
