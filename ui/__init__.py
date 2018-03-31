@@ -23,7 +23,7 @@ Created by Christopher Gearhart
 import bpy
 from bpy.types import Panel
 from bpy.props import *
-from .animated_groups import *
+from .aglist import *
 from .app_handlers import *
 from ..functions import *
 props = bpy.props
@@ -251,7 +251,7 @@ class SettingsPanel(Panel):
         col = row.column(align=True)
         col.prop(ag, "yOrient")
         col = split.column(align=True)
-        if ag.visualizerLinked:
+        if ag.visualizerActive:
             col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF")
         else:
             col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_ON")

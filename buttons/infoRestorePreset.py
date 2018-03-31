@@ -19,11 +19,16 @@
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
     """
 
-# system imports
-import bpy
+# System imports
 import time
-from ..functions import *
+
+# Blender imports
+import bpy
 props = bpy.props
+
+# Addon imports
+from ..functions import *
+
 
 class infoRestorePreset(bpy.types.Operator):
     """Clear animation from objects moved in last 'Create Build Animation' action""" # blender will use this as a tooltip for menu items and buttons.
@@ -56,17 +61,6 @@ class infoRestorePreset(bpy.types.Operator):
             bpy.ops.text.move(type='LINE_BEGIN')
 
         except:
-            self.handle_exception()
+            handle_exception()
 
         return{"FINISHED"}
-
-    def handle_exception(self):
-        errormsg = print_exception('AssemblMe_log')
-        # if max number of exceptions occur within threshold of time, abort!
-        curtime = time.time()
-        print('\n'*5)
-        print('-'*100)
-        print("Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the 'Advanced' dropdown menu of AssemblMe)")
-        print('-'*100)
-        print('\n'*5)
-        showErrorMessage("Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the 'Advanced' dropdown menu of AssemblMe)", wrap=240)

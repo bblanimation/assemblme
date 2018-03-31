@@ -27,8 +27,9 @@ import time
 import os
 import traceback
 from math import *
-from .common_functions import *
+from .common import *
 from .common_mesh_generate import *
+from ..buttons.visualizer import *
 props = bpy.props
 
 def getRandomizedOrient(orient):
@@ -53,7 +54,7 @@ def getOffsetRotation(rotation):
     X = rotation.x + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset
     Y = rotation.y + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset
     Z = rotation.z + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset
-    return {"X":X, "Y":Y, "Z":Z}
+    return Vector((X, Y, Z))
 
 # def toDegrees(degreeValue):
 #     """ converts radians to degrees """
@@ -72,13 +73,13 @@ def getObjectVelocity():
     frameVelocity = round(2**(10-ag.velocity))
     return frameVelocity
 
-def getAnimLength(objectsToMove, listZValues):
+def getAnimLength(objects_to_move, listZValues):
     scn = bpy.context.scene
     ag = scn.aglist[scn.aglist_index]
     tempObjCount = 0
     numLayers = 0
-    while len(objectsToMove) > tempObjCount:
-        numObjs = len(getNewSelection(objectsToMove, listZValues))
+    while len(objects_to_move) > tempObjCount:
+        numObjs = len(getNewSelection(objects_to_move, listZValues))
         if numObjs != 0:
             numLayers += 1
             tempObjCount += numObjs
@@ -138,7 +139,7 @@ def getListZValues(objects, rotXL=False, rotYL=False):
     # return list of dictionaries
     return listZValues,rotXL,rotYL
 
-def getObjectsInBound(objectsToMove, listZValues, z_lower_bound):
+def getObjectsInBound(objects_to_move, listZValues, z_lower_bound):
     """ select objects in bounds from listZValues """
     scn = bpy.context.scene
     ag = scn.aglist[scn.aglist_index]
@@ -148,9 +149,9 @@ def getObjectsInBound(objectsToMove, listZValues, z_lower_bound):
         # set obj and z_loc
         obj = lst["obj"]
         z_loc = lst["loc"]
-        # if object is camera or lamp, remove from objectsToMove
+        # if object is camera or lamp, remove from objects_to_move
         if obj.type in props.ignoredTypes:
-            objectsToMove.remove(obj)
+            objects_to_move.remove(obj)
             continue
         # check if object is in bounding z value
         if z_loc >= z_lower_bound and not ag.invertBuild or z_loc <= z_lower_bound and ag.invertBuild:
@@ -162,7 +163,7 @@ def getObjectsInBound(objectsToMove, listZValues, z_lower_bound):
             break
     return objsInBound
 
-def getNewSelection(objectsToMove, listZValues):
+def getNewSelection(objects_to_move, listZValues):
     """ selects next layer of objects """
     scn = bpy.context.scene
     ag = scn.aglist[scn.aglist_index]
@@ -178,7 +179,7 @@ def getNewSelection(objectsToMove, listZValues):
         props.z_lower_bound = props.z_upper_bound - ag.layerHeight
 
     # select objects in bounds
-    objsInBound = getObjectsInBound(objectsToMove, listZValues, props.z_lower_bound)
+    objsInBound = getObjectsInBound(objects_to_move, listZValues, props.z_lower_bound)
 
     return objsInBound
 
@@ -248,15 +249,15 @@ def updateAnimPreset(self, context):
                 default="None")
             scn.animPreset = "None"
 
-    if groupExists("AssemblMe_visualizer"):
-        if scn.animPreset == "Standard Build" or scn.animPreset == "Explode":
-            visualizer.disable(visualizer, bpy.context)
+    # if groupExists("AssemblMe_visualizer"):
+    #     if scn.animPreset == "Standard Build" or scn.animPreset == "Explode":
+    #         visualizer.disable()
 
     scn.animPresetToDelete = scn.animPreset
 
     return None
 
-def animateObjects(objectsToMove, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
+def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
 
     # initialize variables for use in while loop
@@ -267,23 +268,20 @@ def animateObjects(objectsToMove, listZValues, curFrame, locInterpolationMode='L
     curTime = lastUpdated
     estTimeRemaining = []
     objects_moved = []
-    # axisObj = bpy.data.groups['AssemblMe_axis_obj'].objects[0]
+    mult = 1 if ag.buildType == "Assemble" else -1
 
-    while len(objectsToMove) > 0:
+    while len(objects_to_move) > 0:
         # iterate num times in while loop
         acc += 1
 
         # get next objects to animate
-        newSelection = getNewSelection(objectsToMove, listZValues)
+        newSelection = getNewSelection(objects_to_move, listZValues)
 
-        # iterate through selected objects
+        # add objs to objects_moved
+        objects_moved += [obj for obj in newSelection]
+        # remove objs in new selection from objects_to_move
         for obj in newSelection:
-            # # set object parent to axisObj
-            # obj.parent = axisObj
-            # put selected objects in 'objects_moved'
-            objects_moved.append(obj)
-            # obj no longer needs to be moved, so remove from 'objectsToMove'
-            objectsToMove.remove(obj)
+            objects_to_move.remove(obj)
 
         # move selected objects and add keyframes
         kfIdxLoc = -1
@@ -292,19 +290,14 @@ def animateObjects(objectsToMove, listZValues, curFrame, locInterpolationMode='L
             # insert location keyframes
             if ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0:
                 insertKeyframes(newSelection, "location", curFrame, locInterpolationMode, kfIdxLoc)
-                if ag.buildType == "Assemble":
-                    kfIdxLoc -= 1
+                kfIdxLoc -= 1 if ag.buildType == "Assemble" else 0
             # insert rotation keyframes
             if ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0:
                 insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
-                if ag.buildType == "Assemble":
-                    kfIdxRot -= 1
+                kfIdxLoc -= 1 if ag.buildType == "Assemble" else 0
 
             # set curFrame
-            if ag.buildType == "Assemble":
-                curFrame -= getObjectVelocity()
-            else:
-                curFrame += getObjectVelocity()
+            curFrame -= getObjectVelocity() * mult
 
             # move object and insert location keyframes
             if ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0:
@@ -314,26 +307,16 @@ def animateObjects(objectsToMove, listZValues, curFrame, locInterpolationMode='L
             # rotate object and insert rotation keyframes
             if ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0:
                 for obj in newSelection:
-                    offsetRotation = getOffsetRotation(obj.rotation_euler)
-                    obj.rotation_euler.x = offsetRotation["X"]
-                    obj.rotation_euler.y = offsetRotation["Y"]
-                    obj.rotation_euler.z = offsetRotation["Z"]
+                    obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
 
             # set curFrame
-            if ag.buildType == "Assemble":
-                curFrame += getObjectVelocity() - getBuildSpeed()
-            else:
-                curFrame += getBuildSpeed() - getObjectVelocity()
-
+            curFrame += getObjectVelocity() - getBuildSpeed() * mult
 
         # handle case where 'scn.skipEmptySelections' == False and empty selection is grabbed
         elif not scn.skipEmptySelections:
             # skip frame if nothing selected
-            if ag.buildType == "Assemble":
-                curFrame -= getBuildSpeed()
-            else:
-                curFrame += getBuildSpeed()
+            curFrame -= getBuildSpeed() * mult
         # handle case where 'scn.skipEmptySelections' == True and empty selection is grabbed
         else:
             os.stderr.write("Grabbed empty selection. This shouldn't happen!")

@@ -40,7 +40,7 @@ class reportError(bpy.types.Operator):
         # set up file paths
         libraryServersPath = os.path.join(getLibraryPath(), "error_log")
         # write necessary debugging information to text file
-        writeErrorToFile(libraryServersPath, 'AssemblMe_log', props.addonVersion)
+        writeErrorToFile(libraryServersPath, 'AssemblMe_log', props.assemblme_version)
         # open error report in UI with text editor
         changeContext(context, "TEXT_EDITOR")
         try:

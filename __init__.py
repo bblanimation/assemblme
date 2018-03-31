@@ -127,7 +127,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.props.assemblme_module_name = __name__
 
-    props.addonVersion = str(bl_info["version"])[1:-1]
+    bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
@@ -140,7 +140,7 @@ def register():
 
     bpy.types.Scene.skipEmptySelections = BoolProperty(
         name="Skip Empty Selections",
-        description="Skip frames where nothing is selected if checked",
+        description="Skip frames where nothing is selected if checked (Recommended)",
         default=True)
 
     bpy.types.Scene.newPresetName = StringProperty(
@@ -219,6 +219,9 @@ def unregister():
     del Scn.assemblMe_runningOperation
 
     del Scn.assemblme_copy_from_id
+
+    del bpy.props.assemblme_version
+    del bpy.props.assemblme_module_name
 
     bpy.utils.unregister_module(__name__)
 

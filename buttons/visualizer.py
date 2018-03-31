@@ -19,12 +19,16 @@
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
     """
 
-# system imports
-import bpy
+# System imports
 import math
+
+# Blender imports
+import bpy
 import bmesh
-from ..functions import *
 props = bpy.props
+
+# Addon imports
+from ..functions import *
 
 class visualizer(bpy.types.Operator):
     """Visualize the layer orientation with a plane"""                          # blender will use this as a tooltip for menu items and buttons.
@@ -32,8 +36,72 @@ class visualizer(bpy.types.Operator):
     bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
+    ################################################
+    # Blender Operator methods
+
+    def modal(self, context, event):
+        """ runs as long as visualizer is active """
+        if event.type in {"ESC"}:
+            self.full_disable(context)
+            return{"CANCELLED"}
+
+        if event.type == "TIMER":
+            scn = context.scene
+            ag = scn.aglist[scn.aglist_index]
+            try:
+                # if the visualizer is has been disabled, stop running modal
+                if not self.enabled():
+                    self.full_disable(context)
+                    return{"CANCELLED"}
+                # if new build animation created, update visualizer animation
+                if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
+                    self.minAndMax = [props.objMinLoc, props.objMaxLoc]
+                    self.createAnim()
+                # set visualizer object rotation
+                if self.visualizerObj.rotation_euler.x != ag.xOrient:
+                    self.visualizerObj.rotation_euler.x = ag.xOrient
+                if self.visualizerObj.rotation_euler.y != ag.yOrient:
+                    self.visualizerObj.rotation_euler.y = ag.yOrient
+                if self.visualizerObj.rotation_euler.z != self.zOrient:
+                    self.visualizerObj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
+                    self.zOrient = self.visualizerObj.rotation_euler.z
+                if scn.visualizerScale != self.visualizerScale or scn.visualizerNumCuts != self.visualizerNumCuts:
+                    self.loadLatticeMesh(context)
+            except:
+                handle_exception()
+
+        return{"PASS_THROUGH"}
+
+    def execute(self, context):
+        try:
+            scn = bpy.context.scene
+            ag = scn.aglist[scn.aglist_index]
+            # if enabled, all we do is disable it
+            if self.enabled():
+                self.full_disable(context)
+                return{"FINISHED"}
+            else:
+                # create animation for visualizer if build animation exists
+                self.minAndMax = [props.objMinLoc, props.objMaxLoc]
+                if groupExists(ag.group_name):
+                    self.createAnim()
+                # enable visualizer
+                self.enable(context)
+                # initialize self.zOrient for modal
+                self.zOrient = None
+                # create timer for modal
+                wm = context.window_manager
+                self._timer = wm.event_timer_add(.02, context.window)
+                wm.modal_handler_add(self)
+        except:
+            handle_exception()
+
+        return{"RUNNING_MODAL"}
+
+    ################################################
+    # initialization method
+
     def __init__(self):
-        """ sets up self.visualizerObj """
         if groupExists("AssemblMe_visualizer"):
             # set self.visualizer and self.m with existing data
             self.visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
@@ -49,6 +117,9 @@ class visualizer(bpy.types.Operator):
             vGroup.objects.link(self.visualizerObj)
         # not sure what this does, to be honest
         visualizer.instance = self
+
+    #############################################
+    # class methods
 
     def createAnim(self):
         scn = bpy.context.scene
@@ -101,94 +172,32 @@ class visualizer(bpy.types.Operator):
         # link visualizer object to scene
         scn.objects.link(self.visualizerObj)
         unhide(self.visualizerObj)
-        ag.visualizerLinked = True
+        ag.visualizerActive = True
 
-    def disable(self, context):
+    def full_disable(self, context):
         """ disables visualizer """
         scn = bpy.context.scene
         ag = scn.aglist[scn.aglist_index]
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
         # unlink visualizer object to scene
-        scn.objects.unlink(self.visualizerObj)
-        ag.visualizerLinked = False
+        if self.visualizerObj.name in scn.objects.keys():
+            scn.objects.unlink(self.visualizerObj)
+        ag.visualizerActive = False
+
+    @staticmethod
+    def disable():
+        """ static method for disabling visualizer """
+        scn = bpy.context.scene
+        ag = scn.aglist[scn.aglist_index]
+        ag.visualizerActive = False
 
     @staticmethod
     def enabled():
         """ returns boolean for visualizer linked to scene """
         scn = bpy.context.scene
         ag = scn.aglist[scn.aglist_index]
-        return ag.visualizerLinked
-
-    def modal(self, context, event):
-        """ runs as long as visualizer is active """
-        if event.type in {"ESC"}:
-            self.report({"INFO"}, "Visualizer disabled")
-            self.disable(context)
-            return{"CANCELLED"}
-
-        if event.type == "TIMER":
-            scn = context.scene
-            ag = scn.aglist[scn.aglist_index]
-            try:
-                # if the visualizer is has been disabled, stop running modal
-                if not self.enabled():
-                    return{"CANCELLED"}
-                # if new build animation created, update visualizer animation
-                if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
-                    self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                    self.createAnim()
-                # set visualizer object rotation
-                if self.visualizerObj.rotation_euler.x != ag.xOrient:
-                    self.visualizerObj.rotation_euler.x = ag.xOrient
-                if self.visualizerObj.rotation_euler.y != ag.yOrient:
-                    self.visualizerObj.rotation_euler.y = ag.yOrient
-                if self.visualizerObj.rotation_euler.z != self.zOrient:
-                    self.visualizerObj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
-                    self.zOrient = self.visualizerObj.rotation_euler.z
-                if scn.visualizerScale != self.visualizerScale or scn.visualizerNumCuts != self.visualizerNumCuts:
-                    self.loadLatticeMesh(context)
-            except:
-                self.handle_exception()
-
-        return{"PASS_THROUGH"}
-
-    def execute(self, context):
-        try:
-            scn = bpy.context.scene
-            ag = scn.aglist[scn.aglist_index]
-            # if enabled, all we do is disable it
-            if self.enabled():
-                self.disable(context)
-                return{"FINISHED"}
-            else:
-                # create animation for visualizer if build animation exists
-                self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                if groupExists(ag.group_name):
-                    self.createAnim()
-                # enable visualizer
-                self.enable(context)
-                # initialize self.zOrient for modal
-                self.zOrient = None
-                # create timer for modal
-                wm = context.window_manager
-                self._timer = wm.event_timer_add(.02, context.window)
-                wm.modal_handler_add(self)
-        except:
-            self.handle_exception()
-
-        return{"RUNNING_MODAL"}
-
-    def handle_exception(self):
-        errormsg = print_exception('AssemblMe_log')
-        # if max number of exceptions occur within threshold of time, abort!
-        curtime = time.time()
-        print('\n'*5)
-        print('-'*100)
-        print("Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the 'Advanced' dropdown menu of AssemblMe)")
-        print('-'*100)
-        print('\n'*5)
-        showErrorMessage("Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the 'Advanced' dropdown menu of AssemblMe)", wrap=240)
+        return ag.visualizerActive
 
     def cancel(self, context):
         # remove timer

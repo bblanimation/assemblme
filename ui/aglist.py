@@ -569,7 +569,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         default=-1)
     visualizerAnimated = BoolProperty(
         default=False)
-    visualizerLinked = BoolProperty(
+    visualizerActive = BoolProperty(
         default=False)
 
     lastActiveObjectName = StringProperty(default="")
