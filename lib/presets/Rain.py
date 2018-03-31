@@ -1,7 +1,7 @@
 import bpy
-from ...functions.common import *
 def execute():
-    ag = getActiveContextInfo()[1]
+    scn = bpy.context.scene
+    ag = scn.aglist[scn.aglist_index]
     ag.buildSpeed = 5.0
     ag.velocity = 5.0
     ag.xLocOffset = 0.0
