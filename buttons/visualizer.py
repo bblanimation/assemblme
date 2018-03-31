@@ -46,8 +46,7 @@ class visualizer(bpy.types.Operator):
             return{"CANCELLED"}
 
         if event.type == "TIMER":
-            scn = context.scene
-            ag = scn.aglist[scn.aglist_index]
+            scn, ag = getActiveContextInfo()
             try:
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
@@ -65,8 +64,10 @@ class visualizer(bpy.types.Operator):
                 if self.visualizerObj.rotation_euler.z != self.zOrient:
                     self.visualizerObj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
                     self.zOrient = self.visualizerObj.rotation_euler.z
-                if scn.visualizerScale != self.visualizerScale or scn.visualizerNumCuts != self.visualizerNumCuts:
+                if scn.visualizerScale != self.visualizerScale or scn.visualizerRes != self.visualizerRes:
                     self.loadLatticeMesh(context)
+                    self.visualizerObj.data.update()
+                    scn.update()
             except:
                 handle_exception()
 
@@ -74,8 +75,7 @@ class visualizer(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            scn = bpy.context.scene
-            ag = scn.aglist[scn.aglist_index]
+            scn, ag = getActiveContextInfo()
             # if enabled, all we do is disable it
             if self.enabled():
                 self.full_disable(context)
@@ -122,8 +122,7 @@ class visualizer(bpy.types.Operator):
     # class methods
 
     def createAnim(self):
-        scn = bpy.context.scene
-        ag = scn.aglist[scn.aglist_index]
+        scn, ag = getActiveContextInfo()
         # if first and last location are the same, keep visualizer stationary
         if props.objMinLoc == props.objMaxLoc or ag.orientRandom > 0.0025:
             self.visualizerObj.animation_data_clear()
@@ -156,15 +155,14 @@ class visualizer(bpy.types.Operator):
 
     def loadLatticeMesh(self, context):
         scn = bpy.context.scene
-        visualizerBM = makeSimple2DLattice(scn.visualizerNumCuts, scn.visualizerScale)
-        self.visualizerNumCuts = scn.visualizerNumCuts
+        visualizerBM = makeLattice(Vector((scn.visualizerRes, scn.visualizerRes, 1)), Vector([scn.visualizerScale]*2 + [1]))
+        self.visualizerRes = scn.visualizerRes
         self.visualizerScale = scn.visualizerScale
         visualizerBM.to_mesh(self.visualizerObj.data)
 
     def enable(self, context):
         """ enables visualizer """
-        scn = context.scene
-        ag = scn.aglist[scn.aglist_index]
+        scn, ag = getActiveContextInfo()
         # alert user that visualizer is enabled
         self.report({"INFO"}, "Visualizer enabled... ('ESC' to disable)")
         # add proper mesh data to visualizer object
@@ -176,8 +174,7 @@ class visualizer(bpy.types.Operator):
 
     def full_disable(self, context):
         """ disables visualizer """
-        scn = bpy.context.scene
-        ag = scn.aglist[scn.aglist_index]
+        scn, ag = getActiveContextInfo()
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
         # unlink visualizer object to scene
@@ -188,15 +185,13 @@ class visualizer(bpy.types.Operator):
     @staticmethod
     def disable():
         """ static method for disabling visualizer """
-        scn = bpy.context.scene
-        ag = scn.aglist[scn.aglist_index]
+        ag = getActiveContextInfo()[1]
         ag.visualizerActive = False
 
     @staticmethod
     def enabled():
         """ returns boolean for visualizer linked to scene """
-        scn = bpy.context.scene
-        ag = scn.aglist[scn.aglist_index]
+        ag = getActiveContextInfo()[1]
         return ag.visualizerActive
 
     def cancel(self, context):

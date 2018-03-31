@@ -165,14 +165,14 @@ def register():
         name="Scale",
         description="Scale of layer orientation visualizer",
         precision=1,
-        min=0.1, max=1000,
+        min=0.1, max=16,
         default=10)
-    bpy.types.Scene.visualizerNumCuts = FloatProperty(
-        name="Num Cuts",
-        description="Scale of layer orientation visualizer",
-        precision=0,
-        min=2, max=128,
-        default=50)
+    bpy.types.Scene.visualizerRes = FloatProperty(
+        name="Resolution",
+        description="Resolution of layer orientation visualizer",
+        precision=2,
+        min=0.05, max=1,
+        default=0.25)
 
     # list properties
     bpy.types.Scene.aglist = CollectionProperty(type=AssemblMe_AnimatedGroups)
@@ -203,7 +203,7 @@ def unregister():
     del Scn.aglist_index
     del Scn.aglist
 
-    del Scn.visualizerNumCuts
+    del Scn.visualizerRes
     del Scn.visualizerScale
 
     del Scn.animPresetToDelete

@@ -65,14 +65,9 @@ def stopWatch(text, value, precision=2):
     return time.time()
 
 
-def groupExists(groupName):
+def groupExists(name):
     """ check if group exists in blender's memory """
-
-    groupExists = False
-    for group in bpy.data.groups:
-        if group.name == groupName:
-            groupExists = True
-    return groupExists
+    return name in bpy.data.groups.keys()
 
 
 def getItemByID(collection, id):

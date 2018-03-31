@@ -59,8 +59,7 @@ class createBuildAnimation(bpy.types.Operator):
             startTime = time.time()
             self.curTime = startTime
 
-            scn = context.scene
-            ag = scn.aglist[scn.aglist_index]
+            scn, ag = getActiveContextInfo()
 
             if ag.group_name == "":
                 self.report({"WARNING"}, "No group name specified")
@@ -73,13 +72,8 @@ class createBuildAnimation(bpy.types.Operator):
                 return {"CANCELLED"}
 
             # save backup of blender file
-            if bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.autoSaveOnCreateAnim and self.action == "CREATE":
-                if bpy.data.filepath == '':
-                    self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
-                    return{"CANCELLED"}
-                print("saving backup file...")
-                bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath[:-6] + "_backup.blend", copy=True)
-                self.report({"INFO"}, "Backup file saved")
+            if self.action == "CREATE":
+                saveBackupFile(self)
 
             # set up other variables
             print("initializing...")
@@ -101,12 +95,11 @@ class createBuildAnimation(bpy.types.Operator):
                 self.objects_moved = []
 
             # make sure no objects in this group are part of another AssemblMe animation
-            for obj in self.objects_to_move:
-                for i in range(len(scn.aglist)):
-                    ag0 = scn.aglist[i]
-                    if i == scn.aglist_index or not ag0.animated:
-                        continue
-                    g = bpy.data.groups.get(ag0.group_name)
+            for i in range(len(scn.aglist)):
+                if i == scn.aglist_index or not scn.aglist[i].animated:
+                    continue
+                g = bpy.data.groups.get(scn.aglist[i].group_name)
+                for obj in self.objects_to_move:
                     if g in obj.users_group:
                         self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")
                         return{"CANCELLED"}
@@ -122,10 +115,7 @@ class createBuildAnimation(bpy.types.Operator):
             ag.animLength = getAnimLength(self.objects_to_move, self.listZValues)
 
             # set first frame to animate from
-            if ag.buildType == "Assemble":
-                self.curFrame = ag.firstFrame + ag.animLength
-            else:
-                self.curFrame = ag.firstFrame
+            self.curFrame = ag.firstFrame + (ag.animLength if ag.buildType == "Assemble" else 0)
 
             # set frameWithOrigLoc for 'Start Over' operation
             ag.frameWithOrigLoc = self.curFrame
@@ -146,15 +136,11 @@ class createBuildAnimation(bpy.types.Operator):
                 self.report({"ERROR"}, animationReturnDict["errorMsg"])
                 return{"CANCELLED"}
 
-            if self.action == "CREATE":
-                # handle case where no object was ever selected (e.g. only camera passed to function).
-                if ag.frameWithOrigLoc == animationReturnDict["lastFrame"]:
-                    ignoredTypes = str(props.ignoredTypes).replace("[","").replace("]","")
-                    self.report({"WARNING"}, "No valid objects selected! (igored types: {})".format(ignoredTypes))
-                    return{"FINISHED"}
-
-                # select all objects moved and put in group
-                select(list(animationReturnDict["moved"]))
+            # handle case where no object was ever selected (e.g. only camera passed to function).
+            if self.action == "CREATE" and ag.frameWithOrigLoc == animationReturnDict["lastFrame"]:
+                ignoredTypes = str(props.ignoredTypes).replace("[","").replace("]","")
+                self.report({"WARNING"}, "No valid objects selected! (igored types: {})".format(ignoredTypes))
+                return{"FINISHED"}
 
             # reset upper and lower bound values
             props.z_upper_bound = None

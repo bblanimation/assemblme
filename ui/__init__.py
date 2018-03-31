@@ -23,7 +23,9 @@ Created by Christopher Gearhart
 import bpy
 from bpy.types import Panel
 from bpy.props import *
-from .aglist import *
+from .aglist_actions import *
+from .aglist_utils import *
+from .aglist_attrs import *
 from .app_handlers import *
 from ..functions import *
 props = bpy.props
@@ -129,8 +131,7 @@ class ActionsPanel(Panel):
 
     def draw(self, context):
         layout = self.layout
-        scn = bpy.context.scene
-        ag = scn.aglist[scn.aglist_index]
+        scn, ag = getActiveContextInfo()
 
         col = layout.column(align=True)
         row = col.row(align=True)
@@ -171,8 +172,7 @@ class SettingsPanel(Panel):
 
     def draw(self, context):
         layout = self.layout
-        scn = context.scene
-        ag = scn.aglist[scn.aglist_index]
+        scn, ag = getActiveContextInfo()
 
         if bversion() < '002.075.00':
             col = layout.column(align=True)
@@ -301,7 +301,7 @@ class AdvancedPanel(Panel):
         row.label("Visualizer:")
         row = col.row(align=True)
         row.prop(scn, "visualizerScale")
-        row.prop(scn, "visualizerNumCuts")
+        row.prop(scn, "visualizerRes")
 
 class presetManager(Panel):
     bl_space_type  = "VIEW_3D"

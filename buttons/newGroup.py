@@ -38,13 +38,7 @@ class newGroupFromSelection(bpy.types.Operator):
         if scn.aglist_index == -1:
             return False
         return True
-    #
-    # action = bpy.props.EnumProperty(
-    #     items=(
-    #         ('CREATE', "Create", ""),
-    #         ('REMOVE', "Remove", ""),
-    #     )
-    # )
+
     def canRun(self):
         if len(bpy.context.selected_objects) == 0:
             self.report({"WARNING"}, "No objects selected")
@@ -55,16 +49,13 @@ class newGroupFromSelection(bpy.types.Operator):
         if not self.canRun():
             return{"CANCELLED"}
         try:
-            scn = bpy.context.scene
-            ag = scn.aglist[scn.aglist_index]
-            i = 0
-            groupIdx = 0
-            while groupIdx != -1:
-                i += 1
-                groupIdx = bpy.data.groups.find("AssemblMe_animated_group_%(i)s" % locals())
-            agGroup = bpy.data.groups.new("AssemblMe_animated_group_%(i)s" % locals())
+            scn, ag = getActiveContextInfo()
+            # create new animated group
+            agGroup = bpy.data.groups.new("AssemblMe_animated_group")
+            # add selected objects to new group
             for obj in bpy.context.selected_objects:
                 agGroup.objects.link(obj)
+            # set ag.group_name
             ag.group_name = agGroup.name
         except:
             handle_exception()

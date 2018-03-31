@@ -38,8 +38,7 @@ class startOver(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        scn = bpy.context.scene
-        ag = scn.aglist[scn.aglist_index]
+        scn, ag = getActiveContextInfo()
         if ag.animated:
             return True
         return False
@@ -50,17 +49,11 @@ class startOver(bpy.types.Operator):
             startTime = time.time()
 
             # set up origGroup variable
-            scn = context.scene
-            ag = scn.aglist[scn.aglist_index]
+            scn, ag = getActiveContextInfo()
             origGroup = bpy.data.groups.get(ag.group_name)
 
-            # save backup of blender file
-            if bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.autoSaveOnStartOver:
-                if bpy.data.filepath == '':
-                    self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
-                    return{"CANCELLED"}
-                bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath[:-6] + "_backup.blend", copy=True)
-                self.report({"INFO"}, "Backup file saved")
+            # save backup of blender file if enabled in user prefs
+            saveBackupFile(self)
 
             # set current_frame to animation start frame
             self.origFrame = scn.frame_current
@@ -77,9 +70,8 @@ class startOver(bpy.types.Operator):
             if origGroup is not None:
                 for obj in origGroup.objects:
                     obj.animation_data_clear()
-                select(list(origGroup.objects))
 
-                if "AssemblMe_animated_group_" in ag.group_name:
+                if ag.group_name.startswith("AssemblMe_animated_group"):
                     bpy.data.groups.remove(origGroup, True)
                     ag.group_name = ""
 

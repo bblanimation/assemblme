@@ -49,8 +49,7 @@ class refreshBuildAnimationLength(bpy.types.Operator):
     def execute(self, context):
         try:
             # set up variables
-            scn = context.scene
-            ag = scn.aglist[scn.aglist_index]
+            scn, ag = getActiveContextInfo()
 
             if groupExists(ag.group_name):
                 # if objects in ag.group_name, populate objects_to_move with them
