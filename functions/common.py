@@ -287,22 +287,13 @@ def confirmList(itemList):
     return itemList
 
 
-def insertKeyframes(objList, keyframeType, frame, interpolationMode='Default', idx=-1):
+def insertKeyframes(objList, keyframeType, frame, if_needed=False):
     """ insert key frames for given objects to given frames """
     objList = confirmList(objList)
+    ct = time.time()
+    options = set(["INSERTKEY_NEEDED"] if if_needed else [])
     for obj in objList:
-        obj.keyframe_insert(data_path=keyframeType, frame=frame)
-        if interpolationMode == "Default":
-            continue
-        fcurves = []
-        for i in range(3):  # increase if inserting keyframes for something that takes up more than three fcurves
-            fc = obj.animation_data.action.fcurves.find(keyframeType, index=i)
-            if fc is not None:
-                fcurves.append(fc)
-        for fcurve in fcurves:
-            # for kf in fcurve.keyframe_points:
-            kf = fcurve.keyframe_points[idx]
-            kf.interpolation = interpolationMode
+        inserted = obj.keyframe_insert(data_path=keyframeType, frame=frame, options=options)
 
 
 def setActiveScn(scn):

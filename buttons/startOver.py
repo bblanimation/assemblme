@@ -45,44 +45,40 @@ class startOver(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            # get start time
-            startTime = time.time()
-
-            # set up origGroup variable
-            scn, ag = getActiveContextInfo()
-            origGroup = bpy.data.groups.get(ag.group_name)
-
-            # save backup of blender file if enabled in user prefs
-            saveBackupFile(self)
-
-            # set current_frame to animation start frame
-            self.origFrame = scn.frame_current
-            bpy.context.scene.frame_set(ag.frameWithOrigLoc)
-
-            if origGroup is not None:
-                print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
-
-            # clear objMinLoc and objMaxLoc
-            props.objMinLoc = 0
-            props.objMaxLoc = 0
-
-            # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
-            if origGroup is not None:
-                for obj in origGroup.objects:
-                    obj.animation_data_clear()
-
-                if ag.group_name.startswith("AssemblMe_animated_group"):
-                    bpy.data.groups.remove(origGroup, True)
-                    ag.group_name = ""
-
-            # set current_frame to original current_frame
-            bpy.context.scene.frame_set(self.origFrame)
-
-            ag.animated = False
-
-            # STOPWATCH CHECK
-            stopWatch("Time Elapsed", time.time()-startTime)
+            self.startOver()
         except:
             handle_exception()
-
         return{"FINISHED"}
+
+    @timed_call("Time Elapsed")
+    def startOver(self):
+        # set up origGroup variable
+        scn, ag = getActiveContextInfo()
+        origGroup = bpy.data.groups.get(ag.group_name)
+
+        # save backup of blender file if enabled in user prefs
+        saveBackupFile(self)
+
+        # set current_frame to animation start frame
+        self.origFrame = scn.frame_current
+        bpy.context.scene.frame_set(ag.frameWithOrigLoc)
+
+        if origGroup is not None:
+            print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
+
+        # clear objMinLoc and objMaxLoc
+        props.objMinLoc, props.objMaxLoc = 0, 0
+
+        # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
+        if origGroup is not None:
+            for obj in origGroup.objects:
+                obj.animation_data_clear()
+
+            if ag.group_name.startswith("AssemblMe_animated_group"):
+                bpy.data.groups.remove(origGroup, True)
+                ag.group_name = ""
+
+        # set current_frame to original current_frame
+        bpy.context.scene.frame_set(self.origFrame)
+
+        ag.animated = False

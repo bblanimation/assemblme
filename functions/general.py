@@ -52,7 +52,7 @@ def saveBackupFile(self):
 def getRandomizedOrient(orient):
     """ returns randomized orientation based on user settings """
     scn, ag = getActiveContextInfo()
-    return (orient + random.uniform(-ag.orientRandom, ag.orientRandom))
+    return orient + random.uniform(-ag.orientRandom, ag.orientRandom)
 
 def getOffsetLocation(location):
     """ returns randomized location offset """
@@ -91,11 +91,8 @@ def getAnimLength(objects_to_move, listZValues):
     numLayers = 0
     while len(objects_to_move) > tempObjCount:
         numObjs = len(getNewSelection(listZValues))
-        if numObjs != 0:
-            numLayers += 1
-            tempObjCount += numObjs
-        elif not scn.skipEmptySelections:
-            numLayers += 1
+        numLayers += 1 if numObjs > 0 or not scn.skipEmptySelections else 0
+        tempObjCount += numObjs
     return (numLayers - 1) * getBuildSpeed() + getObjectVelocity() + 1
 
 def getPresetTuples(fileNames=None):
@@ -233,31 +230,34 @@ def updateAnimPreset(self, context):
 
     return None
 
+def setInterpolation(objList, data_path, mode, idx):
+    objList = confirmList(objList)
+    for obj in objList:
+        if obj.animation_data is None:
+            return
+        for fcurve in obj.animation_data.action.fcurves:
+            if fcurve is not None and fcurve.data_path.startswith(data_path):
+                fcurve.keyframe_points[idx].interpolation = mode
+
 def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
 
     # initialize variables for use in while loop
     scn, ag = getActiveContextInfo()
-    acc = 0
-    lastUpdated = time.time()
-    curTime = lastUpdated
-    estTimeRemaining = []
     objects_moved = []
     last_len_objects_moved = 0
     mult = 1 if ag.buildType == "Assemble" else -1
+    inc  = 1 if ag.buildType == "Assemble" else 0
+    insertLoc = ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0
+    insertRot = ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0
 
     while len(objects_to_move) > len(objects_moved):
         # print status to terminal
         updateProgressBars(True, True, len(objects_moved) / len(objects_to_move), last_len_objects_moved / len(objects_to_move), "Animating Layers")
         last_len_objects_moved = len(objects_moved)
 
-        # iterate num times in while loop
-        acc += 1
-
         # get next objects to animate
         newSelection = getNewSelection(listZValues)
-
-        # add objs to objects_moved
         objects_moved += newSelection
 
         # move selected objects and add keyframes
@@ -265,29 +265,29 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
         kfIdxRot = -1
         if len(newSelection) != 0:
             # insert location keyframes
-            if ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0:
-                insertKeyframes(newSelection, "location", curFrame, locInterpolationMode, kfIdxLoc)
-                kfIdxLoc -= 1 if ag.buildType == "Assemble" else 0
+            if insertLoc:
+                insertKeyframes(newSelection, "location", curFrame)
+                kfIdxLoc -= inc
             # insert rotation keyframes
-            if ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0:
-                insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
-                kfIdxLoc -= 1 if ag.buildType == "Assemble" else 0
+            if insertRot:
+                insertKeyframes(newSelection, "rotation_euler", curFrame)
+                kfIdxLoc -= inc
 
-            # set curFrame
+            # step curFrame backwards
             curFrame -= getObjectVelocity() * mult
 
             # move object and insert location keyframes
-            if ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0:
+            if insertLoc:
                 for obj in newSelection:
                     obj.location = getOffsetLocation(obj.location)
-                insertKeyframes(newSelection, "location", curFrame, locInterpolationMode, kfIdxLoc)
+                insertKeyframes(newSelection, "location", curFrame, if_needed=True)
             # rotate object and insert rotation keyframes
-            if ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0:
+            if insertRot:
                 for obj in newSelection:
                     obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
-                insertKeyframes(newSelection, "rotation_euler", curFrame, rotInterpolationMode, kfIdxRot)
+                insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
 
-            # set curFrame
+            # step curFrame forwards
             curFrame += getObjectVelocity() - getBuildSpeed() * mult
 
         # handle case where 'scn.skipEmptySelections' == False and empty selection is grabbed
@@ -297,6 +297,10 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
         # handle case where 'scn.skipEmptySelections' == True and empty selection is grabbed
         else:
             os.stderr.write("Grabbed empty selection. This shouldn't happen!")
+
+    # set interpolation modes for moved objects
+    setInterpolation(objects_moved, 'loc', locInterpolationMode, kfIdxLoc)
+    setInterpolation(objects_moved, 'rot', rotInterpolationMode, kfIdxRot)
 
     updateProgressBars(True, True, 1, 0, "Animating Layers", end=True)
 

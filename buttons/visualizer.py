@@ -48,6 +48,7 @@ class visualizer(bpy.types.Operator):
         if event.type == "TIMER":
             scn, ag = getActiveContextInfo()
             try:
+                v_obj = self.visualizerObj
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
                     self.full_disable(context)
@@ -57,16 +58,16 @@ class visualizer(bpy.types.Operator):
                     self.minAndMax = [props.objMinLoc, props.objMaxLoc]
                     self.createAnim()
                 # set visualizer object rotation
-                if self.visualizerObj.rotation_euler.x != ag.xOrient:
-                    self.visualizerObj.rotation_euler.x = ag.xOrient
-                if self.visualizerObj.rotation_euler.y != ag.yOrient:
-                    self.visualizerObj.rotation_euler.y = ag.yOrient
-                if self.visualizerObj.rotation_euler.z != self.zOrient:
-                    self.visualizerObj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
-                    self.zOrient = self.visualizerObj.rotation_euler.z
+                if v_obj.rotation_euler.x != ag.xOrient:
+                    v_obj.rotation_euler.x = ag.xOrient
+                if v_obj.rotation_euler.y != ag.yOrient:
+                    v_obj.rotation_euler.y = ag.yOrient
+                if v_obj.rotation_euler.z != self.zOrient:
+                    v_obj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
+                    self.zOrient = v_obj.rotation_euler.z
                 if scn.visualizerScale != self.visualizerScale or scn.visualizerRes != self.visualizerRes:
                     self.loadLatticeMesh(context)
-                    self.visualizerObj.data.update()
+                    v_obj.data.update()
                     scn.update()
             except:
                 handle_exception()
@@ -126,10 +127,7 @@ class visualizer(bpy.types.Operator):
         # if first and last location are the same, keep visualizer stationary
         if props.objMinLoc == props.objMaxLoc or ag.orientRandom > 0.0025:
             self.visualizerObj.animation_data_clear()
-            if type(props.objMinLoc) == type(self.visualizerObj.location):
-                self.visualizerObj.location = props.objMinLoc
-            else:
-                self.visualizerObj.location = (0,0,0)
+            self.visualizerObj.location = props.objMinLoc if type(props.objMinLoc) == type(self.visualizerObj.location) else (0, 0, 0)
             ag.visualizerAnimated = False
             return "static"
         # else, create animation
@@ -140,17 +138,16 @@ class visualizer(bpy.types.Operator):
             # set up vars
             self.visualizerObj.location = props.objMinLoc
             curFrame = ag.frameWithOrigLoc
-            idx = -1
+            idx = -2 if ag.buildType == "Assemble" else -1
+            mult = 1 if ag.buildType == "Assemble" else -1
             # insert keyframe and iterate current frame, and set another
-            insertKeyframes(self.visualizerObj, "location", curFrame, 'LINEAR', idx)
+            insertKeyframes(self.visualizerObj, "location", curFrame)
             self.visualizerObj.location = props.objMaxLoc
-            if ag.buildType == "Assemble":
-                curFrame -= (ag.animLength - ag.lastLayerVelocity)
-                idx -= 1
-            else:
-                curFrame += (ag.animLength - ag.lastLayerVelocity)
-            insertKeyframes(self.visualizerObj, "location", curFrame, 'LINEAR', idx)
+            curFrame -= (ag.animLength - ag.lastLayerVelocity) * mult
+            insertKeyframes(self.visualizerObj, "location", curFrame, if_needed=True)
             ag.visualizerAnimated = True
+            setInterpolation(self.visualizerObj, 'loc', 'LINEAR', idx)
+
             return "animated"
 
     def loadLatticeMesh(self, context):
