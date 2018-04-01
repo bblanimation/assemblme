@@ -231,8 +231,6 @@ def updateAnimPreset(self, context):
                 default="None")
             scn.animPreset = "None"
 
-    scn.animPresetToDelete = scn.animPreset
-
     return None
 
 def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):

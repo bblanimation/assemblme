@@ -347,4 +347,4 @@ class presetManager(Panel):
         col.operator("scene.animation_presets", text="Remove", icon="X").action = "REMOVE"
         col = layout.column(align=True)
         row = col.row(align=True)
-        col.operator("scene.info_restore_preset", text="Restoring Removed Preset(s)", icon="INFO")
+        col.operator("scene.info_restore_preset", text="Restore Presets", icon="INFO")
