@@ -90,7 +90,7 @@ def getAnimLength(objects_to_move, listZValues):
     tempObjCount = 0
     numLayers = 0
     while len(objects_to_move) > tempObjCount:
-        numObjs = len(getNewSelection(objects_to_move, listZValues))
+        numObjs = len(getNewSelection(listZValues))
         if numObjs != 0:
             numLayers += 1
             tempObjCount += numObjs
@@ -138,7 +138,7 @@ def getListZValues(objects, rotXL=False, rotYL=False):
     # return list of dictionaries
     return listZValues, rotXL, rotYL
 
-def getObjectsInBound(objects_to_move, listZValues, z_lower_bound):
+def getObjectsInBound(listZValues, z_lower_bound):
     """ select objects in bounds from listZValues """
     scn, ag = getActiveContextInfo()
     objsInBound = []
@@ -147,10 +147,6 @@ def getObjectsInBound(objects_to_move, listZValues, z_lower_bound):
         # set obj and z_loc
         obj = lst["obj"]
         z_loc = lst["loc"]
-        # if object is camera or lamp, remove from objects_to_move
-        if obj.type in props.ignoredTypes:
-            objects_to_move.remove(obj)
-            continue
         # check if object is in bounding z value
         if z_loc >= z_lower_bound and not ag.invertBuild or z_loc <= z_lower_bound and ag.invertBuild:
             objsInBound.append(obj)
@@ -161,7 +157,7 @@ def getObjectsInBound(objects_to_move, listZValues, z_lower_bound):
             break
     return objsInBound
 
-def getNewSelection(objects_to_move, listZValues):
+def getNewSelection(listZValues):
     """ selects next layer of objects """
     scn, ag = getActiveContextInfo()
 
@@ -170,7 +166,7 @@ def getNewSelection(objects_to_move, listZValues):
     props.z_lower_bound = props.z_upper_bound + ag.layerHeight * (1 if ag.invertBuild else -1)
 
     # select objects in bounds
-    objsInBound = getObjectsInBound(objects_to_move, listZValues, props.z_lower_bound)
+    objsInBound = getObjectsInBound(listZValues, props.z_lower_bound)
 
     return objsInBound
 
@@ -249,20 +245,22 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
     curTime = lastUpdated
     estTimeRemaining = []
     objects_moved = []
+    last_len_objects_moved = 0
     mult = 1 if ag.buildType == "Assemble" else -1
 
-    while len(objects_to_move) > 0:
+    while len(objects_to_move) > len(objects_moved):
+        # print status to terminal
+        updateProgressBars(True, True, len(objects_moved) / len(objects_to_move), last_len_objects_moved / len(objects_to_move), "Animating Layers")
+        last_len_objects_moved = len(objects_moved)
+
         # iterate num times in while loop
         acc += 1
 
         # get next objects to animate
-        newSelection = getNewSelection(objects_to_move, listZValues)
+        newSelection = getNewSelection(listZValues)
 
         # add objs to objects_moved
-        objects_moved += [obj for obj in newSelection]
-        # remove objs in new selection from objects_to_move
-        for obj in newSelection:
-            objects_to_move.remove(obj)
+        objects_moved += newSelection
 
         # move selected objects and add keyframes
         kfIdxLoc = -1
@@ -301,6 +299,8 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
         # handle case where 'scn.skipEmptySelections' == True and empty selection is grabbed
         else:
             os.stderr.write("Grabbed empty selection. This shouldn't happen!")
+
+    updateProgressBars(True, True, 1, 0, "Animating Layers", end=True)
 
     return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
 

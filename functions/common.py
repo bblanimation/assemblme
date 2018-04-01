@@ -524,6 +524,23 @@ def print_exception(txtName, showError=False):
     return errormsg
 
 
+def updateProgressBars(printStatus, cursorStatus, cur_percent, old_percent, statusType, end=False):
+    if printStatus:
+        # print status to terminal
+        if cur_percent - old_percent > 0.001 and (cur_percent < 1 or end):
+            update_progress(statusType, cur_percent)
+            if cursorStatus:
+                wm = bpy.context.window_manager
+                if cur_percent == 0:
+                    wm.progress_begin(0, 100)
+                elif cur_percent < 1:
+                    wm.progress_update(cur_percent*100)
+                else:
+                    wm.progress_end()
+            old_percent = cur_percent
+    return old_percent
+
+
 def update_progress(job_title, progress):
     length = 20  # modify this to change the length
     block = int(round(length*progress))

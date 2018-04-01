@@ -53,22 +53,14 @@ class createBuildAnimation(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            print("\nRunning 'Create Build Animation' operation")
-
-            # get start time
+            print("\ncreating build animation...")
+            # initialize vars
             startTime = time.time()
             self.curTime = startTime
-
             scn, ag = getActiveContextInfo()
 
-            if ag.group_name == "":
-                self.report({"WARNING"}, "No group name specified")
-                return {"CANCELLED"}
-            if not groupExists(ag.group_name):
-                self.report({"WARNING"}, "Group '%(n)s' does not exist." % locals())
-                return {"CANCELLED"}
-            if len(bpy.data.groups[ag.group_name].objects) == 0:
-                self.report({"WARNING"}, "Group contains no objects!")
+            # ensure operation can run
+            if not self.isValid(scn, ag):
                 return {"CANCELLED"}
 
             # save backup of blender file
@@ -76,15 +68,12 @@ class createBuildAnimation(bpy.types.Operator):
                 saveBackupFile(self)
 
             # set up other variables
-            print("initializing...")
             self.curFrame = scn.frame_current
             ag.lastLayerVelocity = getObjectVelocity()
-            self.original_selection = context.selected_objects
-            self.original_active = context.active_object
             origGroup = bpy.data.groups[ag.group_name]
             self.origFrame = scn.frame_current
             # set up origGroup variable
-            self.objects_to_move = list(bpy.data.groups[ag.group_name].objects)
+            self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if obj.type not in props.ignoredTypes]
             if self.action == "UPDATE":
                 # set current_frame to animation start frame
                 scn.frame_set(ag.frameWithOrigLoc)
@@ -111,8 +100,8 @@ class createBuildAnimation(bpy.types.Operator):
             # set props.objMinLoc and props.objMaxLoc
             setBoundsForVisualizer(self.listZValues)
 
-            # calculate how many frames the animation will last (depletes self.listZValues)
-            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues)
+            # calculate how many frames the animation will last
+            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues.copy())
 
             # set first frame to animate from
             self.curFrame = ag.firstFrame + (ag.animLength if ag.buildType == "Assemble" else 0)
@@ -120,15 +109,11 @@ class createBuildAnimation(bpy.types.Operator):
             # set frameWithOrigLoc for 'Start Over' operation
             ag.frameWithOrigLoc = self.curFrame
 
-            # populate self.listZValues again
-            self.listZValues,_,_ = getListZValues(self.objects_to_move, rotXL, rotYL)
-
             # reset upper and lower bound values
             props.z_upper_bound = None
             props.z_lower_bound = None
 
             # animate the objects
-            print("creating animation...")
             animationReturnDict = animateObjects(self.objects_to_move, self.listZValues, self.curFrame, ag.locInterpolationMode, ag.rotInterpolationMode)
 
             # verify animateObjects() ran correctly
@@ -146,8 +131,6 @@ class createBuildAnimation(bpy.types.Operator):
             props.z_upper_bound = None
             props.z_lower_bound = None
 
-            # set to original selection and active object
-            select(self.original_selection, active=self.original_active)
             # set current_frame to original current_frame
             bpy.context.scene.frame_set(self.origFrame)
             if self.action == "CREATE":
@@ -162,3 +145,15 @@ class createBuildAnimation(bpy.types.Operator):
             return{"CANCELLED"}
 
         return{"FINISHED"}
+
+    def isValid(self, scn, ag):
+        if ag.group_name == "":
+            self.report({"WARNING"}, "No group name specified")
+            return False
+        if not groupExists(ag.group_name):
+            self.report({"WARNING"}, "Group '%(n)s' does not exist." % locals())
+            return False
+        if len(bpy.data.groups[ag.group_name].objects) == 0:
+            self.report({"WARNING"}, "Group contains no objects!")
+            return False
+        return True
