@@ -71,8 +71,7 @@ class startOver(bpy.types.Operator):
 
         # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
         if origGroup is not None:
-            for obj in origGroup.objects:
-                obj.animation_data_clear()
+            clearAnimation(list(origGroup.objects))
 
             if ag.group_name.startswith("AssemblMe_animated_group"):
                 bpy.data.groups.remove(origGroup, True)

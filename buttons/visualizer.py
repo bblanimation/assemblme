@@ -126,7 +126,7 @@ class visualizer(bpy.types.Operator):
         scn, ag = getActiveContextInfo()
         # if first and last location are the same, keep visualizer stationary
         if props.objMinLoc == props.objMaxLoc or ag.orientRandom > 0.0025:
-            self.visualizerObj.animation_data_clear()
+            clearAnimation(self.visualizerObj)
             self.visualizerObj.location = props.objMinLoc if type(props.objMinLoc) == type(self.visualizerObj.location) else (0, 0, 0)
             ag.visualizerAnimated = False
             return "static"
@@ -134,7 +134,7 @@ class visualizer(bpy.types.Operator):
         else:
             # if animation already created, clear it
             if ag.visualizerAnimated:
-                self.visualizerObj.animation_data_clear()
+                clearAnimation(self.visualizerObj)
             # set up vars
             self.visualizerObj.location = props.objMinLoc
             curFrame = ag.frameWithOrigLoc

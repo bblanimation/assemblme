@@ -84,8 +84,7 @@ class createBuildAnimation(bpy.types.Operator):
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
         # clear animation data from all objects in ag.group_name group
-        for obj in origGroup.objects:
-            obj.animation_data_clear()
+        clearAnimation(list(origGroup.objects))
 
         # make sure no objects in this group are part of another AssemblMe animation
         for i in range(len(scn.aglist)):

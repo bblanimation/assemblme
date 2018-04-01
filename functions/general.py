@@ -230,6 +230,15 @@ def updateAnimPreset(self, context):
 
     return None
 
+def clearAnimation(objList):
+    objList = confirmList(objList)
+    for obj in objList:
+        obj.animation_data_clear()
+        obj.data.update()
+    bpy.context.scene.update()
+
+
+
 def setInterpolation(objList, data_path, mode, idx):
     objList = confirmList(objList)
     for obj in objList:
