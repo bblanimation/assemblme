@@ -53,6 +53,7 @@ def matchProperties(agNew, agOld):
     agNew.orientRandom = agOld.orientRandom
     agNew.buildType = agOld.buildType
     agNew.invertBuild = agOld.invertBuild
+    agNew.useGlobal = agOld.useGlobal
 
 
 def uniquifyName(self, context):

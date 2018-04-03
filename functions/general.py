@@ -123,7 +123,7 @@ def getListZValues(objects, rotXL=False, rotYL=False):
         rotXL = [getRandomizedOrient(ag.xOrient) for i in range(len(objects))]
         rotYL = [getRandomizedOrient(ag.yOrient) for i in range(len(objects))]
     for i,obj in enumerate(objects):
-        l = obj.location
+        l = obj.matrix_world.to_translation() if ag.useGlobal else obj.location
         rotX = rotXL[i]
         rotY = rotYL[i]
         zLoc = (l.z * cos(rotX) * cos(rotY)) + (l.x * sin(rotY)) + (l.y * -sin(rotX))

@@ -197,6 +197,11 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Invert the animation so that the objects start (dis)assembling from the other side",
         default=False)
 
+    useGlobal = BoolProperty(
+        name="Use Global Location",
+        description="Use global object locations for creating animation",
+        default=False)
+
     animated = BoolProperty(default=False)
 
     ## DO THESE BELONG HERE??? ##

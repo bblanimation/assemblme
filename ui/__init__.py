@@ -291,11 +291,13 @@ class AdvancedPanel(Panel):
 
     def draw(self, context):
         layout = self.layout
-        scn = context.scene
+        scn, ag = getActiveContextInfo()
 
         col = layout.column(align=True)
         row = col.row(align=True)
         row.prop(scn, "skipEmptySelections")
+        row = col.row(align=True)
+        row.prop(ag, "useGlobal")
 
         row = col.row(align=True)
         row.label("Visualizer:")
