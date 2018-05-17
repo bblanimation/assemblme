@@ -2,11 +2,11 @@ bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
     "version"     : (1, 1, 0),
-    "blender"     : (2, 78, 0),
+    "blender"     : (2, 79, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     # "wiki_url"    : "",
-    "tracker_url" : "https://github.com/bblanimation/lego_add_ons/issues",
+    "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
     "category"    : "Animation"}
 
 """
@@ -96,7 +96,7 @@ def register():
     props.addon_prefs = user_preferences.addons[__name__].preferences
     bpy.utils.register_module(__name__)
 
-    props.addonVersion = "1.1.0" 
+    props.addonVersion = "1.1.0"
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
