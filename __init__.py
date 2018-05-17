@@ -1,12 +1,11 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 1, 2),
-    "blender"     : (2, 78, 0),
+    "version"     : (1, 1, 3),
+    "blender"     : (2, 79, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
-    "warning"     : "",  # used for warning icon and text in addons panel
-    "wiki_url"    : "https://www.blendermarket.com/products/assemblme--lego-animation-made-easy",
+    # "wiki_url"    : "",
     "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
     "category"    : "Animation"}
 
@@ -127,7 +126,11 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.props.assemblme_module_name = __name__
 
+<<<<<<< HEAD
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
+=======
+    props.addonVersion = "1.1.0"
+>>>>>>> release/1.1.0
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
