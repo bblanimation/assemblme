@@ -126,11 +126,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.props.assemblme_module_name = __name__
 
-<<<<<<< HEAD
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
-=======
-    props.addonVersion = "1.1.0"
->>>>>>> release/1.1.0
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
