@@ -1,5 +1,5 @@
 """
-Copyright (C) 2017 Bricks Brought to Life
+Copyright (C) 2018 Bricks Brought to Life
 http://bblanimation.com/
 chris@bblanimation.com
 
@@ -30,11 +30,12 @@ import operator
 import json
 import traceback
 import subprocess
+import hashlib
 from math import *
 
 # Blender imports
 import bpy
-from mathutils import Vector
+from mathutils import Vector, Euler, Matrix
 from bpy.types import Object, Scene
 props = bpy.props
 
@@ -135,8 +136,19 @@ def uniquify2(seq, innerType=list):
     return [innerType(x) for x in set(tuple(x) for x in seq)]
 
 
+# efficient removal from list if unordered
+def remove_item(ls, item):
+    try:
+        i = ls.index(item)
+    except ValueError:
+        return False
+    ls[-1], ls[i] = ls[i], ls[-1]
+    ls.pop()
+    return True
+
+
 def tag_redraw_areas(areaTypes=["ALL"]):
-    areaTypes = confirmList(areaTypes)
+    areaTypes = confirmIter(areaTypes)
     for area in bpy.context.screen.areas:
         for areaType in areaTypes:
             if areaType == "ALL" or area.type == areaType:
@@ -150,7 +162,7 @@ def disableRelationshipLines():
             area.spaces[0].show_relationship_lines = False
 
 
-def drawBMesh(BMesh, name="drawnBMesh"):
+def drawBMesh(bm, name="drawnBMesh"):
     """ create mesh and object from bmesh """
     # note: neither are linked to the scene, yet, so they won't show in the 3d view
     m = bpy.data.meshes.new(name + "_mesh")
@@ -160,7 +172,7 @@ def drawBMesh(BMesh, name="drawnBMesh"):
     scn.objects.link(obj)     # link new object to scene
     scn.objects.active = obj  # make new object active
     obj.select = True         # make new object selected (does not deselect other objects)
-    BMesh.to_mesh(m)          # push bmesh data into m
+    bm.to_mesh(m)          # push bmesh data into m
     return obj
 
 
@@ -194,22 +206,20 @@ class Suppressor(object):
         pass
 
 
-def applyModifiers(obj, only=None, exclude=None, curFrame=None):
+def applyModifiers(obj, only=None, exclude=["SMOKE"], curFrame=None):
     hasArmature = False
     select(obj, active=True, only=True)
     # apply modifiers
     for mod in obj.modifiers:
-        # only = ["SUBSURF", "ARMATURE", "SOLIDIFY", "MIRROR", "ARRAY", "BEVEL", "BOOLEAN", "SKIN", "OCEAN", "FLUID_SIMULATION"]
-        if (only is None or mod.type in only) and (exclude is None or mod.type not in exclude) and mod.show_viewport:
-            if curFrame and mod.type in ["CLOTH", "SOFT_BODY", "ARMATURE"]:
-                pass
-            try:
-                with Suppressor():
-                    bpy.ops.object.modifier_apply(apply_as='DATA', modifier=mod.name)
-            except:
-                mod.show_viewport = False
-            if mod.type == "ARMATURE" and not hasArmature and mod.show_viewport:
-                hasArmature = True
+        if not (only is None or mod.type in only) or not (exclude is None or mod.type not in exclude) or not mod.show_viewport:
+            continue
+        try:
+            with Suppressor():
+                bpy.ops.object.modifier_apply(apply_as='DATA', modifier=mod.name)
+        except:
+            mod.show_viewport = False
+        if mod.type == "ARMATURE" and not hasArmature and mod.show_viewport:
+            hasArmature = True
     return hasArmature
 
 
@@ -264,6 +274,23 @@ def vec_conv(v1, innerType=int, outerType=Vector):
     return outerType([innerType(x) for x in v1])
 
 
+def vec_round(v1, precision=0):
+    return Vector(round(e1, precision) for e1 in v1)
+
+
+def mean(lst):
+    return sum(lst)/len(lst)
+
+
+def cap(string, max_len):
+    return string[:max_len] if len(string) > max_len else string
+
+
+def rreplace(s, old, new, occurrence=1):
+    li = s.rsplit(old, occurrence)
+    return new.join(li)
+
+
 def round_nearest(num, divisor):
     rem = num % divisor
     if rem > divisor / 2:
@@ -280,6 +307,10 @@ def round_down(num, divisor):
     return num - (num % divisor)
 
 
+def hash_str(string):
+    return hashlib.md5(string.encode()).hexdigest()
+
+
 def confirmList(itemList):
     """ if single item passed, convert to list """
     if type(itemList) != list:
@@ -287,12 +318,21 @@ def confirmList(itemList):
     return itemList
 
 
-def insertKeyframes(objList, keyframeType, frame, if_needed=False):
+def confirmIter(object):
+    """ if single item passed, convert to list """
+    try:
+        iter(object)
+    except TypeError:
+        object = [object]
+    return object
+
+
+def insertKeyframes(objs, keyframeType, frame, if_needed=False):
     """ insert key frames for given objects to given frames """
-    objList = confirmList(objList)
+    objs = confirmIter(objs)
     ct = time.time()
     options = set(["INSERTKEY_NEEDED"] if if_needed else [])
-    for obj in objList:
+    for obj in objs:
         inserted = obj.keyframe_insert(data_path=keyframeType, frame=frame, options=options)
 
 
@@ -301,9 +341,9 @@ def setActiveScn(scn):
         screen.scene = scn
 
 
-def getLayersList(layerList):
-    layerList = confirmList(layerList)
-    newLayersList = [i in layerList for i in range(20)]
+def getLayersList(layers):
+    layers = confirmIter(layers)
+    newLayersList = [i in layers for i in range(20)]
     return newLayersList
 
 
@@ -333,16 +373,17 @@ def selectAll():
     bpy.ops.object.select_all(action='SELECT')
 
 
-def hide(objList):
-    objList = confirmList(objList)
-    for obj in objList:
+def hide(objs):
+    objs = confirmIter(objs)
+    for obj in objs:
         obj.hide = True
 
 
-def unhide(objList):
-    objList = confirmList(objList)
-    for obj in objList:
-        obj.hide = False
+def unhide(objs):
+    objs = confirmIter(objs)
+    for obj in objs:
+        if obj.hide:
+            obj.hide = False
 
 
 def setActiveObj(obj, scene=None):
@@ -370,30 +411,39 @@ def select(objList=[], active=None, deselect:bool=False, only:bool=False, scene:
     return True
 
 
-def delete(objList):
-    objList = confirmList(objList)
-    objs = bpy.data.objects
-    for obj in objList:
+def delete(objs):
+    objs = confirmIter(objs)
+    for obj in objs:
         if obj is None:
             continue
-        objs.remove(obj, True)
+        bpy.data.objects.remove(obj, True)
 
 
-def selectVerts(vertsList):
-    vertsList = confirmList(vertsList)
-    for v in vertsList:
+def duplicate(obj, linked=False, link_to_scene=False):
+    copy = obj.copy()
+    if not linked and copy.data:
+        copy.data = copy.data.copy()
+    copy.hide = False
+    if link_to_scene:
+        bpy.context.scene.objects.link(copy)
+    return copy
+
+
+def selectVerts(verts):
+    verts= confirmIter(verts)
+    for v in verts:
         v.select = True
 
 
-def smoothBMFaces(facesList):
-    facesList = confirmList(facesList)
-    for f in facesList:
+def smoothBMFaces(faces):
+    faces = confirmIter(faces)
+    for f in faces:
         f.smooth = True
 
 
-def smoothMeshFaces(facesList):
-    facesList = confirmList(facesList)
-    for f in facesList:
+def smoothMeshFaces(faces):
+    faces = confirmIter(faces)
+    for f in faces:
         f.use_smooth = True
 
 
@@ -520,12 +570,12 @@ def updateProgressBars(printStatus, cursorStatus, cur_percent, old_percent, stat
         # print status to terminal
         if cur_percent - old_percent > 0.001 and (cur_percent < 1 or end):
             update_progress(statusType, cur_percent)
-            if cursorStatus:
+            if cursorStatus and ceil(cur_percent*100) != ceil(old_percent*100):
                 wm = bpy.context.window_manager
                 if cur_percent == 0:
                     wm.progress_begin(0, 100)
                 elif cur_percent < 1:
-                    wm.progress_update(cur_percent*100)
+                    wm.progress_update(floor(cur_percent*100))
                 else:
                     wm.progress_end()
             old_percent = cur_percent
@@ -540,6 +590,37 @@ def update_progress(job_title, progress):
         msg += " DONE\r\n"
     sys.stdout.write(msg)
     sys.stdout.flush()
+
+
+def apply_transform(obj):
+    # select(obj, only=True, active=True)
+    # bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    loc, rot, scale = obj.matrix_world.decompose()
+    obj.matrix_world = Matrix.Identity(4)
+    m = obj.data
+    s_mat_x = Matrix.Scale(scale.x, 4, Vector((1, 0, 0)))
+    s_mat_y = Matrix.Scale(scale.y, 4, Vector((0, 1, 0)))
+    s_mat_z = Matrix.Scale(scale.z, 4, Vector((0, 0, 1)))
+    m.transform(s_mat_x * s_mat_y * s_mat_z)
+    m.transform(rot.to_matrix().to_4x4())
+    m.transform(Matrix.Translation(loc))
+
+
+def parent_clear(objs, apply_transform=True):
+    # select(objs, only=True, active=True)
+    # bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+    objs = confirmIter(objs)
+    if apply_transform:
+        for obj in objs:
+            obj.rotation_mode = "XYZ"
+            loc = obj.matrix_world.to_translation()
+            rot = obj.matrix_world.to_euler()
+            scale = obj.matrix_world.to_scale()
+            obj.location = loc
+            obj.rotation_euler = rot
+            obj.scale = scale
+    for obj in objs:
+        obj.parent = None
 
 
 def writeErrorToFile(errorReportPath, txtName, addonVersion):

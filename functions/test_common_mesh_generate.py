@@ -58,7 +58,7 @@ def newObjFromBmesh(layer, bme, meshName, objName=None, loc=(0,0,0), edgeSplit=T
 
 def main():
     # try to delete existing objects
-    delete(list(bpy.data.objects))
+    delete(bpy.data.objects)
 
     # create objects
     newObjFromBmesh(1, makeSquare(), "square")

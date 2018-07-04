@@ -74,7 +74,6 @@ class createBuildAnimation(bpy.types.Operator):
             saveBackupFile(self)
 
         # set up other variables
-        self.curFrame = scn.frame_current
         ag.lastLayerVelocity = getObjectVelocity()
         origGroup = bpy.data.groups[ag.group_name]
         self.origFrame = scn.frame_current
@@ -84,17 +83,7 @@ class createBuildAnimation(bpy.types.Operator):
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
         # clear animation data from all objects in ag.group_name group
-        clearAnimation(list(origGroup.objects))
-
-        # make sure no objects in this group are part of another AssemblMe animation
-        for i in range(len(scn.aglist)):
-            if i == scn.aglist_index or not scn.aglist[i].animated:
-                continue
-            g = bpy.data.groups.get(scn.aglist[i].group_name)
-            for obj in self.objects_to_move:
-                if g in obj.users_group:
-                    self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")
-                    return{"CANCELLED"}
+        clearAnimation(origGroup.objects)
 
         ### BEGIN ANIMATION GENERATION ###
         # populate self.listZValues
@@ -127,7 +116,7 @@ class createBuildAnimation(bpy.types.Operator):
         # handle case where no object was ever selected (e.g. only camera passed to function).
         if self.action == "CREATE" and ag.frameWithOrigLoc == animationReturnDict["lastFrame"]:
             ignoredTypes = str(props.ignoredTypes).replace("[","").replace("]","")
-            self.report({"WARNING"}, "No valid objects selected! (igored types: {})".format(ignoredTypes))
+            self.report({"WARNING"}, "No valid objects selected! (igored types: %(ignoredTypes)s)" % locals())
             return{"FINISHED"}
 
         # reset upper and lower bound values
@@ -150,4 +139,13 @@ class createBuildAnimation(bpy.types.Operator):
         if len(bpy.data.groups[ag.group_name].objects) == 0:
             self.report({"WARNING"}, "Group contains no objects!")
             return False
+        # make sure no objects in this group are part of another AssemblMe animation
+        for i in range(len(scn.aglist)):
+            if i == scn.aglist_index or not scn.aglist[i].animated:
+                continue
+            g = bpy.data.groups.get(scn.aglist[i].group_name)
+            for obj in self.objects_to_move:
+                if g in obj.users_group:
+                    self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")
+                    return False
         return True

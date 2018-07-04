@@ -230,18 +230,18 @@ def updateAnimPreset(self, context):
 
     return None
 
-def clearAnimation(objList):
-    objList = confirmList(objList)
-    for obj in objList:
+def clearAnimation(objs):
+    objs = confirmIter(objs)
+    for obj in objs:
         obj.animation_data_clear()
         obj.data.update()
     bpy.context.scene.update()
 
 
 
-def setInterpolation(objList, data_path, mode, idx):
-    objList = confirmList(objList)
-    for obj in objList:
+def setInterpolation(objs, data_path, mode, idx):
+    objs = confirmIter(objs)
+    for obj in objs:
         if obj.animation_data is None:
             return
         for fcurve in obj.animation_data.action.fcurves:

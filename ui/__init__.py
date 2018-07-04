@@ -47,7 +47,7 @@ class BasicMenu(bpy.types.Menu):
 class AnimationsPanel(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_label       = "AssemblMe Animations"
+    bl_label       = "Animations"
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_animations"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
