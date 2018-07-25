@@ -17,7 +17,7 @@ def execute():
     ag.xOrient = 0.0
     ag.yOrient = 0.0
     ag.orientRandom = 50.0
-    ag.layerHeight = 15.0
+    ag.layerHeight = 1000.0
     ag.buildType = 'Disassemble'
     ag.invertBuild = False
     return None

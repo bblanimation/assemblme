@@ -70,7 +70,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Height of the bounding box that selects objects for each frame in animation",
         unit="LENGTH",
         subtype="DISTANCE",
-        min=0.0001, max=100,
+        min=0.0001, max=1000,
         precision=4,
         default=.1)
 
@@ -100,16 +100,16 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
     locationRandom = FloatProperty(
         name="Randomize",
         description="Randomize object location offset",
-        min=0.0, max=1000.0,
+        min=0, max=10000,
         precision=1,
-        default=0.0)
+        default=0)
 
     xRotOffset = FloatProperty(
         name="X",
         description="Rotate objects by this x value",
         unit="ROTATION",
         subtype="ANGLE",
-        min=-1000, max=1000,
+        min=-10000, max=10000,
         precision=1, step=20,
         default=0)
     yRotOffset = FloatProperty(
@@ -117,7 +117,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Rotate objects by this y value",
         unit="ROTATION",
         subtype="ANGLE",
-        min=-1000, max=1000,
+        min=-10000, max=10000,
         precision=1, step=20,
         default=0)
     zRotOffset = FloatProperty(
@@ -125,15 +125,15 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Rotate objects by this z value",
         unit="ROTATION",
         subtype="ANGLE",
-        min=-1000, max=1000,
+        min=-10000, max=10000,
         precision=1, step=20,
         default=0)
     rotationRandom = FloatProperty(
         name="Randomize",
         description="Randomize object rotation offset",
-        min=0.0, max=1000.0,
+        min=0, max=10000,
         precision=1,
-        default=0.0)
+        default=0)
 
     interpolationModes = [("CONSTANT", "Constant", "Set interpolation mode for each object in assembly animation: Constant", "IPO_CONSTANT", 1),
                                 ("LINEAR", "Linear", "Set interpolation mode for each object in assembly animation: Linear", "IPO_LINEAR", 2),
@@ -182,9 +182,9 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
     orientRandom = FloatProperty(
         name="Random",
         description="Randomize object assembly/disassembly angle",
-        min=0.0, max=100.0,
+        min=0, max=100,
         precision=1,
-        default=0.0)
+        default=0)
 
     buildType = EnumProperty(
         name="Build Type",
