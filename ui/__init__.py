@@ -68,7 +68,11 @@ class AnimationsPanel(Panel):
             col.label('AssemblMe requires Blender 2.78+')
             return
 
-        # call built-in function with draw code/checks
+        # Call to check for update in background
+        # Internally also checks to see if auto-check enabled
+        # and if the time interval has passed
+        addon_updater_ops.check_for_update_background()
+        # draw auto-updater update box
         addon_updater_ops.update_notice_box_ui(self, context)
 
         # draw UI list and list actions
