@@ -64,6 +64,7 @@ class createBuildAnimation(bpy.types.Operator):
         print("\ncreating build animation...")
         # initialize vars
         scn, ag = getActiveContextInfo()
+        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if obj.type not in props.ignoredTypes]
 
         # ensure operation can run
         if not self.isValid(scn, ag):
@@ -77,8 +78,6 @@ class createBuildAnimation(bpy.types.Operator):
         ag.lastLayerVelocity = getObjectVelocity()
         origGroup = bpy.data.groups[ag.group_name]
         self.origFrame = scn.frame_current
-        # set up origGroup variable
-        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if obj.type not in props.ignoredTypes]
         if self.action == "UPDATE":
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
