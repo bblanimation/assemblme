@@ -523,7 +523,7 @@ def showErrorMessage(message, wrap=80):
     return
 
 
-def handle_exception(plugin_name="Bricker", report_button_loc="Brick Models"):
+def handle_exception(plugin_name="AssemblMe", report_button_loc="Brick Models"):
     errormsg = print_exception('%(plugin_name)s_log' % locals())
     # if max number of exceptions occur within threshold of time, abort!
     errorStr = "Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the '%(report_button_loc)s' dropdown menu of %(plugin_name)s)" % locals()
@@ -627,7 +627,7 @@ def writeErrorToFile(errorReportPath, txtName, addonVersion):
     # write error to log text object
     if not os.path.exists(errorReportPath):
         os.makedirs(errorReportPath)
-    fullFilePath = os.path.join(errorReportPath, "Bricker_error_report.txt")
+    fullFilePath = os.path.join(errorReportPath, "AssemblMe_error_report.txt")
     f = open(fullFilePath, "w")
     f.write("\nPlease copy the following form and paste it into a new issue at https://github.com/bblanimation/rebrickr/issues")
     f.write("\n\nDon't forget to include a description of your problem! The more information you provide (what you were trying to do, what action directly preceeded the error, etc.), the easier it will be for us to squash the bug.")
