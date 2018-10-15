@@ -59,22 +59,22 @@ def getRandomizedOrient(orient):
     return orient + random.uniform(-ag.orientRandom, ag.orientRandom)
 
 
-def getOffsetLocation(location):
+def getOffsetLocation(loc):
     """ returns randomized location offset """
     scn, ag = getActiveContextInfo()
-    X = location.x + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.xLocOffset
-    Y = location.y + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.yLocOffset
-    Z = location.z + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.zLocOffset
+    X = loc.x + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.xLocOffset
+    Y = loc.y + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.yLocOffset
+    Z = loc.z + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.zLocOffset
     return (X, Y, Z)
 
 
-def getOffsetRotation(rotation):
+def getOffsetRotation(rot):
     """ returns randomized rotation offset """
     scn, ag = getActiveContextInfo()
-    X = rotation.x + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset
-    Y = rotation.y + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset
-    Z = rotation.z + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset
-    return Vector((X, Y, Z))
+    X = rot.x + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset
+    Y = rot.y + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset
+    Z = rot.z + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset
+    return (X, Y, Z)
 
 # def toDegrees(degreeValue):
 #     """ converts radians to degrees """
@@ -135,8 +135,11 @@ def transferDefaultsToPresetsFolder(presetsPath):
         os.mkdir(presetsPath)
     for fn in fileNames:
         dst = os.path.join(presetsPath, fn)
+        backup_dst = os.path.join(presetsPath, "backups", fn)
         if os.path.isfile(dst):
             os.remove(dst)
+        elif os.path.isfile(backup_dst):
+            continue
         src = os.path.join(defaultPresetsPath, fn)
         copyfile(src, dst)
 
@@ -329,7 +332,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
             # insert rotation keyframes
             if insertRot:
                 insertKeyframes(newSelection, "rotation_euler", curFrame)
-                kfIdxLoc -= inc
+                kfIdxRot -= inc
 
             # step curFrame backwards
             curFrame -= getObjectVelocity() * mult
@@ -337,12 +340,25 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
             # move object and insert location keyframes
             if insertLoc:
                 for obj in newSelection:
-                    obj.location = getOffsetLocation(obj.location)
+                    if ag.useGlobal:
+                        obj.matrix_world.translation = getOffsetLocation(obj.matrix_world.translation)
+                    else:
+                        obj.location = getOffsetLocation(obj.location)
                 insertKeyframes(newSelection, "location", curFrame, if_needed=True)
             # rotate object and insert rotation keyframes
             if insertRot:
                 for obj in newSelection:
-                    obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
+                    if ag.useGlobal:
+                        rot = getOffsetRotation(Vector((0, 0, 0)))
+                        # TODO: Get this to work for angles greater than 360 degrees
+                        # print(rot)
+                        # print(Euler(rot, 'XYZ'))
+                        # print(Euler(rot, 'XYZ').to_matrix())
+                        new_world_mat = obj.matrix_world.to_3x3()
+                        new_world_mat.rotate(Euler(rot, 'XYZ').to_matrix())
+                        obj.matrix_world = new_world_mat.to_4x4()
+                    else:
+                        obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
 
             # step curFrame forwards

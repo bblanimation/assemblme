@@ -205,6 +205,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
     meshOnly = BoolProperty(
         name="Mesh Objects Only",
         description="Non-mesh objects will be excluded from the animation",
+        update=setMeshesOnly,
         default=False)
 
     animated = BoolProperty(default=False)

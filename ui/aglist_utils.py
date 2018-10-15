@@ -74,8 +74,7 @@ def uniquifyName(self, context):
 
 
 def groupNameUpdate(self, context):
-    scn = context.scene
-    ag0 = scn.aglist[scn.aglist_index]
+    scn, ag0 = getActiveContextInfo()
     # verify model doesn't exist with that name
     if ag0.group_name != "":
         for i,ag1 in enumerate(scn.aglist):
@@ -92,3 +91,12 @@ def groupNameUpdate(self, context):
                     success = True
             if not success:
                 bpy.data.groups.remove(g, True)
+
+
+def setMeshesOnly(self, context):
+    scn, ag = getActiveContextInfo()
+    curGroup = bpy.data.groups.get(ag.group_name)
+    if curGroup is not None and ag.meshOnly:
+        for obj in curGroup.objects:
+            if obj.type != "MESH":
+                curGroup.objects.unlink(obj)
