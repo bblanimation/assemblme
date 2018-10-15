@@ -90,6 +90,7 @@ def handle_selections(scene):
 
 bpy.app.handlers.scene_update_pre.append(handle_selections)
 
+
 @persistent
 def convert_velocity_value(scene):
     scn = bpy.context.scene
@@ -106,3 +107,19 @@ def convert_velocity_value(scene):
                 ag.objectVelocity = -1
 
 bpy.app.handlers.load_post.append(convert_velocity_value)
+
+
+@persistent
+def handle_upconversion(scene):
+    scn = bpy.context.scene
+    # update storage scene name
+    for ag in scn.aglist:
+        if createdWithUnsupportedVersion(ag):
+            # convert from v1_1 to v1_2
+            if int(ag.version[2]) < 2:
+                if ag.group_name.startswith("AssemblMe_animated_group"):
+                    curGroup = bpy.data.groups.get(ag.group_name)
+                    curGroup.name = "AssemblMe_{}_group".format(ag.name)
+                    ag.group_name = curGroup.name
+
+bpy.app.handlers.load_post.append(handle_upconversion)

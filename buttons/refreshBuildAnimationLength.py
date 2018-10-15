@@ -35,6 +35,9 @@ class refreshBuildAnimationLength(bpy.types.Operator):
     bl_label = "Refresh Build Animation Length"                                 # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
+    ################################################
+    # Blender Operator methods
+
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
@@ -68,7 +71,7 @@ class refreshBuildAnimationLength(bpy.types.Operator):
             setBoundsForVisualizer(self.listZValues)
 
             # calculate how many frames the animation will last (depletes self.listZValues)
-            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues)
+            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild)
 
             if groupExists(ag.group_name):
                 # set current_frame to original current_frame
@@ -81,3 +84,5 @@ class refreshBuildAnimationLength(bpy.types.Operator):
             handle_exception()
 
         return{"FINISHED"}
+
+    #############################################

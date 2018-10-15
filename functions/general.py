@@ -85,12 +85,12 @@ def getObjectVelocity():
     frameVelocity = round(2**(10-ag.velocity))
     return frameVelocity
 
-def getAnimLength(objects_to_move, listZValues):
-    scn, ag = getActiveContextInfo()
+def getAnimLength(objects_to_move, listZValues, layerHeight, invertBuild):
+    scn = bpy.context.scene
     tempObjCount = 0
     numLayers = 0
     while len(objects_to_move) > tempObjCount:
-        numObjs = len(getNewSelection(listZValues))
+        numObjs = len(getNewSelection(listZValues, layerHeight, invertBuild))
         numLayers += 1 if numObjs > 0 or not scn.skipEmptySelections else 0
         tempObjCount += numObjs
     return (numLayers - 1) * getBuildSpeed() + getObjectVelocity() + 1
@@ -135,9 +135,8 @@ def getListZValues(objects, rotXL=False, rotYL=False):
     # return list of dictionaries
     return listZValues, rotXL, rotYL
 
-def getObjectsInBound(listZValues, z_lower_bound):
+def getObjectsInBound(listZValues, z_lower_bound, invertBuild):
     """ select objects in bounds from listZValues """
-    scn, ag = getActiveContextInfo()
     objsInBound = []
     # iterate through objects in listZValues (breaks when outside range)
     for i,lst in enumerate(listZValues):
@@ -145,7 +144,7 @@ def getObjectsInBound(listZValues, z_lower_bound):
         obj = lst["obj"]
         z_loc = lst["loc"]
         # check if object is in bounding z value
-        if z_loc >= z_lower_bound and not ag.invertBuild or z_loc <= z_lower_bound and ag.invertBuild:
+        if z_loc >= z_lower_bound and not invertBuild or z_loc <= z_lower_bound and invertBuild:
             objsInBound.append(obj)
         # if not, break for loop and pop previous objects from listZValues
         else:
@@ -154,17 +153,14 @@ def getObjectsInBound(listZValues, z_lower_bound):
             break
     return objsInBound
 
-def getNewSelection(listZValues):
+def getNewSelection(listZValues, layerHeight, invertBuild):
     """ selects next layer of objects """
-    scn, ag = getActiveContextInfo()
-
+    scn = bpy.context.scene
     # get new upper and lower bounds
     props.z_upper_bound = listZValues[0]["loc"] if scn.skipEmptySelections or props.z_upper_bound is None else props.z_lower_bound
-    props.z_lower_bound = props.z_upper_bound + ag.layerHeight * (1 if ag.invertBuild else -1)
-
+    props.z_lower_bound = props.z_upper_bound + layerHeight * (1 if invertBuild else -1)
     # select objects in bounds
-    objsInBound = getObjectsInBound(listZValues, props.z_lower_bound)
-
+    objsInBound = getObjectsInBound(listZValues, props.z_lower_bound, invertBuild)
     return objsInBound
 
 def setBoundsForVisualizer(listZValues):
@@ -234,19 +230,22 @@ def clearAnimation(objs):
     objs = confirmIter(objs)
     for obj in objs:
         obj.animation_data_clear()
-        obj.data.update()
     bpy.context.scene.update()
 
+
+def createdWithUnsupportedVersion(ag):
+    return ag.version[:3] != bpy.props.assemblme_version[:3]
 
 
 def setInterpolation(objs, data_path, mode, idx):
     objs = confirmIter(objs)
     for obj in objs:
         if obj.animation_data is None:
-            return
+            continue
         for fcurve in obj.animation_data.action.fcurves:
-            if fcurve is not None and fcurve.data_path.startswith(data_path):
-                fcurve.keyframe_points[idx].interpolation = mode
+            if fcurve is None or not fcurve.data_path.startswith(data_path):
+                continue
+            fcurve.keyframe_points[idx].interpolation = mode
 
 def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
@@ -259,6 +258,10 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
     inc  = 1 if ag.buildType == "Assemble" else 0
     insertLoc = ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0
     insertRot = ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0
+    layerHeight = ag.layerHeight
+    invertBuild = ag.invertBuild
+    kfIdxLoc = -1
+    kfIdxRot = -1
 
     while len(objects_to_move) > len(objects_moved):
         # print status to terminal
@@ -266,7 +269,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
         last_len_objects_moved = len(objects_moved)
 
         # get next objects to animate
-        newSelection = getNewSelection(listZValues)
+        newSelection = getNewSelection(listZValues, layerHeight, invertBuild)
         objects_moved += newSelection
 
         # move selected objects and add keyframes
@@ -319,7 +322,7 @@ def writeErrorToFile(errorReportPath, txtName, addonVersion):
     # write error to log text object
     if not os.path.exists(errorReportPath):
         os.makedirs(errorReportPath)
-    fullFilePath = os.path.join(errorReportPath, "error_report.txt")
+    fullFilePath = os.path.join(errorReportPath, "AssemblMe_error_report.txt")
     f = open(fullFilePath, "w")
     f.write("\nPlease copy the following form and paste it into a new issue at https://github.com/bblanimation/assemblme/issues")
     f.write("\n\nDon't forget to include a description of your problem! The more information you provide (what you were trying to do, what action directly preceeded the error, etc.), the easier it will be for us to squash the bug.")

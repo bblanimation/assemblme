@@ -30,6 +30,7 @@ props = bpy.props
 
 # Addon imports
 from ..functions import *
+from ..buttons.visualizer import *
 
 # ui list item actions
 class AssemblMe_Uilist_actions(bpy.types.Operator):
@@ -67,8 +68,11 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
         if self.action == 'REMOVE':
             ag = scn.aglist[scn.aglist_index]
             if not ag.animated:
-                if ag.group_name.startswith("AssemblMe_animated_group"):
-                    bpy.data.groups.remove(bpy.data.groups[ag.group_name], True)
+                if visualizer.enabled():
+                    visualizer.disable()
+                curGroup = bpy.data.groups.get(ag.group_name)
+                if curGroup is not None:
+                    bpy.data.groups.remove(curGroup, True)
                     bpy.context.area.tag_redraw()
                 if len(scn.aglist) - 1 == scn.aglist_index:
                     scn.aglist_index -= 1
@@ -79,6 +83,8 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
                 self.report({"WARNING"}, "Please press 'Start Over' to clear the animation before removing this item.")
 
         if self.action == 'ADD':
+            if visualizer.enabled():
+                visualizer.disable()
             item = scn.aglist.add()
             last_index = scn.aglist_index
             scn.aglist_index = len(scn.aglist)-1

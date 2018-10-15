@@ -35,6 +35,9 @@ class createBuildAnimation(bpy.types.Operator):
     bl_label = "Create Build Animation"                                         # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
+    ################################################
+    # Blender Operator methods
+
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
@@ -42,14 +45,6 @@ class createBuildAnimation(bpy.types.Operator):
         if scn.aglist_index == -1:
             return False
         return True
-
-    action = bpy.props.EnumProperty(
-        items=(
-            ("CREATE", "Create", ""),
-            ("UPDATE", "Update", ""),
-            ("GET_LEN", "Get Length", ""),
-        )
-    )
 
     def execute(self, context):
         try:
@@ -59,12 +54,32 @@ class createBuildAnimation(bpy.types.Operator):
             return{"CANCELLED"}
         return{"FINISHED"}
 
+    ################################################
+    # initialization method
+
+    def __init__(self):
+        scn, ag = getActiveContextInfo()
+        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if not (ag.ignoreTypes and obj.type in props.ignoredTypes)]
+
+    ###################################################
+    # class variables
+
+    action = bpy.props.EnumProperty(
+        items=(
+            ("CREATE", "Create", ""),
+            ("UPDATE", "Update", ""),
+            ("GET_LEN", "Get Length", ""),
+        )
+    )
+
+    ###################################################
+    # class methods
+
     @timed_call("Time Elapsed")
     def createAnim(self):
         print("\ncreating build animation...")
         # initialize vars
         scn, ag = getActiveContextInfo()
-        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if obj.type not in props.ignoredTypes]
 
         # ensure operation can run
         if not self.isValid(scn, ag):
@@ -92,7 +107,7 @@ class createBuildAnimation(bpy.types.Operator):
         setBoundsForVisualizer(self.listZValues)
 
         # calculate how many frames the animation will last
-        ag.animLength = getAnimLength(self.objects_to_move, self.listZValues.copy())
+        ag.animLength = getAnimLength(self.objects_to_move, self.listZValues.copy(), ag.layerHeight, ag.invertBuild)
 
         # set first frame to animate from
         self.curFrame = ag.firstFrame + (ag.animLength if ag.buildType == "Assemble" else 0)
@@ -148,3 +163,5 @@ class createBuildAnimation(bpy.types.Operator):
                     self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")
                     return False
         return True
+
+    #############################################

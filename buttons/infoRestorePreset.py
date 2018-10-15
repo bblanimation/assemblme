@@ -36,6 +36,9 @@ class infoRestorePreset(bpy.types.Operator):
     bl_label = "Info Restore Preset"                                                     # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
+    ################################################
+    # Blender Operator methods
+
     # @classmethod
     # def poll(cls, context):
     #     """ ensures operator can execute (if not, returns false) """
@@ -64,3 +67,5 @@ class infoRestorePreset(bpy.types.Operator):
             handle_exception()
 
         return{"FINISHED"}
+
+    #############################################

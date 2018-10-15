@@ -302,6 +302,8 @@ class AdvancedPanel(Panel):
         row.prop(scn, "skipEmptySelections")
         row = col.row(align=True)
         row.prop(ag, "useGlobal")
+        row = col.row(align=True)
+        row.prop(ag, "ignoreTypes")
 
         row = col.row(align=True)
         row.label("Visualizer:")

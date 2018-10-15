@@ -202,6 +202,11 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         description="Use global object locations for creating animation",
         default=False)
 
+    ignoreTypes = BoolProperty(
+        name="Ignore Non-Mesh Objects",
+        description="Don't animate objects of the following types: ['CAMERA', 'LAMP', 'POINT', 'PLAIN_AXES', 'EMPTY']",
+        default=False)
+
     animated = BoolProperty(default=False)
 
     ## DO THESE BELONG HERE??? ##
@@ -218,3 +223,4 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
 
     lastActiveObjectName = StringProperty(default="")
     activeGroupIndex = IntProperty(default=0)
+    version = StringProperty(default="1.1.6")

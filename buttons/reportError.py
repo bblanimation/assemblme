@@ -36,21 +36,27 @@ class reportError(bpy.types.Operator):
     bl_label = "Report Error"                                                   # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
+    ################################################
+    # Blender Operator methods
+
     def execute(self, context):
         # set up file paths
         libraryServersPath = os.path.join(getLibraryPath(), "error_log")
         # write necessary debugging information to text file
         writeErrorToFile(libraryServersPath, 'AssemblMe_log', props.assemblme_version)
         # open error report in UI with text editor
-        changeContext(context, "TEXT_EDITOR")
+        lastType = changeContext(context, "TEXT_EDITOR")
         try:
-            bpy.ops.text.open(filepath=os.path.join(libraryServersPath, "error_report.txt"))
+            bpy.ops.text.open(filepath=os.path.join(libraryServersPath, "AssemblMe_error_report.txt"))
             bpy.context.space_data.show_word_wrap = True
-            self.report({"INFO"}, "Opened 'error_report.txt'")
+            self.report({"INFO"}, "Opened 'AssemblMe_error_report.txt'")
             bpy.props.needsUpdating = True
         except:
-            self.report({"ERROR"}, "ERROR: Could not open 'error_report.txt'. If the problem persists, try reinstalling the add-on.")
+            changeContext(context, lastType)
+            self.report({"ERROR"}, "ERROR: Could not open 'AssemblMe_error_report.txt'. If the problem persists, try reinstalling the add-on.")
         return{"FINISHED"}
+
+    #############################################
 
 class closeReportError(bpy.types.Operator):
     """Deletes error report from blender's memory (still exists in file system)"""    # blender will use this as a tooltip for menu items and buttons.
@@ -58,7 +64,12 @@ class closeReportError(bpy.types.Operator):
     bl_label = "Close Report Error"                                                   # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
+    ################################################
+    # Blender Operator methods
+
     def execute(self, context):
         txt = bpy.data.texts['AssemblMe_log']
         bpy.data.texts.remove(txt, True)
         return{"FINISHED"}
+
+    #############################################

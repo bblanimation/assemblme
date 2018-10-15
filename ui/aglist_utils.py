@@ -83,12 +83,12 @@ def groupNameUpdate(self, context):
                 ag0.group_name = ""
                 scn.aglist_index = i
     # get rid of unused groups created by AssemblMe
-    for g in bpy.data.groups.keys():
-        if g.startswith("AssemblMe_animated_group"):
+    for g in bpy.data.groups:
+        if g.name.startswith("AssemblMe_"):
             success = False
             for i in range(len(scn.aglist)):
                 ag0 = scn.aglist[i]
-                if g == ag0.group_name:
+                if g.name == "AssemblMe_{}_group".format(ag0.name):
                     success = True
             if not success:
-                bpy.data.groups.remove(bpy.data.groups[g], True)
+                bpy.data.groups.remove(g, True)

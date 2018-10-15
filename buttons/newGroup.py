@@ -31,17 +31,14 @@ class newGroupFromSelection(bpy.types.Operator):
     bl_label = "New Group"                                                      # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
+    ################################################
+    # Blender Operator methods
+
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
         scn = bpy.context.scene
         if scn.aglist_index == -1:
-            return False
-        return True
-
-    def canRun(self):
-        if len(bpy.context.selected_objects) == 0:
-            self.report({"WARNING"}, "No objects selected")
             return False
         return True
 
@@ -51,13 +48,34 @@ class newGroupFromSelection(bpy.types.Operator):
         try:
             scn, ag = getActiveContextInfo()
             # create new animated group
-            agGroup = bpy.data.groups.new("AssemblMe_animated_group")
+            ag.group_name = "AssemblMe_{}_group".format(ag.name)
+            agGroup = bpy.data.groups.get(ag.group_name)
+            if agGroup is not None:
+                bpy.data.groups.remove(agGroup)
+            agGroup = bpy.data.groups.new(ag.group_name)
             # add selected objects to new group
-            for obj in bpy.context.selected_objects:
+            for obj in self.objs_to_move:
                 agGroup.objects.link(obj)
-            # set ag.group_name
             ag.group_name = agGroup.name
         except:
             handle_exception()
 
         return{"FINISHED"}
+
+    ################################################
+    # initialization method
+
+    def __init__(self):
+        scn, ag = getActiveContextInfo()
+        self.objs_to_move = [obj for obj in bpy.context.selected_objects if not (ag.ignoreTypes and obj.type in props.ignoredTypes)]
+
+    ################################################
+    # class method
+
+    def canRun(self):
+        if len(self.objs_to_move) == 0:
+            self.report({"WARNING"}, "No objects selected")
+            return False
+        return True
+
+    #############################################

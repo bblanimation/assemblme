@@ -46,12 +46,15 @@ class visualizer(bpy.types.Operator):
             return{"CANCELLED"}
 
         if event.type == "TIMER":
+            if context.scene.aglist_index == -1:
+                self.full_disable(context, setInactive=False)
+                return{"CANCELLED"}
             scn, ag = getActiveContextInfo()
             try:
                 v_obj = self.visualizerObj
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
-                    self.full_disable(context)
+                    self.full_disable(context, setInactive=False)
                     return{"CANCELLED"}
                 # if new build animation created, update visualizer animation
                 if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
@@ -169,15 +172,17 @@ class visualizer(bpy.types.Operator):
         unhide(self.visualizerObj)
         ag.visualizerActive = True
 
-    def full_disable(self, context):
+    def full_disable(self, context, setInactive=True):
         """ disables visualizer """
-        scn, ag = getActiveContextInfo()
+        scn = bpy.context.scene
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
         # unlink visualizer object to scene
         if self.visualizerObj.name in scn.objects.keys():
             scn.objects.unlink(self.visualizerObj)
-        ag.visualizerActive = False
+        if setInactive:
+            ag = getActiveContextInfo()[1]
+            ag.visualizerActive = False
 
     @staticmethod
     def disable():
@@ -188,6 +193,8 @@ class visualizer(bpy.types.Operator):
     @staticmethod
     def enabled():
         """ returns boolean for visualizer linked to scene """
+        if bpy.context.scene.aglist_index == -1:
+            return False
         ag = getActiveContextInfo()[1]
         return ag.visualizerActive
 
@@ -201,3 +208,5 @@ class visualizer(bpy.types.Operator):
         if groupExists("AssemblMe_visualizer"):
             vGroup = bpy.data.groups["AssemblMe_visualizer"]
             bpy.data.groups.remove(vGroup, True)
+            
+    #############################################

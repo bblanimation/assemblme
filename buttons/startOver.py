@@ -35,6 +35,9 @@ class startOver(bpy.types.Operator):
     bl_label = "Start Over"                                                     # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
+    ################################################
+    # Blender Operator methods
+
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
@@ -50,6 +53,9 @@ class startOver(bpy.types.Operator):
             handle_exception()
         return{"FINISHED"}
 
+    ###################################################
+    # class methods
+
     @timed_call("Time Elapsed")
     def startOver(self):
         # set up origGroup variable
@@ -63,21 +69,17 @@ class startOver(bpy.types.Operator):
         self.origFrame = scn.frame_current
         bpy.context.scene.frame_set(ag.frameWithOrigLoc)
 
-        if origGroup is not None:
-            print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
-
         # clear objMinLoc and objMaxLoc
         props.objMinLoc, props.objMaxLoc = 0, 0
 
         # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
         if origGroup is not None:
+            print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
             clearAnimation(origGroup.objects)
-
-            if ag.group_name.startswith("AssemblMe_animated_group"):
-                bpy.data.groups.remove(origGroup, True)
-                ag.group_name = ""
 
         # set current_frame to original current_frame
         bpy.context.scene.frame_set(self.origFrame)
 
         ag.animated = False
+
+    #############################################
