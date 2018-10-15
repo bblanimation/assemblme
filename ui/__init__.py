@@ -303,7 +303,7 @@ class AdvancedPanel(Panel):
         row = col.row(align=True)
         row.prop(ag, "useGlobal")
         row = col.row(align=True)
-        row.prop(ag, "ignoreTypes")
+        row.prop(ag, "meshOnly")
 
         row = col.row(align=True)
         row.label("Visualizer:")

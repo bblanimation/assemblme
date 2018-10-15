@@ -59,7 +59,7 @@ class createBuildAnimation(bpy.types.Operator):
 
     def __init__(self):
         scn, ag = getActiveContextInfo()
-        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if not (ag.ignoreTypes and obj.type in props.ignoredTypes)]
+        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if not ag.meshOnly or obj.type == "MESH"]
 
     ###################################################
     # class variables
@@ -129,8 +129,10 @@ class createBuildAnimation(bpy.types.Operator):
 
         # handle case where no object was ever selected (e.g. only camera passed to function).
         if self.action == "CREATE" and ag.frameWithOrigLoc == animationReturnDict["lastFrame"]:
-            ignoredTypes = str(props.ignoredTypes).replace("[","").replace("]","")
-            self.report({"WARNING"}, "No valid objects selected! (igored types: %(ignoredTypes)s)" % locals())
+            warningMsg = "No valid objects selected!"
+            if ag.meshOnly:
+                warningMsg += " (Non-mesh objects ignored – see advanced settings)"
+            self.report({"WARNING"}, warningMsg)
             return{"FINISHED"}
 
         # reset upper and lower bound values

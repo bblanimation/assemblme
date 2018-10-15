@@ -25,6 +25,7 @@ import sys
 import time
 import os
 import traceback
+from shutil import copyfile
 from math import *
 
 # Blender imports
@@ -35,24 +36,28 @@ props = bpy.props
 from .common import *
 # from .common_mesh_generate import *
 
+
 def getActiveContextInfo(ag_idx=None):
     scn = bpy.context.scene
     ag_idx = ag_idx or scn.aglist_index
     ag = scn.aglist[ag_idx]
     return scn, ag
 
+
 def saveBackupFile(self):
-    if bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.autoSaveOnStartOver:
+    if bpy.props.assemblme_preferences.autoSaveOnStartOver:
         if bpy.data.filepath == '':
             self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
             return{"CANCELLED"}
         bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath[:-6] + "_backup.blend", copy=True)
         self.report({"INFO"}, "Backup file saved")
 
+
 def getRandomizedOrient(orient):
     """ returns randomized orientation based on user settings """
     scn, ag = getActiveContextInfo()
     return orient + random.uniform(-ag.orientRandom, ag.orientRandom)
+
 
 def getOffsetLocation(location):
     """ returns randomized location offset """
@@ -61,6 +66,7 @@ def getOffsetLocation(location):
     Y = location.y + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.yLocOffset
     Z = location.z + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.zLocOffset
     return (X, Y, Z)
+
 
 def getOffsetRotation(rotation):
     """ returns randomized rotation offset """
@@ -74,16 +80,19 @@ def getOffsetRotation(rotation):
 #     """ converts radians to degrees """
 #     return (degreeValue*57.2958)
 
+
 def getBuildSpeed():
     """ calculates and returns build speed """
     scn, ag = getActiveContextInfo()
     return floor(ag.buildSpeed)
+
 
 def getObjectVelocity():
     """ calculates and returns brick velocity """
     scn, ag = getActiveContextInfo()
     frameVelocity = round(2**(10-ag.velocity))
     return frameVelocity
+
 
 def getAnimLength(objects_to_move, listZValues, layerHeight, invertBuild):
     scn = bpy.context.scene
@@ -95,16 +104,42 @@ def getAnimLength(objects_to_move, listZValues, layerHeight, invertBuild):
         tempObjCount += numObjs
     return (numLayers - 1) * getBuildSpeed() + getObjectVelocity() + 1
 
-def getPresetTuples(fileNames=None):
-    # get list of filenames in presets directory
+
+def getFileNames(dir):
+    """ list files in the given directory """
+    return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and not f.startswith(".")]
+
+
+def getPresetTuples(fileNames=None, transferDefaults=False):
     if not fileNames:
-        path = bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath
-        fileNames = os.listdir(path)
+        # initialize presets path
+        path = bpy.props.assemblme_preferences.presetsFilepath
+        # set up presets folder and transfer default presets
+        if not os.path.exists(path):
+            os.makedirs(path)
+        if transferDefaults:
+            transferDefaultsToPresetsFolder(path)
+        # get list of filenames in presets directory
+        fileNames = getFileNames(path)
     # refresh preset names
     fileNames.sort()
-    presetNames = [(fileNames[i][:-3], fileNames[i][:-3], "Select this preset!") for i in range(len(fileNames)) if not fileNames[i].startswith(".") and fileNames[i].endswith(".py") and fileNames[i][:-3] not in ["__init__", "None"]]
+    presetNames = [(fileNames[i][:-3], fileNames[i][:-3], "Select this preset!") for i in range(len(fileNames))]
     presetNames.append(("None", "None", "Don't use a preset"))
     return presetNames
+
+
+def transferDefaultsToPresetsFolder(presetsPath):
+    defaultPresetsPath = os.path.join(bpy.props.assemblme_module_path, "lib", "default_presets")
+    fileNames = getFileNames(defaultPresetsPath)
+    if not os.path.exists(presetsPath):
+        os.mkdir(presetsPath)
+    for fn in fileNames:
+        dst = os.path.join(presetsPath, fn)
+        if os.path.isfile(dst):
+            os.remove(dst)
+        src = os.path.join(defaultPresetsPath, fn)
+        copyfile(src, dst)
+
 
 # def setOrientation(orientation):
 #     """ sets transform orientation """
@@ -112,6 +147,7 @@ def getPresetTuples(fileNames=None):
 #         bpy.ops.transform.create_orientation(name="LEGO Build Custom Orientation", use_view=False, use=True, overwrite=True)
 #     else:
 #         bpy.ops.transform.select_orientation(orientation=orientation)
+
 
 def getListZValues(objects, rotXL=False, rotYL=False):
     """ returns list of dicts containing objects and ther z locations relative to layer orientation """
@@ -135,6 +171,7 @@ def getListZValues(objects, rotXL=False, rotYL=False):
     # return list of dictionaries
     return listZValues, rotXL, rotYL
 
+
 def getObjectsInBound(listZValues, z_lower_bound, invertBuild):
     """ select objects in bounds from listZValues """
     objsInBound = []
@@ -153,6 +190,7 @@ def getObjectsInBound(listZValues, z_lower_bound, invertBuild):
             break
     return objsInBound
 
+
 def getNewSelection(listZValues, layerHeight, invertBuild):
     """ selects next layer of objects """
     scn = bpy.context.scene
@@ -163,15 +201,20 @@ def getNewSelection(listZValues, layerHeight, invertBuild):
     objsInBound = getObjectsInBound(listZValues, props.z_lower_bound, invertBuild)
     return objsInBound
 
+
 def setBoundsForVisualizer(listZValues):
+    scn, ag = getActiveContextInfo()
     for i in range(len(listZValues)):
-        if listZValues[i]["obj"].type not in props.ignoredTypes:
-            props.objMinLoc = listZValues[i]["obj"].location.copy()
+        obj = listZValues[i]["obj"]
+        if not ag.meshOnly or obj.type == "MESH":
+            props.objMinLoc = obj.location.copy()
             break
     for i in range(len(listZValues)-1,-1,-1):
-        if listZValues[i]["obj"].type not in props.ignoredTypes:
-            props.objMaxLoc = listZValues[i]["obj"].location.copy()
+        obj = listZValues[i]["obj"]
+        if not ag.meshOnly or obj.type == "MESH":
+            props.objMaxLoc = obj.location.copy()
             break
+
 
 def layers(l):
     all = [False]*20
@@ -190,11 +233,12 @@ def layers(l):
         sys.stderr.write("Argument passed to 'layers()' function not recognized")
     return all
 
+
 def updateAnimPreset(self, context):
     scn = bpy.context.scene
     if scn.animPreset != "None":
         import importlib.util
-        pathToFile = os.path.join(bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath, scn.animPreset + ".py")
+        pathToFile = os.path.join(bpy.props.assemblme_preferences.presetsFilepath, scn.animPreset + ".py")
         if os.path.isfile(pathToFile):
             spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
             foo = importlib.util.module_from_spec(spec)
@@ -226,6 +270,7 @@ def updateAnimPreset(self, context):
 
     return None
 
+
 def clearAnimation(objs):
     objs = confirmIter(objs)
     for obj in objs:
@@ -246,6 +291,7 @@ def setInterpolation(objs, data_path, mode, idx):
             if fcurve is None or not fcurve.data_path.startswith(data_path):
                 continue
             fcurve.keyframe_points[idx].interpolation = mode
+
 
 def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
@@ -317,6 +363,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
     updateProgressBars(True, True, 1, 0, "Animating Layers", end=True)
 
     return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
+
 
 def writeErrorToFile(errorReportPath, txtName, addonVersion):
     # write error to log text object

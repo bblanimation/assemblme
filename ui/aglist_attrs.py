@@ -67,7 +67,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
 
     layerHeight = FloatProperty(
         name="Layer Height",
-        description="Height of the bounding box that selects objects for each frame in animation",
+        description="Height of the bounding box that selects objects for each layer in animation",
         unit="LENGTH",
         subtype="DISTANCE",
         min=0.0001, max=1000,
@@ -164,7 +164,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
 
     xOrient = FloatProperty(
         name="X",
-        description="Objects assemble/disassemble at this angle",
+        description="Orientation of the bounding box that selects objects for each layer in animation",
         unit="ROTATION",
         subtype="ANGLE",
         min=-1.570796, max=1.570796,
@@ -172,7 +172,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         default=0)
     yOrient = FloatProperty(
         name="Y",
-        description="Objects assemble/disassemble at this angle",
+        description="Orientation of the bounding box that selects objects for each layer in animation",
         unit="ROTATION",
         subtype="ANGLE",
         min=-1.570796, max=1.570796,
@@ -181,7 +181,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         default=0)
     orientRandom = FloatProperty(
         name="Random",
-        description="Randomize object assembly/disassembly angle",
+        description="Randomize orientation of the bounding box that selects objects for each frame",
         min=0, max=100,
         precision=1,
         default=0)
@@ -198,13 +198,13 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         default=False)
 
     useGlobal = BoolProperty(
-        name="Use Global Location",
-        description="Use global object locations for creating animation",
+        name="Use Global Orientation",
+        description="Use global object orientation for creating animation (local orientation if disabled)",
         default=False)
 
-    ignoreTypes = BoolProperty(
-        name="Ignore Non-Mesh Objects",
-        description="Don't animate objects of the following types: ['CAMERA', 'LAMP', 'POINT', 'PLAIN_AXES', 'EMPTY']",
+    meshOnly = BoolProperty(
+        name="Mesh Objects Only",
+        description="Non-mesh objects will be excluded from the animation",
         default=False)
 
     animated = BoolProperty(default=False)

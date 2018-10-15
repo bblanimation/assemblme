@@ -21,6 +21,7 @@
 
 # System imports
 import time
+from shutil import copyfile
 
 # Blender imports
 import bpy
@@ -50,8 +51,8 @@ class animPresets(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn = bpy.context.scene
-            path = bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath
-            fileNames = os.listdir(path)
+            path = bpy.props.assemblme_preferences.presetsFilepath
+            fileNames = getFileNames(path)
             selectedPreset = "None"
             if self.action == "CREATE":
                 if scn.newPresetName + ".py" in fileNames:
@@ -115,7 +116,7 @@ class animPresets(bpy.types.Operator):
 
     def writeNewPreset(self, presetName):
         scn, ag = getActiveContextInfo()
-        presetsFilepath = bpy.context.user_preferences.addons[bpy.props.assemblme_module_name].preferences.presetsFilepath
+        presetsFilepath = bpy.props.assemblme_preferences.presetsFilepath
         if not os.path.exists(presetsFilepath):
             os.makedirs(presetsFilepath)
         newPresetPath = os.path.join(presetsFilepath, presetName + ".py")

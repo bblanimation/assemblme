@@ -67,7 +67,7 @@ class newGroupFromSelection(bpy.types.Operator):
 
     def __init__(self):
         scn, ag = getActiveContextInfo()
-        self.objs_to_move = [obj for obj in bpy.context.selected_objects if not (ag.ignoreTypes and obj.type in props.ignoredTypes)]
+        self.objs_to_move = [obj for obj in bpy.context.selected_objects if not ag.meshOnly or obj.type == "MESH"]
 
     ################################################
     # class method

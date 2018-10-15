@@ -37,96 +37,20 @@ from bpy.props import *
 from .ui import *
 from .buttons import *
 from .functions import getPresetTuples
-from bpy.types import Operator, AddonPreferences
-props = bpy.props
 
 # updater import
 from . import addon_updater_ops
+from .buttons.presets import *
+from .lib.preferences import *
 
-class AssemblMePreferences(AddonPreferences):
-    bl_idname = __name__
-
-    # file path to assemblMe presets (non-user-editable)
-    addonPath = os.path.dirname(os.path.abspath(__file__))
-    defaultPresetsFP = os.path.join(addonPath, "lib", "presets")
-    presetsFilepath = StringProperty(
-            name="Path to assemblMe presets",
-            subtype='FILE_PATH',
-            default=defaultPresetsFP)
-
-    # auto save preferences
-    autoSaveOnCreateAnim = BoolProperty(
-            name="Before 'Create Build Animation'",
-            description="Save backup .blend file to project directory before executing 'Create Build Animation' actions",
-            default=False)
-    autoSaveOnStartOver = BoolProperty(
-            name="Before 'Start Over'",
-            description="Save backup .blend file to project directory before executing 'Start Over' actions",
-            default=False)
-
-	# addon updater preferences
-    auto_check_update = bpy.props.BoolProperty(
-        name = "Auto-check for Update",
-        description = "If enabled, auto-check for updates using an interval",
-        default = False)
-    updater_intrval_months = bpy.props.IntProperty(
-        name='Months',
-        description = "Number of months between checking for updates",
-        default=0, min=0)
-    updater_intrval_days = bpy.props.IntProperty(
-        name='Days',
-        description = "Number of days between checking for updates",
-        default=7, min=0)
-    updater_intrval_hours = bpy.props.IntProperty(
-        name='Hours',
-        description = "Number of hours between checking for updates",
-        min=0, max=23,
-        default=0)
-    updater_intrval_minutes = bpy.props.IntProperty(
-        name='Minutes',
-        description = "Number of minutes between checking for updates",
-        min=0, max=59,
-        default=0)
-
-
-    def draw(self, context):
-        layout = self.layout
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        row.label(text="Auto-Save:")
-        row = col.row(align=True)
-        row.prop(self, "autoSaveOnCreateAnim")
-        row = col.row(align=True)
-        row.prop(self, "autoSaveOnStartOver")
-
-        # updater draw function
-        addon_updater_ops.update_settings_ui(self,context)
-
-# class OBJECT_OT_addon_prefs_example(Operator):
-#     """Display example preferences"""
-#     bl_idname = "object.addon_prefs_example"
-#     bl_label = "Addon Preferences Example"
-#     bl_options = {'REGISTER', 'UNDO'}
-#
-#     def execute(self, context):
-#         user_preferences = context.user_preferences
-#         addon_prefs = user_preferences.addons[__name__].preferences
-#
-#         info = ("Path: %s, Number: %d, Boolean %r" %
-#                 (addon_prefs.filepath, addon_prefs.number, addon_prefs.boolean))
-#
-#         self.report({'INFO'}, info)
-#         print(info)
-#
-#         return {'FINISHED'}
 
 def register():
-    # bpy.utils.register_class(OBJECT_OT_addon_prefs_example)
-    bpy.utils.register_class(AssemblMePreferences)
     bpy.utils.register_module(__name__)
-    bpy.props.assemblme_module_name = __name__
 
+    bpy.props.assemblme_module_name = __name__
+    bpy.props.assemblme_module_path = os.path.dirname(os.path.abspath(__file__))
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
+    bpy.props.assemblme_preferences = bpy.context.user_preferences.addons[__package__].preferences
 
     bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
@@ -147,7 +71,7 @@ def register():
         description="Full name of new custom preset",
         default="")
     bpy.types.Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
-    presetNames = getPresetTuples()
+    presetNames = getPresetTuples(transferDefaults=True)
     bpy.types.Scene.animPreset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
@@ -178,14 +102,14 @@ def register():
     bpy.types.Scene.aglist_index = IntProperty(default=-1)
 
     # Session properties
-    props.z_upper_bound = None
-    props.z_lower_bound = None
-    props.ignoredTypes = ["CAMERA", "LAMP", "POINT", "PLAIN_AXES", "EMPTY"]
-    props.objMinLoc = 0
-    props.objMaxLoc = 0
+    bpy.props.z_upper_bound = None
+    bpy.props.z_lower_bound = None
+    bpy.props.objMinLoc = 0
+    bpy.props.objMaxLoc = 0
 
     # addon updater code and configurations
     addon_updater_ops.register(bl_info)
+
 
 def unregister():
     Scn = bpy.types.Scene
@@ -193,11 +117,10 @@ def unregister():
     # addon updater unregister
     addon_updater_ops.unregister()
 
-    del props.z_upper_bound
-    del props.z_lower_bound
-    del props.ignoredTypes
-    del props.objMinLoc
-    del props.objMaxLoc
+    del bpy.props.z_upper_bound
+    del bpy.props.z_lower_bound
+    del bpy.props.objMinLoc
+    del bpy.props.objMaxLoc
 
     del Scn.aglist_index
     del Scn.aglist
@@ -219,7 +142,9 @@ def unregister():
 
     del Scn.assemblme_copy_from_id
 
+    del bpy.props.assemblme_preferences
     del bpy.props.assemblme_version
+    del bpy.props.assemblme_module_path
     del bpy.props.assemblme_module_name
 
     bpy.utils.unregister_module(__name__)
