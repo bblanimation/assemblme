@@ -107,7 +107,7 @@ class createBuildAnimation(bpy.types.Operator):
         setBoundsForVisualizer(self.listZValues)
 
         # calculate how many frames the animation will last
-        ag.animLength = getAnimLength(self.objects_to_move, self.listZValues.copy(), ag.layerHeight, ag.invertBuild)
+        ag.animLength = getAnimLength(self.objects_to_move, self.listZValues.copy(), ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
 
         # set first frame to animate from
         self.curFrame = ag.firstFrame + (ag.animLength if ag.buildType == "Assemble" else 0)

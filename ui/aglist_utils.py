@@ -96,7 +96,11 @@ def groupNameUpdate(self, context):
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
     curGroup = bpy.data.groups.get(ag.group_name)
+    removedObjs = []
     if curGroup is not None and ag.meshOnly:
         for obj in curGroup.objects:
             if obj.type != "MESH":
                 curGroup.objects.unlink(obj)
+                removedObjs.append(obj)
+    if ag.animated:
+        clearAnimation(removedObjs)

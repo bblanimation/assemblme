@@ -20,4 +20,7 @@ def execute():
     ag.layerHeight = 0.01
     ag.buildType = 'Assemble'
     ag.invertBuild = False
+    ag.skipEmptySelections = True
+    ag.useGlobal = True
+    ag.meshOnly = False
     return None

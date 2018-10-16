@@ -61,11 +61,6 @@ def register():
     bpy.types.Scene.assemblMe_active_object_name = StringProperty(default="")
     bpy.types.Scene.assemblMe_last_active_object_name = StringProperty(default="")
 
-    bpy.types.Scene.skipEmptySelections = BoolProperty(
-        name="Skip Empty Selections",
-        description="Skip frames where nothing is selected if checked (Recommended)",
-        default=True)
-
     bpy.types.Scene.newPresetName = StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
@@ -131,8 +126,6 @@ def unregister():
     del Scn.animPresetToDelete
     del Scn.animPreset
     del Scn.newPresetName
-
-    del Scn.skipEmptySelections
 
     del Scn.assemblMe_last_active_object_name
     del Scn.assemblMe_active_object_name

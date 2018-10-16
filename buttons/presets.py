@@ -143,6 +143,9 @@ class animPresets(bpy.types.Operator):
         f.write("\n    ag.layerHeight = " + str(round(ag.layerHeight, 6)))
         f.write("\n    ag.buildType = '" + ag.buildType + "'")
         f.write("\n    ag.invertBuild = " + str(round(ag.invertBuild, 6)))
+        f.write("\n    ag.skipEmptySelections = " + str(ag.skipEmptySelections))
+        f.write("\n    ag.useGlobal = " + str(ag.useGlobal))
+        f.write("\n    ag.meshOnly = " + str(ag.meshOnly))
         f.write("\n    return None")
 
     def canRun(self):

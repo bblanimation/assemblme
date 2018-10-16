@@ -71,7 +71,7 @@ class refreshBuildAnimationLength(bpy.types.Operator):
             setBoundsForVisualizer(self.listZValues)
 
             # calculate how many frames the animation will last (depletes self.listZValues)
-            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild)
+            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
 
             if groupExists(ag.group_name):
                 # set current_frame to original current_frame

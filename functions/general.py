@@ -71,9 +71,9 @@ def getOffsetLocation(loc):
 def getOffsetRotation(rot):
     """ returns randomized rotation offset """
     scn, ag = getActiveContextInfo()
-    X = rot.x + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset
-    Y = rot.y + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset
-    Z = rot.z + random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset
+    X = rot.x + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset)
+    Y = rot.y + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset)
+    Z = rot.z + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset)
     return (X, Y, Z)
 
 # def toDegrees(degreeValue):
@@ -94,13 +94,13 @@ def getObjectVelocity():
     return frameVelocity
 
 
-def getAnimLength(objects_to_move, listZValues, layerHeight, invertBuild):
+def getAnimLength(objects_to_move, listZValues, layerHeight, invertBuild, skipEmptySelections):
     scn = bpy.context.scene
     tempObjCount = 0
     numLayers = 0
     while len(objects_to_move) > tempObjCount:
-        numObjs = len(getNewSelection(listZValues, layerHeight, invertBuild))
-        numLayers += 1 if numObjs > 0 or not scn.skipEmptySelections else 0
+        numObjs = len(getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections))
+        numLayers += 1 if numObjs > 0 or not skipEmptySelections else 0
         tempObjCount += numObjs
     return (numLayers - 1) * getBuildSpeed() + getObjectVelocity() + 1
 
@@ -194,11 +194,11 @@ def getObjectsInBound(listZValues, z_lower_bound, invertBuild):
     return objsInBound
 
 
-def getNewSelection(listZValues, layerHeight, invertBuild):
+def getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections):
     """ selects next layer of objects """
     scn = bpy.context.scene
     # get new upper and lower bounds
-    props.z_upper_bound = listZValues[0]["loc"] if scn.skipEmptySelections or props.z_upper_bound is None else props.z_lower_bound
+    props.z_upper_bound = listZValues[0]["loc"] if skipEmptySelections or props.z_upper_bound is None else props.z_lower_bound
     props.z_lower_bound = props.z_upper_bound + layerHeight * (1 if invertBuild else -1)
     # select objects in bounds
     objsInBound = getObjectsInBound(listZValues, props.z_lower_bound, invertBuild)
@@ -309,6 +309,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
     insertRot = ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0
     layerHeight = ag.layerHeight
     invertBuild = ag.invertBuild
+    skipEmptySelections = ag.skipEmptySelections
     kfIdxLoc = -1
     kfIdxRot = -1
 
@@ -318,7 +319,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
         last_len_objects_moved = len(objects_moved)
 
         # get next objects to animate
-        newSelection = getNewSelection(listZValues, layerHeight, invertBuild)
+        newSelection = getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections)
         objects_moved += newSelection
 
         # move selected objects and add keyframes
@@ -349,14 +350,10 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
             if insertRot:
                 for obj in newSelection:
                     if ag.useGlobal:
-                        rot = getOffsetRotation(Vector((0, 0, 0)))
-                        # TODO: Get this to work for angles greater than 360 degrees
-                        # print(rot)
-                        # print(Euler(rot, 'XYZ'))
-                        # print(Euler(rot, 'XYZ').to_matrix())
-                        new_world_mat = obj.matrix_world.to_3x3()
-                        new_world_mat.rotate(Euler(rot, 'XYZ').to_matrix())
-                        obj.matrix_world = new_world_mat.to_4x4()
+                        orig_rot = obj.matrix_world.decompose()[1]
+                        print(obj.rotation_euler)
+                        print(orig_rot.to_euler())
+                        obj.rotation_euler = Vector(getOffsetRotation(orig_rot.to_euler())) - Vector(orig_rot.to_euler())
                     else:
                         obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
@@ -364,11 +361,11 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
             # step curFrame forwards
             curFrame += getObjectVelocity() - getBuildSpeed() * mult
 
-        # handle case where 'scn.skipEmptySelections' == False and empty selection is grabbed
-        elif not scn.skipEmptySelections:
+        # handle case where 'ag.skipEmptySelections' == False and empty selection is grabbed
+        elif not ag.skipEmptySelections:
             # skip frame if nothing selected
             curFrame -= getBuildSpeed() * mult
-        # handle case where 'scn.skipEmptySelections' == True and empty selection is grabbed
+        # handle case where 'ag.skipEmptySelections' == True and empty selection is grabbed
         else:
             os.stderr.write("Grabbed empty selection. This shouldn't happen!")
 

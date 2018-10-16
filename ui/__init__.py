@@ -207,41 +207,41 @@ class SettingsPanel(Panel):
         row.prop(ag, "velocity")
         row = col.row(align=True)
 
+        col = box.column(align=True)
         if scn.animPreset == "Follow Curve":
-            col = layout.column(align=True)
             row = col.row(align=True)
             row.label("Path Object:")
             row = col.row(align=True)
             row.prop(ag, "pathObject")
         else:
-            split = box.split(align=False, percentage = 0.5)
-            col = split.column(align=True)
-            row = col.row(align=True)
+            split = col.split(align=False, percentage = 0.5)
+            col1 = split.column(align=True)
+            row = col1.row(align=True)
             row.label("Location Offset:")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "xLocOffset")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "yLocOffset")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "zLocOffset")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "locInterpolationMode", text="")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "locationRandom")
-            row = col.row(align=True)
+            row = col1.row(align=True)
 
-            col = split.column(align=True)
-            row = col.row(align=True)
+            col1 = split.column(align=True)
+            row = col1.row(align=True)
             row.label("Rotation Offset:")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "xRotOffset")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "yRotOffset")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "zRotOffset")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "rotInterpolationMode", text="")
-            row = col.row(align=True)
+            row = col1.row(align=True)
             row.prop(ag, "rotationRandom")
 
         col1 = box.column(align=True)
@@ -273,11 +273,22 @@ class SettingsPanel(Panel):
         row = col.row(align=True)
         row.prop(ag, "invertBuild")
 
-class AdvancedPanel(Panel):
+        col = box.column(align=True)
+        row = col.row(align=True)
+        row.label("Advanced:")
+        row = col.row(align=True)
+        row.prop(ag, "skipEmptySelections")
+        row = col.row(align=True)
+        row.prop(ag, "useGlobal")
+        row = col.row(align=True)
+        row.prop(ag, "meshOnly")
+
+
+class InterfacePanel(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_label       = "Advanced"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_advanced"
+    bl_label       = "Interface"
+    bl_idname      = "VIEW3D_PT_tools_AssemblMe_interface"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
@@ -298,13 +309,6 @@ class AdvancedPanel(Panel):
         scn, ag = getActiveContextInfo()
 
         col = layout.column(align=True)
-        row = col.row(align=True)
-        row.prop(scn, "skipEmptySelections")
-        row = col.row(align=True)
-        row.prop(ag, "useGlobal")
-        row = col.row(align=True)
-        row.prop(ag, "meshOnly")
-
         row = col.row(align=True)
         row.label("Visualizer:")
         row = col.row(align=True)

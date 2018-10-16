@@ -201,12 +201,15 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         name="Use Global Orientation",
         description="Use global object orientation for creating animation (local orientation if disabled)",
         default=False)
-
     meshOnly = BoolProperty(
         name="Mesh Objects Only",
         description="Non-mesh objects will be excluded from the animation",
         update=setMeshesOnly,
         default=False)
+    skipEmptySelections = BoolProperty(
+        name="Skip Empty Selections",
+        description="Skip frames where nothing is selected if checked (Recommended)",
+        default=True)
 
     animated = BoolProperty(default=False)
 

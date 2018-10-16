@@ -20,4 +20,7 @@ def execute():
     ag.layerHeight = 1000.0
     ag.buildType = 'Disassemble'
     ag.invertBuild = False
+    ag.skipEmptySelections = True
+    ag.useGlobal = True
+    ag.meshOnly = False
     return None
