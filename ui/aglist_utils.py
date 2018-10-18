@@ -103,4 +103,10 @@ def setMeshesOnly(self, context):
                 curGroup.objects.unlink(obj)
                 removedObjs.append(obj)
     if ag.animated:
+        # set current_frame to animation start frame
+        origFrame = scn.frame_current
+        scn.frame_set(ag.frameWithOrigLoc)
+        # clear animation
         clearAnimation(removedObjs)
+        # set current_frame back to to original frame
+        scn.frame_set(origFrame)
