@@ -349,13 +349,20 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
             # rotate object and insert rotation keyframes
             if insertRot:
                 for obj in newSelection:
-                    if ag.useGlobal:
-                        orig_rot = obj.matrix_world.decompose()[1]
-                        print(obj.rotation_euler)
-                        print(orig_rot.to_euler())
-                        obj.rotation_euler = Vector(getOffsetRotation(orig_rot.to_euler())) - Vector(orig_rot.to_euler())
-                    else:
-                        obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
+                    # if ag.useGlobal:
+                    #     # TODO: Fix global rotation functionality
+                    #     # NOTE: Solution 1 - currently limited to at most 360 degrees
+                    #     xr, yr, zr = getOffsetRotation(Vector((0,0,0)))
+                    #     inv_mat = obj.matrix_world.inverted()
+                    #     xAxis = inv_mat * Vector((1, 0, 0))
+                    #     yAxis = inv_mat * Vector((0, 1, 0))
+                    #     zAxis = inv_mat * Vector((0, 0, 1))
+                    #     xMat = Matrix.Rotation(xr, 4, xAxis)
+                    #     yMat = Matrix.Rotation(yr, 4, yAxis)
+                    #     zMat = Matrix.Rotation(zr, 4, zAxis)
+                    #     obj.matrix_local = zMat * yMat * xMat * obj.matrix_local
+                    # else:
+                    obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
 
             # step curFrame forwards

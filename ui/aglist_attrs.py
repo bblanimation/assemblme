@@ -106,7 +106,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
 
     xRotOffset = FloatProperty(
         name="X",
-        description="Rotate objects by this x value",
+        description="Rotate objects by this x value (local space only)",
         unit="ROTATION",
         subtype="ANGLE",
         min=-10000, max=10000,
@@ -114,7 +114,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         default=0)
     yRotOffset = FloatProperty(
         name="Y",
-        description="Rotate objects by this y value",
+        description="Rotate objects by this y value (local space only)",
         unit="ROTATION",
         subtype="ANGLE",
         min=-10000, max=10000,
@@ -122,7 +122,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         default=0)
     zRotOffset = FloatProperty(
         name="Z",
-        description="Rotate objects by this z value",
+        description="Rotate objects by this z value (local space only)",
         unit="ROTATION",
         subtype="ANGLE",
         min=-10000, max=10000,
