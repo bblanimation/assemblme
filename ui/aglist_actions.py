@@ -33,7 +33,7 @@ from ..functions import *
 from ..buttons.visualizer import *
 
 # ui list item actions
-class AssemblMe_Uilist_actions(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
     bl_idname = "aglist.list_action"
     bl_label = "List Action"
 
@@ -119,7 +119,7 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
 # draw
 # -------------------------------------------------------------------
 
-class AssemblMe_UL_items(UIList):
+class ASSEMBLME_UL_uilist_items(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types
@@ -133,7 +133,7 @@ class AssemblMe_UL_items(UIList):
 
 
 # copy settings from current index to all other indices
-class AssemblMe_Uilist_copySettingsToOthers(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_copySettingsToOthers(bpy.types.Operator):
     bl_idname = "aglist.copy_to_others"
     bl_label = "Copy Settings to Other Animations"
     bl_description = "Copies the settings from the current animation to all other animations"
@@ -158,7 +158,7 @@ class AssemblMe_Uilist_copySettingsToOthers(bpy.types.Operator):
 
 
 # copy settings from current index to memory
-class AssemblMe_Uilist_copySettings(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_copySettings(bpy.types.Operator):
     bl_idname = "aglist.copy_settings"
     bl_label = "Copy Settings from Current Animation"
     bl_description = "Stores the ID of the current animation for pasting"
@@ -178,7 +178,7 @@ class AssemblMe_Uilist_copySettings(bpy.types.Operator):
 
 
 # paste settings from index in memory to current index
-class AssemblMe_Uilist_pasteSettings(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_pasteSettings(bpy.types.Operator):
     bl_idname = "aglist.paste_settings"
     bl_label = "Paste Settings to Current animation"
     bl_description = "Pastes the settings from stored animation ID to the current index"
@@ -202,7 +202,7 @@ class AssemblMe_Uilist_pasteSettings(bpy.types.Operator):
 
 
 # print button
-class AssemblMe_Uilist_printAllItems(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_printAllItems(bpy.types.Operator):
     bl_idname = "aglist.print_list"
     bl_label = "Print List"
     bl_description = "Print all items to the console"
@@ -215,7 +215,7 @@ class AssemblMe_Uilist_printAllItems(bpy.types.Operator):
 
 
 # set source to active button
-class AssemblMe_Uilist_setSourceGroupToActive(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_setSourceGroupToActive(bpy.types.Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
     bl_description = "Set group name to next group in active object"
@@ -247,7 +247,7 @@ class AssemblMe_Uilist_setSourceGroupToActive(bpy.types.Operator):
 
 
 # clear button
-class AssemblMe_Uilist_clearAllItems(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_clearAllItems(bpy.types.Operator):
     bl_idname = "aglist.clear_list"
     bl_label = "Clear List"
     bl_description = "Clear all items in the list"

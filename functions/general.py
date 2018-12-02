@@ -360,7 +360,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
                     #     xMat = Matrix.Rotation(xr, 4, xAxis)
                     #     yMat = Matrix.Rotation(yr, 4, yAxis)
                     #     zMat = Matrix.Rotation(zr, 4, zAxis)
-                    #     obj.matrix_local = zMat * yMat * xMat * obj.matrix_local
+                    #     obj.matrix_local = zMat @ yMat @ xMat @ obj.matrix_local
                     # else:
                     obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)

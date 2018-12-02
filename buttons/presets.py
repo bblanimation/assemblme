@@ -25,14 +25,14 @@ from shutil import copyfile
 
 # Blender imports
 import bpy
-props = bpy.props
+from bpy.props import *
 
 # Addon imports
 from ..functions import *
 
-class animPresets(bpy.types.Operator):
+class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     """Create new preset with current animation settings"""                     # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.animation_presets"                                       # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.animation_presets"                                   # unique identifier for buttons and menu items to reference.
     bl_label = "Animation Presets"                                              # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
@@ -104,7 +104,7 @@ class animPresets(bpy.types.Operator):
     ###################################################
     # class variables
 
-    action = bpy.props.EnumProperty(
+    action: EnumProperty(
         items=(
             ('CREATE', "Create", ""),
             ('REMOVE', "Remove", ""),

@@ -88,7 +88,7 @@ def handle_selections(scene):
                     return
             scn.aglist_index = -1
 
-bpy.app.handlers.scene_update_pre.append(handle_selections)
+# bpy.app.handlers.scene_update_pre.append(handle_selections)
 
 
 @persistent

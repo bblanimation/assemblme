@@ -26,7 +26,6 @@ import numpy as np
 # Blender imports
 import bpy
 import bmesh
-from mathutils import Matrix, Vector
 
 def newObjFromBmesh(layer, bme, meshName, objName=None, loc=(0,0,0), edgeSplit=True):
     scn = bpy.context.scene

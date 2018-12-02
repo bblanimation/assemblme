@@ -33,7 +33,7 @@ props = bpy.props
 # updater import
 from .. import addon_updater_ops
 
-class BasicMenu(bpy.types.Menu):
+class ASSEMBLME_MT_basic_menu(bpy.types.Menu):
     bl_idname = "AssemblMe_specials_menu"
     bl_label = "Select"
 
@@ -44,7 +44,7 @@ class BasicMenu(bpy.types.Menu):
         layout.operator("aglist.copy_settings", icon="COPYDOWN", text="Copy Settings")
         layout.operator("aglist.paste_settings", icon="PASTEDOWN", text="Paste Settings")
 
-class AnimationsPanel(Panel):
+class ASSEMBLME_PT_animations(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_label       = "Animations"
@@ -114,7 +114,7 @@ class AnimationsPanel(Panel):
                     row.active = len(bpy.context.selected_objects) != 0
                     row.operator("scene.new_group_from_selection", icon='ZOOMIN', text="From Selection")
 
-class ActionsPanel(Panel):
+class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_label       = "Actions"
@@ -141,21 +141,21 @@ class ActionsPanel(Panel):
         row = col.row(align=True)
         if not ag.animated:
             row.active = groupExists(ag.group_name)
-            row.operator("scene.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
+            row.operator("assemblme.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
         else:
-            row.operator("scene.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
+            row.operator("assemblme.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
         row = col.row(align=True)
-        row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
+        row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:
             split = layout.split(align=True, percentage = 0.9)
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.report_error", text="Report Error", icon="URL")
+            row.operator("assemblme.report_error", text="Report Error", icon="URL")
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE")
+            row.operator("assemblme.close_report_error", text="", icon="PANEL_CLOSE")
 
-class SettingsPanel(Panel):
+class ASSEMBLME_PT_settings(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_label       = "Settings"
@@ -198,7 +198,7 @@ class SettingsPanel(Panel):
             approx = "~"
         else:
             approx = ""
-        row.operator("scene.refresh_build_animation_length", text="Duration: " + approx + str(ag.animLength) + " frames", icon="FILE_REFRESH")
+        row.operator("assemblme.refresh_anim_length", text="Duration: " + approx + str(ag.animLength) + " frames", icon="FILE_REFRESH")
         row = col.row(align=True)
         row.prop(ag, "firstFrame")
         row = col.row(align=True)
@@ -255,10 +255,7 @@ class SettingsPanel(Panel):
         col = row.column(align=True)
         col.prop(ag, "yOrient")
         col = split.column(align=True)
-        if ag.visualizerActive:
-            col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF")
-        else:
-            col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_ON")
+        col.operator("assemblme.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF" if ag.visualizerActive else "RESTRICT_VIEW_ON")
         row = col1.row(align=True)
         row.prop(ag, "orientRandom")
         col1 = box.column(align=True)
@@ -284,7 +281,7 @@ class SettingsPanel(Panel):
         row.prop(ag, "meshOnly")
 
 
-class InterfacePanel(Panel):
+class ASSEMBLME_PT_interface(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_label       = "Interface"
@@ -315,7 +312,7 @@ class InterfacePanel(Panel):
         row.prop(scn, "visualizerScale")
         row.prop(scn, "visualizerRes")
 
-class presetManager(Panel):
+class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_label       = "Preset Manager"
@@ -346,7 +343,7 @@ class presetManager(Panel):
             col.prop(scn, "newPresetName", text="")
             col = split.column(align=True)
             col.active = scn.newPresetName != ""
-            col.operator("scene.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
+            col.operator("assemblme.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
         row.label("Remove Existing Preset:")
@@ -356,7 +353,7 @@ class presetManager(Panel):
         col.prop(scn, "animPresetToDelete", text="")
         col = split.column(align=True)
         col.active = scn.animPresetToDelete != "None"
-        col.operator("scene.animation_presets", text="Remove", icon="X").action = "REMOVE"
+        col.operator("assemblme.animation_presets", text="Remove", icon="X").action = "REMOVE"
         col = layout.column(align=True)
         row = col.row(align=True)
-        col.operator("scene.info_restore_preset", text="Restore Presets", icon="INFO")
+        col.operator("assemblme.info_restore_preset", text="Restore Presets", icon="INFO")

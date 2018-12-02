@@ -601,7 +601,7 @@ def apply_transform(obj):
     s_mat_x = Matrix.Scale(scale.x, 4, Vector((1, 0, 0)))
     s_mat_y = Matrix.Scale(scale.y, 4, Vector((0, 1, 0)))
     s_mat_z = Matrix.Scale(scale.z, 4, Vector((0, 0, 1)))
-    m.transform(s_mat_x * s_mat_y * s_mat_z)
+    m.transform(s_mat_x @ s_mat_y @ s_mat_z)
     m.transform(rot.to_matrix().to_4x4())
     m.transform(Matrix.Translation(loc))
 

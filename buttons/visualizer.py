@@ -30,9 +30,9 @@ props = bpy.props
 # Addon imports
 from ..functions import *
 
-class visualizer(bpy.types.Operator):
+class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     """Visualize the layer orientation with a plane"""                          # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.visualize_layer_orientation"                             # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.visualize_layer_orientation"                         # unique identifier for buttons and menu items to reference.
     bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
@@ -208,5 +208,5 @@ class visualizer(bpy.types.Operator):
         if groupExists("AssemblMe_visualizer"):
             vGroup = bpy.data.groups["AssemblMe_visualizer"]
             bpy.data.groups.remove(vGroup, True)
-            
+
     #############################################

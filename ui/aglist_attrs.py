@@ -32,30 +32,31 @@ from ..functions import *
 from .aglist_utils import *
 
 # Create custom property group
-class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
-    name = StringProperty(update=uniquifyName)
-    id = IntProperty()
-    idx = IntProperty()
+# TODO: Figure out how to set property group class type
+class ASSEMBLME_PG_animated_groups(bpy.types.PropertyGroup):
+    name: StringProperty(update=uniquifyName)
+    id: IntProperty()
+    idx: IntProperty()
 
-    group_name = StringProperty(
+    group_name: StringProperty(
         name="Object Group Name",
         description="Group name of objects to animate",
         update=groupNameUpdate,
         default="")
 
-    firstFrame = IntProperty(
+    firstFrame: IntProperty(
         name="Start",
         description="First frame of the (dis)assembly animation",
         min=0, max=500000,
         default=1)
-    buildSpeed = FloatProperty(
+    buildSpeed: FloatProperty(
         name="Step",
         description="Number of frames to skip forward between each object selection",
         unit="TIME",
         min=1, max=1000,
         precision=0,
         default=1)
-    velocity = FloatProperty(
+    velocity: FloatProperty(
         name="Velocity",
         description="Speed of individual object layers (2^(10 - Velocity) = object animation duration in frames)",
         unit="VELOCITY",
@@ -63,9 +64,9 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         precision=1,
         step=1,
         default=6)
-    objectVelocity = FloatProperty(default=-1)
+    objectVelocity: FloatProperty(default=-1)
 
-    layerHeight = FloatProperty(
+    layerHeight: FloatProperty(
         name="Layer Height",
         description="Height of the bounding box that selects objects for each layer in animation",
         unit="LENGTH",
@@ -74,37 +75,37 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         precision=4,
         default=.1)
 
-    pathObject = StringProperty(
+    pathObject: StringProperty(
         name="Path",
         description="Path object for animated objects to follow",
         default="")
 
-    xLocOffset = FloatProperty(
+    xLocOffset: FloatProperty(
         name="X",
         description="Move objects by this x value",
         unit="LENGTH",
         precision=0,
         default=0)
-    yLocOffset = FloatProperty(
+    yLocOffset: FloatProperty(
         name="Y",
         description="Move objects by this y value",
         unit="LENGTH",
         precision=0,
         default=0)
-    zLocOffset = FloatProperty(
+    zLocOffset: FloatProperty(
         name="Z",
         description="Move objects by this z value",
         unit="LENGTH",
         precision=0,
         default=10)
-    locationRandom = FloatProperty(
+    locationRandom: FloatProperty(
         name="Randomize",
         description="Randomize object location offset",
         min=0, max=10000,
         precision=1,
         default=0)
 
-    xRotOffset = FloatProperty(
+    xRotOffset: FloatProperty(
         name="X",
         description="Rotate objects by this x value (local space only)",
         unit="ROTATION",
@@ -112,7 +113,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         min=-10000, max=10000,
         precision=1, step=20,
         default=0)
-    yRotOffset = FloatProperty(
+    yRotOffset: FloatProperty(
         name="Y",
         description="Rotate objects by this y value (local space only)",
         unit="ROTATION",
@@ -120,7 +121,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         min=-10000, max=10000,
         precision=1, step=20,
         default=0)
-    zRotOffset = FloatProperty(
+    zRotOffset: FloatProperty(
         name="Z",
         description="Rotate objects by this z value (local space only)",
         unit="ROTATION",
@@ -128,7 +129,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         min=-10000, max=10000,
         precision=1, step=20,
         default=0)
-    rotationRandom = FloatProperty(
+    rotationRandom: FloatProperty(
         name="Randomize",
         description="Randomize object rotation offset",
         min=0, max=10000,
@@ -150,19 +151,19 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
                                 ("ELASTIC", "Elastic", "Set interpolation mode for each object in assembly animation: Elastic", "IPO_ELASTIC", 13)]
 
 
-    locInterpolationMode = EnumProperty(
+    locInterpolationMode: EnumProperty(
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolationModes,
         default="LINEAR")
 
-    rotInterpolationMode = EnumProperty(
+    rotInterpolationMode: EnumProperty(
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolationModes,
         default="LINEAR")
 
-    xOrient = FloatProperty(
+    xOrient: FloatProperty(
         name="X",
         description="Orientation of the bounding box that selects objects for each layer in animation",
         unit="ROTATION",
@@ -170,7 +171,7 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         min=-1.570796, max=1.570796,
         precision=1, step=20,
         default=0)
-    yOrient = FloatProperty(
+    yOrient: FloatProperty(
         name="Y",
         description="Orientation of the bounding box that selects objects for each layer in animation",
         unit="ROTATION",
@@ -179,52 +180,52 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
         # min=-0.785398, max=0.785398,
         precision=1, step=10,
         default=0)
-    orientRandom = FloatProperty(
+    orientRandom: FloatProperty(
         name="Random",
         description="Randomize orientation of the bounding box that selects objects for each frame",
         min=0, max=100,
         precision=1,
         default=0)
 
-    buildType = EnumProperty(
+    buildType: EnumProperty(
         name="Build Type",
         description="Choose whether to assemble or disassemble the objects",
         items=[("Assemble", "Assemble", "Assemble the objects to current location"),
               ("Disassemble", "Disassemble", "Disassemble objects from current location")],
         default="Assemble")
-    invertBuild = BoolProperty(
+    invertBuild: BoolProperty(
         name="Assemble from other direction",
         description="Invert the animation so that the objects start (dis)assembling from the other side",
         default=False)
 
-    useGlobal = BoolProperty(
+    useGlobal: BoolProperty(
         name="Use Global Orientation",
         description="Use global object orientation for creating animation (local orientation if disabled)",
         default=False)
-    meshOnly = BoolProperty(
+    meshOnly: BoolProperty(
         name="Mesh Objects Only",
         description="Non-mesh objects will be excluded from the animation",
         update=setMeshesOnly,
         default=False)
-    skipEmptySelections = BoolProperty(
+    skipEmptySelections: BoolProperty(
         name="Skip Empty Selections",
         description="Skip frames where nothing is selected if checked (Recommended)",
         default=True)
 
-    animated = BoolProperty(default=False)
+    animated: BoolProperty(default=False)
 
     ## DO THESE BELONG HERE??? ##
-    frameWithOrigLoc = IntProperty(
+    frameWithOrigLoc: IntProperty(
         default=-1)
-    animLength = IntProperty(
+    animLength: IntProperty(
         default=0)
-    lastLayerVelocity = IntProperty(
+    lastLayerVelocity: IntProperty(
         default=-1)
-    visualizerAnimated = BoolProperty(
+    visualizerAnimated: BoolProperty(
         default=False)
-    visualizerActive = BoolProperty(
+    visualizerActive: BoolProperty(
         default=False)
 
-    lastActiveObjectName = StringProperty(default="")
-    activeGroupIndex = IntProperty(default=0)
-    version = StringProperty(default="1.1.6")
+    lastActiveObjectName: StringProperty(default="")
+    activeGroupIndex: IntProperty(default=0)
+    version: StringProperty(default="1.1.6")

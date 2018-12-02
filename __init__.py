@@ -2,7 +2,7 @@ bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
     "version"     : (1, 2, 0),
-    "blender"     : (2, 79, 0),
+    "blender"     : (2, 80, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     "wiki_url"    : "https://www.blendermarket.com/products/assemblme",
@@ -31,61 +31,94 @@ Created by Christopher Gearhart
 """
 
 # system imports
-import bpy
 import os
+
+# blender imports
+import bpy
 from bpy.props import *
-from .ui import *
-from .buttons import *
-from .functions import getPresetTuples
+from bpy.types import Scene
+from bpy.utils import register_class, unregister_class
 
 # updater import
 from . import addon_updater_ops
+from .ui import *
+from .buttons import *
 from .buttons.presets import *
+from .functions import getPresetTuples
 from .lib.preferences import *
 
 
+classes = [
+    ASSEMBLME_OT_create_build_animation,
+    ASSEMBLME_OT_info_restore_preset,
+    ASSEMBLME_OT_new_group_from_selection,
+    ASSEMBLME_OT_anim_presets,
+    ASSEMBLME_OT_refresh_anim_length,
+    ASSEMBLME_OT_report_error,
+    ASSEMBLME_OT_close_report_error,
+    ASSEMBLME_OT_start_over,
+    ASSEMBLME_OT_visualizer,
+    ASSEMBLME_PG_animated_groups,
+    ASSEMBLME_OT_uilist_actions,
+    ASSEMBLME_UL_uilist_items,
+    ASSEMBLME_OT_uilist_copySettingsToOthers,
+    ASSEMBLME_OT_uilist_copySettings,
+    ASSEMBLME_OT_uilist_pasteSettings,
+    ASSEMBLME_OT_uilist_printAllItems,
+    ASSEMBLME_OT_uilist_setSourceGroupToActive,
+    ASSEMBLME_OT_uilist_clearAllItems,
+    ASSEMBLME_MT_basic_menu,
+    ASSEMBLME_PT_animations,
+    ASSEMBLME_PT_actions,
+    ASSEMBLME_PT_settings,
+    ASSEMBLME_PT_interface,
+    ASSEMBLME_PT_preset_manager,
+]
+
+
 def register():
-    bpy.utils.register_module(__name__)
+    for cls in classes:
+        register_class(cls)
 
     bpy.props.assemblme_module_name = __name__
     bpy.props.assemblme_module_path = os.path.dirname(os.path.abspath(__file__))
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
     bpy.props.assemblme_preferences = bpy.context.user_preferences.addons[__package__].preferences
 
-    bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
+    Scene.assemblme_copy_from_id: IntProperty(default=-1)
 
     # items used by selection app handler
-    bpy.types.Scene.assemblMe_runningOperation = BoolProperty(default=False)
-    bpy.types.Scene.assemblMe_last_layers = StringProperty(default="")
-    bpy.types.Scene.assemblMe_last_aglist_index = IntProperty(default=-2)
-    bpy.types.Scene.assemblMe_active_object_name = StringProperty(default="")
-    bpy.types.Scene.assemblMe_last_active_object_name = StringProperty(default="")
+    Scene.assemblMe_runningOperation: BoolProperty(default=False)
+    Scene.assemblMe_last_layers: StringProperty(default="")
+    Scene.assemblMe_last_aglist_index: IntProperty(default=-2)
+    Scene.assemblMe_active_object_name: StringProperty(default="")
+    Scene.assemblMe_last_active_object_name: StringProperty(default="")
 
-    bpy.types.Scene.newPresetName = StringProperty(
+    Scene.newPresetName: StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
-    bpy.types.Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
+    Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
     presetNames = getPresetTuples(transferDefaults=True)
-    bpy.types.Scene.animPreset = EnumProperty(
+    Scene.animPreset: EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
         items=presetNames,
         update=updateAnimPreset,
         default="None")
-    bpy.types.Scene.animPresetToDelete = EnumProperty(
+    Scene.animPresetToDelete: EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
-        items=bpy.types.Scene.animPreset[1]['items'],
+        items=Scene.animPreset[1]['items'],
         default="None")
 
-    bpy.types.Scene.visualizerScale = FloatProperty(
+    Scene.visualizerScale: FloatProperty(
         name="Scale",
         description="Scale of layer orientation visualizer",
         precision=1,
         min=0.1, max=16,
         default=10)
-    bpy.types.Scene.visualizerRes = FloatProperty(
+    Scene.visualizerRes: FloatProperty(
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
@@ -93,8 +126,8 @@ def register():
         default=0.25)
 
     # list properties
-    bpy.types.Scene.aglist = CollectionProperty(type=AssemblMe_AnimatedGroups)
-    bpy.types.Scene.aglist_index = IntProperty(default=-1)
+    Scene.aglist: CollectionProperty(type=AssemblMe_AnimatedGroups)
+    Scene.aglist_index: IntProperty(default=-1)
 
     # Session properties
     bpy.props.z_upper_bound = None
@@ -107,8 +140,6 @@ def register():
 
 
 def unregister():
-    Scn = bpy.types.Scene
-
     # addon updater unregister
     addon_updater_ops.unregister()
 
@@ -117,30 +148,31 @@ def unregister():
     del bpy.props.objMinLoc
     del bpy.props.objMaxLoc
 
-    del Scn.aglist_index
-    del Scn.aglist
+    del Scene.aglist_index
+    del Scene.aglist
 
-    del Scn.visualizerRes
-    del Scn.visualizerScale
+    del Scene.visualizerRes
+    del Scene.visualizerScale
 
-    del Scn.animPresetToDelete
-    del Scn.animPreset
-    del Scn.newPresetName
+    del Scene.animPresetToDelete
+    del Scene.animPreset
+    del Scene.newPresetName
 
-    del Scn.assemblMe_last_active_object_name
-    del Scn.assemblMe_active_object_name
-    del Scn.assemblMe_last_aglist_index
-    del Scn.assemblMe_last_layers
-    del Scn.assemblMe_runningOperation
+    del Scene.assemblMe_last_active_object_name
+    del Scene.assemblMe_active_object_name
+    del Scene.assemblMe_last_aglist_index
+    del Scene.assemblMe_last_layers
+    del Scene.assemblMe_runningOperation
 
-    del Scn.assemblme_copy_from_id
+    del Scene.assemblme_copy_from_id
 
     del bpy.props.assemblme_preferences
     del bpy.props.assemblme_version
     del bpy.props.assemblme_module_path
     del bpy.props.assemblme_module_name
 
-    bpy.utils.unregister_module(__name__)
+    for cls in reversed(classes):
+        unregister_class(cls)
 
 if __name__ == "__main__":
     register()

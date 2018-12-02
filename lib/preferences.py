@@ -41,47 +41,47 @@ from bpy.types import AddonPreferences
 # updater import
 from .. import addon_updater_ops
 
-class AssemblMePreferences(AddonPreferences):
+class ASSEMBLME_PT_preferences(AddonPreferences):
     # bl_idname = __name__
     bl_idname = __package__[:__package__.index(".lib")]
 
     # file path to assemblMe presets (non-user-editable)
     addonLibPath = os.path.dirname(os.path.abspath(__file__))
     defaultPresetsFP = os.path.abspath(os.path.join(addonLibPath, '..', '..', '..', 'presets', 'assemblme'))
-    presetsFilepath = StringProperty(
+    presetsFilepath: StringProperty(
             name="Path to assemblMe presets",
             subtype='FILE_PATH',
             default=defaultPresetsFP)
 
     # auto save preferences
-    autoSaveOnCreateAnim = BoolProperty(
+    autoSaveOnCreateAnim: BoolProperty(
             name="Before 'Create Build Animation'",
             description="Save backup .blend file to project directory before executing 'Create Build Animation' actions",
             default=False)
-    autoSaveOnStartOver = BoolProperty(
+    autoSaveOnStartOver: BoolProperty(
             name="Before 'Start Over'",
             description="Save backup .blend file to project directory before executing 'Start Over' actions",
             default=False)
 
 	# addon updater preferences
-    auto_check_update = bpy.props.BoolProperty(
+    auto_check_update: BoolProperty(
         name = "Auto-check for Update",
         description = "If enabled, auto-check for updates using an interval",
         default = False)
-    updater_intrval_months = bpy.props.IntProperty(
+    updater_intrval_months: IntProperty(
         name='Months',
         description = "Number of months between checking for updates",
         default=0, min=0)
-    updater_intrval_days = bpy.props.IntProperty(
+    updater_intrval_days: IntProperty(
         name='Days',
         description = "Number of days between checking for updates",
         default=7, min=0)
-    updater_intrval_hours = bpy.props.IntProperty(
+    updater_intrval_hours: IntProperty(
         name='Hours',
         description = "Number of hours between checking for updates",
         min=0, max=23,
         default=0)
-    updater_intrval_minutes = bpy.props.IntProperty(
+    updater_intrval_minutes: IntProperty(
         name='Minutes',
         description = "Number of minutes between checking for updates",
         min=0, max=59,
