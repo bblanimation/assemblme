@@ -26,16 +26,18 @@ from bpy.app.handlers import persistent
 from ..functions import *
 from mathutils import Vector, Euler
 
-def isGroupVisible(scn, ag):
+def isCollectionVisible(scn, ag):
+    return False, None
+    # TODO: rewrite to check if collection is visible
     scn = bpy.context.scene
-    n = ag.group_name
+    n = ag.collection_name
     objectsOnActiveLayers = []
     objects = scn.objects
     for i in range(20):
         # get objects on current layer if layer is active for object and scene
         objectsOnActiveLayers += [ob for ob in objects if ob.layers[i] and scn.layers[i]]
     for obj in objectsOnActiveLayers:
-        if bpy.data.groups.get(n) in obj.users_group:
+        if bpy.data.collections.get(n) in obj.users_collection:
             return True, obj
     return False, None
 
@@ -50,16 +52,16 @@ def handle_selections(scene):
         # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
         if scn.assemblMe_last_layers != str(list(scn.layers)):
             scn.assemblMe_last_layers = str(list(scn.layers))
-            curGroupVisible = False
+            curCollVisible = False
             if scn.aglist_index != -1:
                 ag0 = scn.aglist[scn.aglist_index]
-                curGroupVisible,_ = isGroupVisible(scn, ag0)
-            if not curGroupVisible or scn.aglist_index == -1:
+                curCollVisible,_ = isCollectionVisible(scn, ag0)
+            if not curCollVisible or scn.aglist_index == -1:
                 setIndex = False
                 for i,ag in enumerate(scn.aglist):
                     if i != scn.aglist_index:
-                        nextGroupVisible,obj = isGroupVisible(scn, ag)
-                        if nextGroupVisible and bpy.context.active_object == obj:
+                        nextCollVisible,obj = isCollectionVisible(scn, ag)
+                        if nextCollVisible and bpy.context.active_object == obj:
                             scn.aglist_index = i
                             setIndex = True
                             break
@@ -69,20 +71,20 @@ def handle_selections(scene):
         elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
             scn.assemblMe_last_aglist_index = scn.aglist_index
             ag = scn.aglist[scn.aglist_index]
-            n = ag.group_name
-            group = bpy.data.groups.get(n)
-            if group is not None and len(group.objects) > 0:
-                select(list(group.objects), active=group.objects[0])
-                scn.assemblMe_last_active_object_name = scn.objects.active.name
+            n = ag.collection_name
+            coll = bpy.data.collections.get(n)
+            if coll is not None and len(coll.objects) > 0:
+                select(list(coll.objects), active=coll.objects[0])
+                scn.assemblMe_last_active_object_name = bpy.context.object.name
         # open LEGO model settings for active object if active object changes
-        elif scn.objects.active and scn.assemblMe_last_active_object_name != scn.objects.active.name and ( scn.aglist_index == -1 or scn.aglist[scn.aglist_index].group_name != ""):# and scn.objects.active.type == "MESH":
-            scn.assemblMe_last_active_object_name = scn.objects.active.name
-            groups = []
-            for g in scn.objects.active.users_group:
-                groups.append(g.name)
+    elif bpy.context.object and scn.assemblMe_last_active_object_name != bpy.context.object.name and ( scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection_name != ""):# and bpy.context.object.type == "MESH":
+            scn.assemblMe_last_active_object_name = bpy.context.object.name
+            colls = []
+            for c in bpy.context.object.users_collection:
+                colls.append(c.name)
             for i in range(len(scn.aglist)):
                 ag = scn.aglist[i]
-                if ag.group_name in groups:
+                if ag.collection_name in colls:
                     scn.aglist_index = i
                     scn.assemblMe_last_aglist_index = scn.aglist_index
                     return

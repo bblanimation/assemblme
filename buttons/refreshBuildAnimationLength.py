@@ -45,7 +45,7 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
         if scn.aglist_index == -1:
             return False
         ag = scn.aglist[scn.aglist_index]
-        if not groupExists(ag.group_name):
+        if not collExists(ag.collection_name):
             return False
         return True
 
@@ -54,9 +54,9 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
             # set up variables
             scn, ag = getActiveContextInfo()
 
-            if groupExists(ag.group_name):
-                # if objects in ag.group_name, populate objects_to_move with them
-                self.objects_to_move = bpy.data.groups[ag.group_name].objects
+            if collExists(ag.collection_name):
+                # if objects in ag.collection_name, populate objects_to_move with them
+                self.objects_to_move = bpy.data.collections[ag.collection_name].objects
                 # set current_frame to animation start frame
                 self.origFrame = scn.frame_current
                 bpy.context.scene.frame_set(ag.frameWithOrigLoc)
@@ -73,7 +73,7 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
             # calculate how many frames the animation will last (depletes self.listZValues)
             ag.animLength = getAnimLength(self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
 
-            if groupExists(ag.group_name):
+            if collExists(ag.collection_name):
                 # set current_frame to original current_frame
                 bpy.context.scene.frame_set(self.origFrame)
 

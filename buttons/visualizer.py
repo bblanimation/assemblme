@@ -87,7 +87,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             else:
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                if groupExists(ag.group_name):
+                if collExists(ag.collection_name):
                     self.createAnim()
                 # enable visualizer
                 self.enable(context)
@@ -106,9 +106,9 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     # initialization method
 
     def __init__(self):
-        if groupExists("AssemblMe_visualizer"):
+        if collExists("AssemblMe_visualizer"):
             # set self.visualizer and self.m with existing data
-            self.visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
+            self.visualizerObj = bpy.data.collections["AssemblMe_visualizer"].objects[0]
             self.m = self.visualizerObj.data
         else:
             # create visualizer object
@@ -116,11 +116,11 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
             self.visualizerObj.hide_select = True
             self.visualizerObj.hide_render = True
-            # put in new group
-            vGroup = bpy.data.groups.new("AssemblMe_visualizer")
-            vGroup.objects.link(self.visualizerObj)
-        # not sure what this does, to be honest
-        visualizer.instance = self
+            # put in new collection
+            vColl = bpy.data.collections.new("AssemblMe_visualizer")
+            vColl.objects.link(self.visualizerObj)
+        # store instance of the visualizer
+        ASSEMBLME_OT_visualizer.instance = self
 
     #############################################
     # class methods
@@ -168,7 +168,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         # add proper mesh data to visualizer object
         self.loadLatticeMesh(context)
         # link visualizer object to scene
-        scn.objects.link(self.visualizerObj)
+        scn.collection.objects.link(self.visualizerObj)
         unhide(self.visualizerObj)
         ag.visualizerActive = True
 
@@ -204,9 +204,9 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         # delete visualizer object and mesh
         bpy.data.objects.remove(self.visualizerObj, True)
         bpy.data.meshes.remove(self.m, True)
-        # remove visualizer group
-        if groupExists("AssemblMe_visualizer"):
-            vGroup = bpy.data.groups["AssemblMe_visualizer"]
-            bpy.data.groups.remove(vGroup, True)
+        # remove visualizer collection
+        if collExists("AssemblMe_visualizer"):
+            vColl = bpy.data.collections["AssemblMe_visualizer"]
+            bpy.data.collections.remove(vColl, True)
 
     #############################################

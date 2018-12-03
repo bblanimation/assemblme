@@ -38,7 +38,7 @@ def newObjFromBmesh(layer, bme, meshName, objName=None, loc=(0,0,0), edgeSplit=T
     # move object to target location
     ob.location = loc
     # link and select object
-    scn.objects.link(ob)
+    scn.collection.objects.link(ob)
     scn.update()
 
     # send bmesh data to object data

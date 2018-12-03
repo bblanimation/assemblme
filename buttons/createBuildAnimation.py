@@ -60,7 +60,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
     def __init__(self):
         scn, ag = getActiveContextInfo()
-        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if not ag.meshOnly or obj.type == "MESH"]
+        self.objects_to_move = [obj for obj in bpy.data.collections[ag.collection_name].objects if not ag.meshOnly or obj.type == "MESH"]
 
     ###################################################
     # class variables
@@ -92,13 +92,13 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
         # set up other variables
         ag.lastLayerVelocity = getObjectVelocity()
-        origGroup = bpy.data.groups[ag.group_name]
+        origColl = bpy.data.collections[ag.collection_name]
         self.origFrame = scn.frame_current
         if self.action == "UPDATE":
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
-        # clear animation data from all objects in ag.group_name group
-        clearAnimation(origGroup.objects)
+        # clear animation data from all objects in animation collection
+        clearAnimation(origColl.objects)
 
         ### BEGIN ANIMATION GENERATION ###
         # populate self.listZValues
@@ -147,23 +147,23 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
             ag.animated = True
 
     def isValid(self, scn, ag):
-        if ag.group_name == "":
-            self.report({"WARNING"}, "No group name specified")
+        if ag.collection_name == "":
+            self.report({"WARNING"}, "No collection name specified")
             return False
-        if not groupExists(ag.group_name):
-            self.report({"WARNING"}, "Group '%(n)s' does not exist." % locals())
+        if not collExists(ag.collection_name):
+            self.report({"WARNING"}, "Collection '%(n)s' does not exist." % locals())
             return False
-        if len(bpy.data.groups[ag.group_name].objects) == 0:
-            self.report({"WARNING"}, "Group contains no objects!")
+        if len(bpy.data.collections[ag.collection_name].objects) == 0:
+            self.report({"WARNING"}, "Collection contains no objects!")
             return False
-        # make sure no objects in this group are part of another AssemblMe animation
+        # make sure no objects in this collection are part of another AssemblMe animation
         for i in range(len(scn.aglist)):
             if i == scn.aglist_index or not scn.aglist[i].animated:
                 continue
-            g = bpy.data.groups.get(scn.aglist[i].group_name)
+            g = bpy.data.collections.get(scn.aglist[i].collection_name)
             for obj in self.objects_to_move:
-                if g in obj.users_group:
-                    self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")
+                if g in obj.users_collection:
+                    self.report({"ERROR"}, "Some objects in this collection are part of another AssemblMe animation")
                     return False
         return True
 

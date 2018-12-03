@@ -68,11 +68,11 @@ class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
         if self.action == 'REMOVE':
             ag = scn.aglist[scn.aglist_index]
             if not ag.animated:
-                if visualizer.enabled():
-                    visualizer.disable()
-                curGroup = bpy.data.groups.get(ag.group_name)
-                if curGroup is not None:
-                    bpy.data.groups.remove(curGroup, True)
+                if ASSEMBLME_OT_visualizer.enabled():
+                    ASSEMBLME_OT_visualizer.disable()
+                curColl = bpy.data.collections.get(ag.collection_name)
+                if curColl is not None:
+                    bpy.data.collections.remove(curColl, True)
                     bpy.context.area.tag_redraw()
                 if len(scn.aglist) - 1 == scn.aglist_index:
                     scn.aglist_index -= 1
@@ -83,8 +83,8 @@ class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
                 self.report({"WARNING"}, "Please press 'Start Over' to clear the animation before removing this item.")
 
         if self.action == 'ADD':
-            if visualizer.enabled():
-                visualizer.disable()
+            if ASSEMBLME_OT_visualizer.enabled():
+                ASSEMBLME_OT_visualizer.disable()
             item = scn.aglist.add()
             last_index = scn.aglist_index
             scn.aglist_index = len(scn.aglist)-1
@@ -125,7 +125,7 @@ class ASSEMBLME_UL_uilist_items(UIList):
         # Make sure your code supports all 3 layout types
         if self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
-        split = layout.split(0.9)
+        split = layout.split(factor=0.9)
         split.prop(item, "name", text="", emboss=False, translate=False, icon='MOD_BUILD')
 
     def invoke(self, context, event):
@@ -215,10 +215,10 @@ class ASSEMBLME_OT_uilist_printAllItems(bpy.types.Operator):
 
 
 # set source to active button
-class ASSEMBLME_OT_uilist_setSourceGroupToActive(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_setSourceCollToActive(bpy.types.Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
-    bl_description = "Set group name to next group in active object"
+    bl_description = "Set collection name to next collection in active object"
 
     @classmethod
     def poll(cls, context):
@@ -226,22 +226,22 @@ class ASSEMBLME_OT_uilist_setSourceGroupToActive(bpy.types.Operator):
         scn = context.scene
         if scn.aglist_index == -1:
             return False
-        if context.scene.objects.active == None:
+        if bpy.context.object is None:
             return False
         return True
 
     def execute(self, context):
         scn, ag = getActiveContextInfo()
-        active_object = context.scene.objects.active
-        if len(active_object.users_group) == 0:
-            self.report({"INFO"}, "Active object has no linked groups.")
+        active_object = bpy.context.object
+        if len(active_object.users_collection) == 0:
+            self.report({"INFO"}, "Active object has no parent collections.")
             return {"CANCELLED"}
         if ag.lastActiveObjectName == active_object.name:
-            ag.activeGroupIndex = (ag.activeGroupIndex + 1) % len(active_object.users_group)
+            ag.activeCollIndex = (ag.activeCollIndex + 1) % len(active_object.users_collection)
         else:
             ag.lastActiveObjectName = active_object.name
-            ag.activeGroupIndex = 0
-        ag.group_name = active_object.users_group[ag.activeGroupIndex].name
+            ag.activeCollIndex = 0
+        ag.collection_name = active_object.users_collection[ag.activeCollIndex].name
 
         return{'FINISHED'}
 
@@ -254,13 +254,13 @@ class ASSEMBLME_OT_uilist_clearAllItems(bpy.types.Operator):
 
     def execute(self, context):
         scn = context.scene
-        lst = scn.animatedGroupsCollection
+        ag = scn.aglist
         current_index = scn.aglist_index
 
-        if len(lst) > 0:
+        if len(ag) > 0:
              # reverse range to remove last item first
-            for i in range(len(lst)-1,-1,-1):
-                scn.animatedGroupsCollection.remove(i)
+            for i in range(len(ag)-1,-1,-1):
+                scn.aglist.remove(i)
             self.report({'INFO'}, "All items removed")
 
         else:

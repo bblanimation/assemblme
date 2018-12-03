@@ -33,15 +33,15 @@ from .aglist_utils import *
 
 # Create custom property group
 # TODO: Figure out how to set property group class type
-class ASSEMBLME_UL_animated_groups(bpy.types.PropertyGroup):
+class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     name: StringProperty(update=uniquifyName)
     id: IntProperty()
     idx: IntProperty()
 
-    group_name: StringProperty(
-        name="Object Group Name",
-        description="Group name of objects to animate",
-        update=groupNameUpdate,
+    collection_name: StringProperty(
+        name="Object Collection Name",
+        description="Collection name of objects to animate",
+        update=collNameUpdate,
         default="")
 
     firstFrame: IntProperty(
@@ -227,5 +227,5 @@ class ASSEMBLME_UL_animated_groups(bpy.types.PropertyGroup):
         default=False)
 
     lastActiveObjectName: StringProperty(default="")
-    activeGroupIndex: IntProperty(default=0)
+    activeCollIndex: IntProperty(default=0)
     version: StringProperty(default="1.1.6")

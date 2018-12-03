@@ -66,9 +66,9 @@ def stopWatch(text, value, precision=2):
     return time.time()
 
 
-def groupExists(name):
-    """ check if group exists in blender's memory """
-    return name in bpy.data.groups.keys()
+def collExists(name):
+    """ check if collection exists in blender's memory """
+    return name in bpy.data.collections.keys()
 
 
 def getItemByID(collection, id):
@@ -159,7 +159,7 @@ def disableRelationshipLines():
     # disable relationship lines
     for area in bpy.context.screen.areas:
         if area.type == 'VIEW_3D':
-            area.spaces[0].show_relationship_lines = False
+            area.spaces[0].overlay.show_relationship_lines = False
 
 
 def drawBMesh(bm, name="drawnBMesh"):
@@ -169,8 +169,8 @@ def drawBMesh(bm, name="drawnBMesh"):
     obj = bpy.data.objects.new(name, m)
 
     scn = bpy.context.scene   # grab a reference to the scene
-    scn.objects.link(obj)     # link new object to scene
-    scn.objects.active = obj  # make new object active
+    scn.collection.objects.link(obj)     # link new object to scene
+    bpy.context.object = obj  # make new object active
     obj.select = True         # make new object selected (does not deselect other objects)
     bm.to_mesh(m)          # push bmesh data into m
     return obj
@@ -389,7 +389,7 @@ def unhide(objs):
 def setActiveObj(obj, scene=None):
     assert type(obj) == Object
     scene = scene or bpy.context.scene
-    scene.objects.active = obj
+    bpy.context.object = obj
 
 
 def select(objList=[], active=None, deselect:bool=False, only:bool=False, scene:Scene=None):
@@ -425,7 +425,7 @@ def duplicate(obj, linked=False, link_to_scene=False):
         copy.data = copy.data.copy()
     copy.hide = False
     if link_to_scene:
-        bpy.context.scene.objects.link(copy)
+        bpy.context.scene.collection.objects.link(copy)
     return copy
 
 
@@ -517,7 +517,7 @@ def showErrorMessage(message, wrap=80):
 
     def draw(self,context):
         for line in lines:
-            self.layout.label(line)
+            self.layout.label(text=line)
 
     bpy.context.window_manager.popup_menu(draw, title="Error Message", icon="ERROR")
     return

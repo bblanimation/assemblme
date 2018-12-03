@@ -73,34 +73,34 @@ def uniquifyName(self, context):
         ag.name = name
 
 
-def groupNameUpdate(self, context):
+def collNameUpdate(self, context):
     scn, ag0 = getActiveContextInfo()
     # verify model doesn't exist with that name
-    if ag0.group_name != "":
+    if ag0.collection_name != "":
         for i,ag1 in enumerate(scn.aglist):
-            if ag1 != ag0 and ag1.group_name == ag0.group_name:
-                ag0.group_name = ""
+            if ag1 != ag0 and ag1.collection_name == ag0.collection_name:
+                ag0.collection_name = ""
                 scn.aglist_index = i
-    # get rid of unused groups created by AssemblMe
-    for g in bpy.data.groups:
-        if g.name.startswith("AssemblMe_"):
+    # get rid of unused collections created by AssemblMe
+    for c in bpy.data.collections:
+        if c.name.startswith("AssemblMe_"):
             success = False
             for i in range(len(scn.aglist)):
                 ag0 = scn.aglist[i]
-                if g.name == "AssemblMe_{}_group".format(ag0.name):
+                if c.name == "AssemblMe_{}_collection".format(ag0.name):
                     success = True
             if not success:
-                bpy.data.groups.remove(g, True)
+                bpy.data.collections.remove(c, True)
 
 
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
-    curGroup = bpy.data.groups.get(ag.group_name)
+    curColl = bpy.data.collections.get(ag.collection_name)
     removedObjs = []
-    if curGroup is not None and ag.meshOnly:
-        for obj in curGroup.objects:
+    if curColl is not None and ag.meshOnly:
+        for obj in curColl.objects:
             if obj.type != "MESH":
-                curGroup.objects.unlink(obj)
+                curColl.objects.unlink(obj)
                 removedObjs.append(obj)
     if ag.animated:
         # set current_frame to animation start frame

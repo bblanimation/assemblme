@@ -25,10 +25,10 @@ import time
 from ..functions import *
 props = bpy.props
 
-class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
-    """Create new group containing selected objects, and set as group to assemble""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "assemblme.new_group_from_selection"                            # unique identifier for buttons and menu items to reference.
-    bl_label = "New Group"                                                      # display name in the interface.
+class ASSEMBLME_OT_new_collection_from_selection(bpy.types.Operator):
+    """Create new collection containing selected objects, and set as collection to assemble""" # blender will use this as a tooltip for menu items and buttons.
+    bl_idname = "assemblme.new_collection_from_selection"                       # unique identifier for buttons and menu items to reference.
+    bl_label = "New Collection"                                                 # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
     ################################################
@@ -47,16 +47,16 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn, ag = getActiveContextInfo()
-            # create new animated group
-            ag.group_name = "AssemblMe_{}_group".format(ag.name)
-            agGroup = bpy.data.groups.get(ag.group_name)
-            if agGroup is not None:
-                bpy.data.groups.remove(agGroup)
-            agGroup = bpy.data.groups.new(ag.group_name)
-            # add selected objects to new group
+            # create new animated collection
+            ag.collection_name = "AssemblMe_{}_collection".format(ag.name)
+            agColl = bpy.data.collections.get(ag.collection_name)
+            if agColl is not None:
+                bpy.data.collections.remove(agColl)
+            agColl = bpy.data.collections.new(ag.collection_name)
+            # add selected objects to new collection
             for obj in self.objs_to_move:
-                agGroup.objects.link(obj)
-            ag.group_name = agGroup.name
+                agColl.objects.link(obj)
+            ag.collection_name = agColl.name
         except:
             handle_exception()
 

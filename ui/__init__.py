@@ -64,8 +64,8 @@ class ASSEMBLME_PT_animations(Panel):
 
         if bversion() < '002.080.00':
             col = layout.column(align=True)
-            col.label('ERROR: upgrade needed', icon='ERROR')
-            col.label('AssemblMe requires Blender 2.80+')
+            col.label(text='ERROR: upgrade needed', icon='ERROR')
+            col.label(text='AssemblMe requires Blender 2.80+')
             return
 
         # Call to check for update in background
@@ -81,11 +81,11 @@ class ASSEMBLME_PT_animations(Panel):
         else:
             rows = 4
         row = layout.row()
-        row.template_list("AssemblMe_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
+        row.template_list("ASSEMBLME_UL_uilist_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
 
         col = row.column(align=True)
-        col.operator("aglist.list_action", icon='ZOOMIN', text="").action = 'ADD'
-        col.operator("aglist.list_action", icon='ZOOMOUT', text="").action = 'REMOVE'
+        col.operator("aglist.list_action", icon='ADD', text="").action = 'ADD'
+        col.operator("aglist.list_action", icon='REMOVE', text="").action = 'REMOVE'
         col.menu("AssemblMe_specials_menu", icon='DOWNARROW_HLT', text="")
         if len(scn.aglist) > 1:
             col.separator()
@@ -95,24 +95,24 @@ class ASSEMBLME_PT_animations(Panel):
         col1 = layout.column(align=True)
         if scn.aglist_index == -1:
             row = col1.row(align=True)
-            row.operator("aglist.list_action", icon='ZOOMIN', text="Create New Animation").action = 'ADD'
+            row.operator("aglist.list_action", icon='ADD', text="Create New Animation").action = 'ADD'
         else:
             ag = scn.aglist[scn.aglist_index]
             if ag.animated:
-                n = ag.group_name
-                col1.label("Group Name:")
-                col1.label("%(n)s" % locals())
+                n = ag.collection_name
+                col1.label(text="Collection Name:")
+                col1.label(text="%(n)s" % locals())
             else:
-                col1.label("Group Name:")
-                split = col1.split(align=True, percentage=0.85)
+                col1.label(text="Collection Name:")
+                split = col1.split(align=True, factor=0.85)
                 col = split.column(align=True)
-                col.prop_search(ag, "group_name", bpy.data, "groups", text="")
+                col.prop_search(ag, "collection_name", bpy.data, "collections", text="")
                 col = split.column(align=True)
-                col.operator("aglist.set_to_active", icon="EDIT", text="")
-                if not bpy.data.groups.get(ag.group_name):
+                col.operator("aglist.set_to_active", text="")
+                if not bpy.data.collections.get(ag.collection_name):
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
-                    row.operator("scene.new_group_from_selection", icon='ZOOMIN', text="From Selection")
+                    row.operator("scene.new_collection_from_selection", icon='ADD', text="From Selection")
 
 class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
@@ -140,14 +140,14 @@ class ASSEMBLME_PT_actions(Panel):
         col = layout.column(align=True)
         row = col.row(align=True)
         if not ag.animated:
-            row.active = groupExists(ag.group_name)
+            row.active = collExists(ag.collection_name)
             row.operator("assemblme.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
         else:
             row.operator("assemblme.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
         row = col.row(align=True)
         row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:
-            split = layout.split(align=True, percentage = 0.9)
+            split = layout.split(align=True, factor=0.9)
             col = split.column(align=True)
             row = col.row(align=True)
             row.operator("assemblme.report_error", text="Report Error", icon="URL")
@@ -186,7 +186,7 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.label("Animation:")
+        row.label(text="Animation:")
         row = col.row(align=True)
         if ag.orientRandom > 0.005:
             approx = "~"
@@ -204,14 +204,14 @@ class ASSEMBLME_PT_settings(Panel):
         col = box.column(align=True)
         if scn.animPreset == "Follow Curve":
             row = col.row(align=True)
-            row.label("Path Object:")
+            row.label(text="Path Object:")
             row = col.row(align=True)
             row.prop(ag, "pathObject")
         else:
-            split = col.split(align=False, percentage = 0.5)
+            split = col.split(align=False, factor=0.5)
             col1 = split.column(align=True)
             row = col1.row(align=True)
-            row.label("Location Offset:")
+            row.label(text="Location Offset:")
             row = col1.row(align=True)
             row.prop(ag, "xLocOffset")
             row = col1.row(align=True)
@@ -226,7 +226,7 @@ class ASSEMBLME_PT_settings(Panel):
 
             col1 = split.column(align=True)
             row = col1.row(align=True)
-            row.label("Rotation Offset:")
+            row.label(text="Rotation Offset:")
             row = col1.row(align=True)
             row.prop(ag, "xRotOffset")
             row = col1.row(align=True)
@@ -240,9 +240,9 @@ class ASSEMBLME_PT_settings(Panel):
 
         col1 = box.column(align=True)
         row = col1.row(align=True)
-        row.label("Layer Orientation:")
+        row.label(text="Layer Orientation:")
         row = col1.row(align=True)
-        split = row.split(align=True, percentage=0.9)
+        split = row.split(align=True, factor=0.9)
         row = split.row(align=True)
         col = row.column(align=True)
         col.prop(ag, "xOrient")
@@ -258,7 +258,7 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.label("Build Type:")
+        row.label(text="Build Type:")
         row = col.row(align=True)
         row.prop(ag, "buildType", text="")
         row = col.row(align=True)
@@ -266,7 +266,7 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.label("Advanced:")
+        row.label(text="Advanced:")
         row = col.row(align=True)
         row.prop(ag, "skipEmptySelections")
         row = col.row(align=True)
@@ -301,7 +301,7 @@ class ASSEMBLME_PT_interface(Panel):
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label("Visualizer:")
+        row.label(text="Visualizer:")
         row = col.row(align=True)
         row.prop(scn, "visualizerScale")
         row.prop(scn, "visualizerRes")
@@ -330,19 +330,19 @@ class ASSEMBLME_PT_preset_manager(Panel):
         if scn.aglist_index != -1:
             col = layout.column(align=True)
             row = col.row(align=True)
-            row.label("Create New Preset:")
+            row.label(text="Create New Preset:")
             row = col.row(align=True)
-            split = row.split(align=True, percentage = 0.7)
+            split = row.split(align=True, factor=0.7)
             col = split.column(align=True)
             col.prop(scn, "newPresetName", text="")
             col = split.column(align=True)
             col.active = scn.newPresetName != ""
-            col.operator("assemblme.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
+            col.operator("assemblme.animation_presets", text="Create", icon="ADD").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label("Remove Existing Preset:")
+        row.label(text="Remove Existing Preset:")
         row = col.row(align=True)
-        split = row.split(align=True, percentage = 0.7)
+        split = row.split(align=True, factor=0.7)
         col = split.column(align=True)
         col.prop(scn, "animPresetToDelete", text="")
         col = split.column(align=True)
