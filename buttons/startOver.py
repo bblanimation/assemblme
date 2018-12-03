@@ -41,7 +41,10 @@ class startOver(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        scn, ag = getActiveContextInfo()
+        scn = bpy.context.scene
+        if scn.aglist_index == -1:
+            return False
+        ag = scn.aglist[scn.aglist_index]
         if ag.animated:
             return True
         return False
