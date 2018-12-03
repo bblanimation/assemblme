@@ -46,7 +46,7 @@ class ASSEMBLME_MT_basic_menu(bpy.types.Menu):
 
 class ASSEMBLME_PT_animations(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI"
     bl_label       = "Animations"
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_animations"
     bl_context     = "objectmode"
@@ -62,10 +62,10 @@ class ASSEMBLME_PT_animations(Panel):
         layout = self.layout
         scn = bpy.context.scene
 
-        if bversion() < '002.078.00':
+        if bversion() < '002.080.00':
             col = layout.column(align=True)
             col.label('ERROR: upgrade needed', icon='ERROR')
-            col.label('AssemblMe requires Blender 2.78+')
+            col.label('AssemblMe requires Blender 2.80+')
             return
 
         # Call to check for update in background
@@ -116,7 +116,7 @@ class ASSEMBLME_PT_animations(Panel):
 
 class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI"
     bl_label       = "Actions"
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_actions"
     bl_context     = "objectmode"
@@ -126,7 +126,7 @@ class ASSEMBLME_PT_actions(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.080.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -157,7 +157,7 @@ class ASSEMBLME_PT_actions(Panel):
 
 class ASSEMBLME_PT_settings(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI"
     bl_label       = "Settings"
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_settings"
     bl_context     = "objectmode"
@@ -167,7 +167,7 @@ class ASSEMBLME_PT_settings(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.080.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -177,12 +177,6 @@ class ASSEMBLME_PT_settings(Panel):
     def draw(self, context):
         layout = self.layout
         scn, ag = getActiveContextInfo()
-
-        if bversion() < '002.075.00':
-            col = layout.column(align=True)
-            col.label('ERROR: upgrade needed', icon='ERROR')
-            col.label('AssemblMe requires Blender 2.75+')
-            return
 
         col = layout.column(align=True)
         row = col.row(align=True)
@@ -283,7 +277,7 @@ class ASSEMBLME_PT_settings(Panel):
 
 class ASSEMBLME_PT_interface(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI"
     bl_label       = "Interface"
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_interface"
     bl_context     = "objectmode"
@@ -294,7 +288,7 @@ class ASSEMBLME_PT_interface(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.080.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -314,7 +308,7 @@ class ASSEMBLME_PT_interface(Panel):
 
 class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI"
     bl_label       = "Preset Manager"
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_preset_manager"
     bl_context     = "objectmode"
@@ -325,7 +319,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.080.00':
             return False
         return True
 

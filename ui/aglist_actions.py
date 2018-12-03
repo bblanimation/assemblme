@@ -37,7 +37,7 @@ class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
     bl_idname = "aglist.list_action"
     bl_label = "List Action"
 
-    action = bpy.props.EnumProperty(
+    action: bpy.props.EnumProperty(
         items=(
             ('UP', "Up", ""),
             ('DOWN', "Down", ""),

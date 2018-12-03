@@ -1,7 +1,7 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 2, 0),
+    "version"     : (1, 2, 1),
     "blender"     : (2, 80, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
@@ -49,16 +49,19 @@ from .lib.preferences import *
 
 
 classes = [
-    ASSEMBLME_OT_create_build_animation,
-    ASSEMBLME_OT_info_restore_preset,
-    ASSEMBLME_OT_new_group_from_selection,
-    ASSEMBLME_OT_anim_presets,
-    ASSEMBLME_OT_refresh_anim_length,
-    ASSEMBLME_OT_report_error,
-    ASSEMBLME_OT_close_report_error,
-    ASSEMBLME_OT_start_over,
-    ASSEMBLME_OT_visualizer,
-    ASSEMBLME_PG_animated_groups,
+    # assemblme/buttons
+    buttons.createBuildAnimation.ASSEMBLME_OT_create_build_animation,
+    buttons.infoRestorePreset.ASSEMBLME_OT_info_restore_preset,
+    buttons.newGroup.ASSEMBLME_OT_new_group_from_selection,
+    buttons.presets.ASSEMBLME_OT_anim_presets,
+    buttons.refreshBuildAnimationLength.ASSEMBLME_OT_refresh_anim_length,
+    buttons.reportError.ASSEMBLME_OT_report_error,
+    buttons.reportError.ASSEMBLME_OT_close_report_error,
+    buttons.startOver.ASSEMBLME_OT_start_over,
+    buttons.visualizer.ASSEMBLME_OT_visualizer,
+    # assemblme/ui/aglist_attrs
+    ASSEMBLME_UL_animated_groups,
+    # assemblme/ui/aglist_actions
     ASSEMBLME_OT_uilist_actions,
     ASSEMBLME_UL_uilist_items,
     ASSEMBLME_OT_uilist_copySettingsToOthers,
@@ -67,6 +70,7 @@ classes = [
     ASSEMBLME_OT_uilist_printAllItems,
     ASSEMBLME_OT_uilist_setSourceGroupToActive,
     ASSEMBLME_OT_uilist_clearAllItems,
+    # assemblme/ui/
     ASSEMBLME_MT_basic_menu,
     ASSEMBLME_PT_animations,
     ASSEMBLME_PT_actions,
@@ -85,40 +89,40 @@ def register():
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
     bpy.props.assemblme_preferences = bpy.context.user_preferences.addons[__package__].preferences
 
-    Scene.assemblme_copy_from_id: IntProperty(default=-1)
+    Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
     # items used by selection app handler
-    Scene.assemblMe_runningOperation: BoolProperty(default=False)
-    Scene.assemblMe_last_layers: StringProperty(default="")
-    Scene.assemblMe_last_aglist_index: IntProperty(default=-2)
-    Scene.assemblMe_active_object_name: StringProperty(default="")
-    Scene.assemblMe_last_active_object_name: StringProperty(default="")
+    Scene.assemblMe_runningOperation = BoolProperty(default=False)
+    Scene.assemblMe_last_layers = StringProperty(default="")
+    Scene.assemblMe_last_aglist_index = IntProperty(default=-2)
+    Scene.assemblMe_active_object_name = StringProperty(default="")
+    Scene.assemblMe_last_active_object_name = StringProperty(default="")
 
-    Scene.newPresetName: StringProperty(
+    Scene.newPresetName = StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
     Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
     presetNames = getPresetTuples(transferDefaults=True)
-    Scene.animPreset: EnumProperty(
+    Scene.animPreset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
         items=presetNames,
         update=updateAnimPreset,
         default="None")
-    Scene.animPresetToDelete: EnumProperty(
+    Scene.animPresetToDelete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
         items=Scene.animPreset[1]['items'],
         default="None")
 
-    Scene.visualizerScale: FloatProperty(
+    Scene.visualizerScale = FloatProperty(
         name="Scale",
         description="Scale of layer orientation visualizer",
         precision=1,
         min=0.1, max=16,
         default=10)
-    Scene.visualizerRes: FloatProperty(
+    Scene.visualizerRes = FloatProperty(
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
@@ -126,8 +130,8 @@ def register():
         default=0.25)
 
     # list properties
-    Scene.aglist: CollectionProperty(type=AssemblMe_AnimatedGroups)
-    Scene.aglist_index: IntProperty(default=-1)
+    Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_groups)
+    Scene.aglist_index = IntProperty(default=-1)
 
     # Session properties
     bpy.props.z_upper_bound = None

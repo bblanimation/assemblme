@@ -33,7 +33,7 @@ from .aglist_utils import *
 
 # Create custom property group
 # TODO: Figure out how to set property group class type
-class ASSEMBLME_PG_animated_groups(bpy.types.PropertyGroup):
+class ASSEMBLME_UL_animated_groups(bpy.types.PropertyGroup):
     name: StringProperty(update=uniquifyName)
     id: IntProperty()
     idx: IntProperty()

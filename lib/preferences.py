@@ -1,14 +1,3 @@
-bl_info = {
-    "name"        : "AssemblMe",
-    "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 2, 0),
-    "blender"     : (2, 79, 0),
-    "description" : "Iterative object assembly animations made simple",
-    "location"    : "View3D > Tools > AssemblMe",
-    "wiki_url"    : "https://www.blendermarket.com/products/assemblme",
-    "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
-    "category"    : "Animation"}
-
 """
 Copyright (C) 2017 Bricks Brought to Life
 http://bblanimation.com/
