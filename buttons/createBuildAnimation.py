@@ -150,10 +150,11 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         if ag.collection_name == "":
             self.report({"WARNING"}, "No collection name specified")
             return False
-        if not collExists(ag.collection_name):
+        n = ag.collection_name
+        if not collExists(n):
             self.report({"WARNING"}, "Collection '%(n)s' does not exist." % locals())
             return False
-        if len(bpy.data.collections[ag.collection_name].objects) == 0:
+        if len(bpy.data.collections[n].objects) == 0:
             self.report({"WARNING"}, "Collection contains no objects!")
             return False
         # make sure no objects in this collection are part of another AssemblMe animation

@@ -112,7 +112,7 @@ class ASSEMBLME_PT_animations(Panel):
                 if not bpy.data.collections.get(ag.collection_name):
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
-                    row.operator("scene.new_collection_from_selection", icon='ADD', text="From Selection")
+                    row.operator("assemblme.new_collection_from_selection", icon='ADD', text="From Selection")
 
 class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
