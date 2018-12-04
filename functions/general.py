@@ -111,7 +111,6 @@ def getFileNames(dir):
 
 
 def getPresetTuples(fileNames=None, transferDefaults=False):
-    return [("None", "None", "")]
     if not fileNames:
         # initialize presets path
         path = bpy.props.assemblme_preferences.presetsFilepath
