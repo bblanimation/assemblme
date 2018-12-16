@@ -1,23 +1,19 @@
-"""
-    Copyright (C) 2017 Bricks Brought to Life
-    http://bblanimation.com/
-    chris@bblanimation.com
-
-    Created by Christopher Gearhart
-
-        This program is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version.
-
-        This program is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    """
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # system imports
 import bpy
@@ -48,15 +44,14 @@ class ASSEMBLME_OT_new_collection_from_selection(bpy.types.Operator):
         try:
             scn, ag = getActiveContextInfo()
             # create new animated collection
-            ag.collection_name = "AssemblMe_{}_collection".format(ag.name)
-            agColl = bpy.data.collections.get(ag.collection_name)
-            if agColl is not None:
-                bpy.data.collections.remove(agColl)
-            agColl = bpy.data.collections.new(ag.collection_name)
-            # add selected objects to new collection
+            newCollName = "AssemblMe_{}_collection".format(ag.name)
+            overwriteColl = bpy.data.collections.get(newCollName)
+            if overwriteColl is not None:
+                bpy.data.collections.remove(overwriteColl)
+            ag.collection = bpy.data.collections.new(newCollName)
+            # add selected objects to new group
             for obj in self.objs_to_move:
-                agColl.objects.link(obj)
-            ag.collection_name = agColl.name
+                ag.collection.objects.link(obj)
         except:
             handle_exception()
 

@@ -1,23 +1,19 @@
-"""
-Copyright (C) 2017 Bricks Brought to Life
-http://bblanimation.com/
-chris@bblanimation.com
-
-Created by Christopher Gearhart
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
 # NONE!
@@ -38,11 +34,11 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     id: IntProperty()
     idx: IntProperty()
 
-    collection_name: StringProperty(
-        name="Object Collection Name",
-        description="Collection name of objects to animate",
-        update=collNameUpdate,
-        default="")
+    collection: PointerProperty(
+        type=bpy.types.Collection,
+        name="Object Collection",
+        description="Collection of objects to animate",
+        update=collUpdate)
 
     firstFrame: IntProperty(
         name="Start",
@@ -229,3 +225,4 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     lastActiveObjectName: StringProperty(default="")
     activeCollIndex: IntProperty(default=0)
     version: StringProperty(default="1.1.6")
+    group_name: StringProperty(default="")

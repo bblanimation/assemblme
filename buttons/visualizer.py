@@ -1,23 +1,19 @@
-"""
-    Copyright (C) 2017 Bricks Brought to Life
-    http://bblanimation.com/
-    chris@bblanimation.com
-
-    Created by Christopher Gearhart
-
-        This program is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version.
-
-        This program is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    """
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
 import math
@@ -87,7 +83,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             else:
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                if collExists(ag.collection_name):
+                if ag.collection is not None:
                     self.createAnim()
                 # enable visualizer
                 self.enable(context)
@@ -204,7 +200,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         # delete visualizer object and mesh
         bpy.data.objects.remove(self.visualizerObj, True)
         bpy.data.meshes.remove(self.m, True)
-        # remove visualizer collection
+        # remove visualizer group
         if collExists("AssemblMe_visualizer"):
             vColl = bpy.data.collections["AssemblMe_visualizer"]
             bpy.data.collections.remove(vColl, True)

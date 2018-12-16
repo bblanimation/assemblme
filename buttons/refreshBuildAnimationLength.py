@@ -1,23 +1,19 @@
-"""
-    Copyright (C) 2017 Bricks Brought to Life
-    http://bblanimation.com/
-    chris@bblanimation.com
-
-    Created by Christopher Gearhart
-
-        This program is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version.
-
-        This program is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    """
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
 # NONE!
@@ -45,7 +41,7 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
         if scn.aglist_index == -1:
             return False
         ag = scn.aglist[scn.aglist_index]
-        if not collExists(ag.collection_name):
+        if ag.collection is None:
             return False
         return True
 
@@ -54,9 +50,9 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
             # set up variables
             scn, ag = getActiveContextInfo()
 
-            if collExists(ag.collection_name):
-                # if objects in ag.collection_name, populate objects_to_move with them
-                self.objects_to_move = bpy.data.collections[ag.collection_name].objects
+            if ag.collection:
+                # if objects in ag.collection, populate objects_to_move with them
+                self.objects_to_move = ag.collection.objects
                 # set current_frame to animation start frame
                 self.origFrame = scn.frame_current
                 bpy.context.scene.frame_set(ag.frameWithOrigLoc)
@@ -73,7 +69,7 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
             # calculate how many frames the animation will last (depletes self.listZValues)
             ag.animLength = getAnimLength(self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
 
-            if collExists(ag.collection_name):
+            if ag.collection:
                 # set current_frame to original current_frame
                 bpy.context.scene.frame_set(self.origFrame)
 

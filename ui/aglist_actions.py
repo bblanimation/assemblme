@@ -1,23 +1,19 @@
-"""
-Copyright (C) 2017 Bricks Brought to Life
-http://bblanimation.com/
-chris@bblanimation.com
-
-Created by Christopher Gearhart
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
 # NONE!
@@ -70,7 +66,7 @@ class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
             if not ag.animated:
                 if ASSEMBLME_OT_visualizer.enabled():
                     ASSEMBLME_OT_visualizer.disable()
-                curColl = bpy.data.collections.get(ag.collection_name)
+                curColl = ag.collection
                 if curColl is not None:
                     bpy.data.collections.remove(curColl, True)
                     bpy.context.area.tag_redraw()
@@ -241,7 +237,7 @@ class ASSEMBLME_OT_uilist_setSourceCollToActive(bpy.types.Operator):
         else:
             ag.lastActiveObjectName = active_object.name
             ag.activeCollIndex = 0
-        ag.collection_name = active_object.users_collection[ag.activeCollIndex].name
+        ag.collection = active_object.users_collection[ag.activeCollIndex]
 
         return{'FINISHED'}
 

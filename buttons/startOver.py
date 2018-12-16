@@ -1,23 +1,19 @@
-"""
-    Copyright (C) 2017 Bricks Brought to Life
-    http://bblanimation.com/
-    chris@bblanimation.com
-
-    Created by Christopher Gearhart
-
-        This program is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version.
-
-        This program is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    """
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
 import time
@@ -41,7 +37,10 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        scn, ag = getActiveContextInfo()
+        scn = bpy.context.scene
+        if scn.aglist_index == -1:
+            return False
+        ag = scn.aglist[scn.aglist_index]
         if ag.animated:
             return True
         return False
@@ -60,7 +59,7 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
     def startOver(self):
         # set up origColl variable
         scn, ag = getActiveContextInfo()
-        origColl = bpy.data.collections.get(ag.collection_name)
+        origGroup = ag.collection
 
         # save backup of blender file if enabled in user prefs
         saveBackupFile(self)

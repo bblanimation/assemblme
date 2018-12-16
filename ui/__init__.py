@@ -1,23 +1,19 @@
-"""
-Copyright (C) 2017 Bricks Brought to Life
-http://bblanimation.com/
-chris@bblanimation.com
-
-Created by Christopher Gearhart
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # system imports
 import bpy
@@ -62,10 +58,10 @@ class ASSEMBLME_PT_animations(Panel):
         layout = self.layout
         scn = bpy.context.scene
 
-        if bversion() < '002.080.00':
+        if bversion() < '002.079.00':
             col = layout.column(align=True)
             col.label(text='ERROR: upgrade needed', icon='ERROR')
-            col.label(text='AssemblMe requires Blender 2.80+')
+            col.label(text='AssemblMe requires Blender 2.79+')
             return
 
         # Call to check for update in background
@@ -99,17 +95,17 @@ class ASSEMBLME_PT_animations(Panel):
         else:
             ag = scn.aglist[scn.aglist_index]
             if ag.animated:
-                n = ag.collection_name
+                n = ag.collection.name
                 col1.label(text="Collection Name:")
                 col1.label(text="%(n)s" % locals())
             else:
                 col1.label(text="Collection Name:")
                 split = col1.split(align=True, factor=0.85)
                 col = split.column(align=True)
-                col.prop_search(ag, "collection_name", bpy.data, "collections", text="")
+                col.prop_search(ag, "collection", bpy.data, "collections", text="")
                 col = split.column(align=True)
                 col.operator("aglist.set_to_active", text="")
-                if not bpy.data.collections.get(ag.collection_name):
+                if ag.collection is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
                     row.operator("assemblme.new_collection_from_selection", icon='ADD', text="From Selection")
@@ -126,7 +122,7 @@ class ASSEMBLME_PT_actions(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.080.00':
+        if bversion() < '002.079.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -140,7 +136,7 @@ class ASSEMBLME_PT_actions(Panel):
         col = layout.column(align=True)
         row = col.row(align=True)
         if not ag.animated:
-            row.active = collExists(ag.collection_name)
+            row.active = ag.collection is not None
             row.operator("assemblme.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
         else:
             row.operator("assemblme.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
@@ -167,7 +163,7 @@ class ASSEMBLME_PT_settings(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.080.00':
+        if bversion() < '002.079.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -288,7 +284,7 @@ class ASSEMBLME_PT_interface(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.080.00':
+        if bversion() < '002.079.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -319,7 +315,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.080.00':
+        if bversion() < '002.079.00':
             return False
         return True
 

@@ -1,23 +1,19 @@
-"""
-Copyright (C) 2017 Bricks Brought to Life
-http://bblanimation.com/
-chris@bblanimation.com
-
-Created by Christopher Gearhart
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
+# Copyright (C) 2018 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
 # NONE!
@@ -73,13 +69,13 @@ def uniquifyName(self, context):
         ag.name = name
 
 
-def collNameUpdate(self, context):
+def collUpdate(self, context):
     scn, ag0 = getActiveContextInfo()
     # verify model doesn't exist with that name
-    if ag0.collection_name != "":
+    if ag0.collection is not None:
         for i,ag1 in enumerate(scn.aglist):
-            if ag1 != ag0 and ag1.collection_name == ag0.collection_name:
-                ag0.collection_name = ""
+            if ag1 != ag0 and ag1.collection is ag0.collection:
+                ag0.collection = None
                 scn.aglist_index = i
     # get rid of unused collections created by AssemblMe
     for c in bpy.data.collections:
@@ -95,7 +91,7 @@ def collNameUpdate(self, context):
 
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
-    curColl = bpy.data.collections.get(ag.collection_name)
+    curGroup = ag.collection
     removedObjs = []
     if curColl is not None and ag.meshOnly:
         for obj in curColl.objects:
