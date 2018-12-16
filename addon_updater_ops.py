@@ -51,7 +51,7 @@ except Exception as e:
 # Must declare this before classes are loaded
 # otherwise the bl_idname's will not match and have errors.
 # Must be all lowercase and no spaces
-updater.addon = "bricker"
+updater.addon = "assemblme"
 
 
 # -----------------------------------------------------------------------------
@@ -1178,12 +1178,12 @@ def register(bl_info):
 	updater.user = "bblanimation"
 
 	# choose your own repository, must match git name
-	updater.repo = "bricker"
+	updater.repo = "assemblme"
 
 	#updater.addon = # define at top of module, MUST be done first
 
 	# Website for manual addon download, optional but recommended to set
-	updater.website = "https://github.com/bblanimation/bricker/"
+	updater.website = "https://github.com/bblanimation/assemblme/"
 
 	# Addon subfolder path
 	# "sample/path/to/addon"
