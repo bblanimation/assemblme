@@ -91,7 +91,7 @@ def collUpdate(self, context):
 
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
-    curGroup = ag.collection
+    curColl = ag.collection
     removedObjs = []
     if curColl is not None and ag.meshOnly:
         for obj in curColl.objects:

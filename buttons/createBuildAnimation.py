@@ -88,7 +88,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
         # set up other variables
         ag.lastLayerVelocity = getObjectVelocity()
-        origGroup = ag.collection
+        origColl = ag.collection
         self.origFrame = scn.frame_current
         if self.action == "UPDATE":
             # set current_frame to animation start frame

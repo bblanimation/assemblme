@@ -372,14 +372,15 @@ def selectAll():
 def hide(objs):
     objs = confirmIter(objs)
     for obj in objs:
-        obj.hide = True
+        if not obj.hide_viewport:
+            obj.hide_viewport = True
 
 
 def unhide(objs):
     objs = confirmIter(objs)
     for obj in objs:
-        if obj.hide:
-            obj.hide = False
+        if obj.hide_viewport:
+            obj.hide_viewport = False
 
 
 def setActiveObj(obj, scene=None):
