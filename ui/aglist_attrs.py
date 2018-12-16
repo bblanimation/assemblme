@@ -33,11 +33,11 @@ class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
     id = IntProperty()
     idx = IntProperty()
 
-    group_name = StringProperty(
-        name="Object Group Name",
-        description="Group name of objects to animate",
-        update=groupNameUpdate,
-        default="")
+    group = PointerProperty(
+        type=bpy.types.Group,
+        name="Object Group",
+        description="Group of objects to animate",
+        update=groupUpdate)
 
     firstFrame = IntProperty(
         name="Start",

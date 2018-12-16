@@ -58,10 +58,10 @@ class AnimationsPanel(Panel):
         layout = self.layout
         scn = bpy.context.scene
 
-        if bversion() < '002.078.00':
+        if bversion() < '002.079.00':
             col = layout.column(align=True)
             col.label('ERROR: upgrade needed', icon='ERROR')
-            col.label('AssemblMe requires Blender 2.78+')
+            col.label('AssemblMe requires Blender 2.79+')
             return
 
         # Call to check for update in background
@@ -95,17 +95,17 @@ class AnimationsPanel(Panel):
         else:
             ag = scn.aglist[scn.aglist_index]
             if ag.animated:
-                n = ag.group_name
+                n = ag.group.name
                 col1.label("Group Name:")
                 col1.label("%(n)s" % locals())
             else:
                 col1.label("Group Name:")
                 split = col1.split(align=True, percentage=0.85)
                 col = split.column(align=True)
-                col.prop_search(ag, "group_name", bpy.data, "groups", text="")
+                col.prop_search(ag, "group", bpy.data, "groups", text="")
                 col = split.column(align=True)
                 col.operator("aglist.set_to_active", icon="EDIT", text="")
-                if not bpy.data.groups.get(ag.group_name):
+                if ag.group is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
                     row.operator("scene.new_group_from_selection", icon='ZOOMIN', text="From Selection")
@@ -122,7 +122,7 @@ class ActionsPanel(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.079.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -136,7 +136,7 @@ class ActionsPanel(Panel):
         col = layout.column(align=True)
         row = col.row(align=True)
         if not ag.animated:
-            row.active = groupExists(ag.group_name)
+            row.active = ag.group is not None
             row.operator("scene.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
         else:
             row.operator("scene.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
@@ -163,7 +163,7 @@ class SettingsPanel(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.079.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -293,7 +293,7 @@ class InterfacePanel(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.079.00':
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -324,7 +324,7 @@ class presetManager(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.078.00':
+        if bversion() < '002.079.00':
             return False
         return True
 

@@ -66,7 +66,7 @@ class AssemblMe_Uilist_actions(bpy.types.Operator):
             if not ag.animated:
                 if visualizer.enabled():
                     visualizer.disable()
-                curGroup = bpy.data.groups.get(ag.group_name)
+                curGroup = ag.group
                 if curGroup is not None:
                     bpy.data.groups.remove(curGroup, True)
                     bpy.context.area.tag_redraw()
@@ -237,7 +237,7 @@ class AssemblMe_Uilist_setSourceGroupToActive(bpy.types.Operator):
         else:
             ag.lastActiveObjectName = active_object.name
             ag.activeGroupIndex = 0
-        ag.group_name = active_object.users_group[ag.activeGroupIndex].name
+        ag.group = active_object.users_group[ag.activeGroupIndex]
 
         return{'FINISHED'}
 

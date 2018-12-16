@@ -55,7 +55,7 @@ class createBuildAnimation(bpy.types.Operator):
 
     def __init__(self):
         scn, ag = getActiveContextInfo()
-        self.objects_to_move = [obj for obj in bpy.data.groups[ag.group_name].objects if not ag.meshOnly or obj.type == "MESH"]
+        self.objects_to_move = [obj for obj in ag.group.objects if not ag.meshOnly or obj.type == "MESH"]
 
     ###################################################
     # class variables
@@ -87,12 +87,12 @@ class createBuildAnimation(bpy.types.Operator):
 
         # set up other variables
         ag.lastLayerVelocity = getObjectVelocity()
-        origGroup = bpy.data.groups[ag.group_name]
+        origGroup = ag.group
         self.origFrame = scn.frame_current
         if self.action == "UPDATE":
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
-        # clear animation data from all objects in ag.group_name group
+        # clear animation data from all objects in ag.group
         clearAnimation(origGroup.objects)
 
         ### BEGIN ANIMATION GENERATION ###
@@ -142,20 +142,17 @@ class createBuildAnimation(bpy.types.Operator):
             ag.animated = True
 
     def isValid(self, scn, ag):
-        if ag.group_name == "":
+        if ag.group is None:
             self.report({"WARNING"}, "No group name specified")
             return False
-        if not groupExists(ag.group_name):
-            self.report({"WARNING"}, "Group '%(n)s' does not exist." % locals())
-            return False
-        if len(bpy.data.groups[ag.group_name].objects) == 0:
+        if len(ag.group.objects) == 0:
             self.report({"WARNING"}, "Group contains no objects!")
             return False
         # make sure no objects in this group are part of another AssemblMe animation
         for i in range(len(scn.aglist)):
             if i == scn.aglist_index or not scn.aglist[i].animated:
                 continue
-            g = bpy.data.groups.get(scn.aglist[i].group_name)
+            g = scn.aglist[i].group
             for obj in self.objects_to_move:
                 if g in obj.users_group:
                     self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")

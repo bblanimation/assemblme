@@ -59,7 +59,7 @@ class startOver(bpy.types.Operator):
     def startOver(self):
         # set up origGroup variable
         scn, ag = getActiveContextInfo()
-        origGroup = bpy.data.groups.get(ag.group_name)
+        origGroup = ag.group
 
         # save backup of blender file if enabled in user prefs
         saveBackupFile(self)

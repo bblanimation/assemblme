@@ -44,15 +44,14 @@ class newGroupFromSelection(bpy.types.Operator):
         try:
             scn, ag = getActiveContextInfo()
             # create new animated group
-            ag.group_name = "AssemblMe_{}_group".format(ag.name)
-            agGroup = bpy.data.groups.get(ag.group_name)
-            if agGroup is not None:
-                bpy.data.groups.remove(agGroup)
-            agGroup = bpy.data.groups.new(ag.group_name)
+            newGroupName = "AssemblMe_{}_group".format(ag.name)
+            overwriteGroup = bpy.data.groups.get(newGroupName)
+            if overwriteGroup is not None:
+                bpy.data.groups.remove(overwriteGroup)
+            ag.group = bpy.data.groups.new(newGroupName)
             # add selected objects to new group
             for obj in self.objs_to_move:
-                agGroup.objects.link(obj)
-            ag.group_name = agGroup.name
+                ag.group.objects.link(obj)
         except:
             handle_exception()
 

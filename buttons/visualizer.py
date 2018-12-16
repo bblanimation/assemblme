@@ -83,7 +83,7 @@ class visualizer(bpy.types.Operator):
             else:
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                if groupExists(ag.group_name):
+                if ag.group is not None:
                     self.createAnim()
                 # enable visualizer
                 self.enable(context)

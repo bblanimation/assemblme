@@ -69,13 +69,13 @@ def uniquifyName(self, context):
         ag.name = name
 
 
-def groupNameUpdate(self, context):
+def groupUpdate(self, context):
     scn, ag0 = getActiveContextInfo()
     # verify model doesn't exist with that name
-    if ag0.group_name != "":
+    if ag0.group is not None:
         for i,ag1 in enumerate(scn.aglist):
-            if ag1 != ag0 and ag1.group_name == ag0.group_name:
-                ag0.group_name = ""
+            if ag1 != ag0 and ag1.group is ag0.group:
+                ag0.group = None
                 scn.aglist_index = i
     # get rid of unused groups created by AssemblMe
     for g in bpy.data.groups:
@@ -91,7 +91,7 @@ def groupNameUpdate(self, context):
 
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
-    curGroup = bpy.data.groups.get(ag.group_name)
+    curGroup = ag.group
     removedObjs = []
     if curGroup is not None and ag.meshOnly:
         for obj in curGroup.objects:
