@@ -40,7 +40,7 @@ def isCollectionVisible(scn, ag):
 def handle_selections(scene):
     scn = bpy.context.scene
     try:
-        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.user_preferences.addons.keys()
+        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.preferences.addons.keys()
     except:
         assemblMeIsActive = False
     if assemblMeIsActive:
@@ -91,7 +91,7 @@ def handle_selections(scene):
 def convert_velocity_value(scene):
     scn = bpy.context.scene
     try:
-        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.user_preferences.addons.keys()
+        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.preferences.addons.keys()
     except:
         assemblMeIsActive = False
     if assemblMeIsActive:

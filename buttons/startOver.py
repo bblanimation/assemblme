@@ -59,7 +59,7 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
     def startOver(self):
         # set up origColl variable
         scn, ag = getActiveContextInfo()
-        origGroup = ag.collection
+        origColl = ag.collection
 
         # save backup of blender file if enabled in user prefs
         saveBackupFile(self)

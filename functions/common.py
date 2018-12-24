@@ -87,7 +87,7 @@ def str_to_bool(s):
 
 # def get_settings():
 #     if not hasattr(get_settings, 'settings'):
-#         addons = bpy.context.user_preferences.addons
+#         addons = bpy.context.preferences.addons
 #         folderpath = os.path.dirname(os.path.abspath(__file__))
 #         while folderpath:
 #             folderpath,foldername = os.path.split(folderpath)

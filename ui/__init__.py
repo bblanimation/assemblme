@@ -47,7 +47,6 @@ class ASSEMBLME_PT_animations(Panel):
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_animations"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -117,7 +116,6 @@ class ASSEMBLME_PT_actions(Panel):
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_actions"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -158,7 +156,6 @@ class ASSEMBLME_PT_settings(Panel):
     bl_idname      = "VIEW3D_PT_tools_AssemblMe_settings"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -279,7 +276,6 @@ class ASSEMBLME_PT_interface(Panel):
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -310,7 +306,6 @@ class ASSEMBLME_PT_preset_manager(Panel):
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):

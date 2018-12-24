@@ -27,7 +27,7 @@ from ..functions import *
 def handle_selections():
     scn = bpy.context.scene
     try:
-        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.user_preferences.addons.keys()
+        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.preferences.addons.keys()
     except:
         assemblMeIsActive = False
     if assemblMeIsActive:
