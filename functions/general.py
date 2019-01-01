@@ -362,7 +362,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
 
             # step curFrame forwards
-            curFrame += getObjectVelocity() - getBuildSpeed() * mult
+            curFrame += (getObjectVelocity() - getBuildSpeed()) * mult
 
         # handle case where 'ag.skipEmptySelections' == False and empty selection is grabbed
         elif not ag.skipEmptySelections:
