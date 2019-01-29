@@ -35,77 +35,59 @@ def isGroupVisible(scn, ag):
     return False, None
 
 @persistent
-def handle_selections(scene):
-    scn = bpy.context.scene
-    try:
-        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.user_preferences.addons.keys()
-    except:
-        assemblMeIsActive = False
-    if assemblMeIsActive:
-        # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
-        if scn.assemblMe_last_layers != str(list(scn.layers)):
-            scn.assemblMe_last_layers = str(list(scn.layers))
-            curGroupVisible = False
-            if scn.aglist_index != -1:
-                ag0 = scn.aglist[scn.aglist_index]
-                curGroupVisible,_ = isGroupVisible(scn, ag0)
-            if not curGroupVisible or scn.aglist_index == -1:
-                setIndex = False
-                for i,ag in enumerate(scn.aglist):
-                    if i != scn.aglist_index:
-                        nextGroupVisible,obj = isGroupVisible(scn, ag)
-                        if nextGroupVisible and bpy.context.active_object == obj:
-                            scn.aglist_index = i
-                            setIndex = True
-                            break
-                if not setIndex:
-                    scn.aglist_index = -1
-        # select and make source or LEGO model active if scn.aglist_index changes
-        elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
-            scn.assemblMe_last_aglist_index = scn.aglist_index
-            ag = scn.aglist[scn.aglist_index]
-            group = ag.group
-            if group is not None and len(group.objects) > 0:
-                select(list(group.objects), active=group.objects[0])
-                scn.assemblMe_last_active_object_name = scn.objects.active.name
-        # open LEGO model settings for active object if active object changes
-    elif scn.objects.active and scn.assemblMe_last_active_object_name != scn.objects.active.name and ( scn.aglist_index == -1 or scn.aglist[scn.aglist_index].group is not None):# and scn.objects.active.type == "MESH":
+def handle_selections(scn):
+    # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
+    if scn.assemblMe_last_layers != str(list(scn.layers)):
+        scn.assemblMe_last_layers = str(list(scn.layers))
+        curGroupVisible = False
+        if scn.aglist_index != -1:
+            ag0 = scn.aglist[scn.aglist_index]
+            curGroupVisible,_ = isGroupVisible(scn, ag0)
+        if not curGroupVisible or scn.aglist_index == -1:
+            setIndex = False
+            for i,ag in enumerate(scn.aglist):
+                if i != scn.aglist_index:
+                    nextGroupVisible,obj = isGroupVisible(scn, ag)
+                    if nextGroupVisible and bpy.context.active_object == obj:
+                        scn.aglist_index = i
+                        setIndex = True
+                        break
+            if not setIndex:
+                scn.aglist_index = -1
+    # select and make source or LEGO model active if scn.aglist_index changes
+    elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
+        scn.assemblMe_last_aglist_index = scn.aglist_index
+        ag = scn.aglist[scn.aglist_index]
+        group = ag.group
+        if group is not None and len(group.objects) > 0:
+            select(list(group.objects), active=group.objects[0])
             scn.assemblMe_last_active_object_name = scn.objects.active.name
-            groups = []
-            for g in scn.objects.active.users_group:
-                groups.append(g)
-            for i in range(len(scn.aglist)):
-                ag = scn.aglist[i]
-                if ag.group in groups:
-                    scn.aglist_index = i
-                    scn.assemblMe_last_aglist_index = scn.aglist_index
-                    return
-            scn.aglist_index = -1
+    # open LEGO model settings for active object if active object changes
+    elif scn.objects.active and scn.assemblMe_last_active_object_name != scn.objects.active.name and ( scn.aglist_index == -1 or scn.aglist[scn.aglist_index].group is not None):# and scn.objects.active.type == "MESH":
+        scn.assemblMe_last_active_object_name = scn.objects.active.name
+        groups = []
+        for g in scn.objects.active.users_group:
+            groups.append(g)
+        for i in range(len(scn.aglist)):
+            ag = scn.aglist[i]
+            if ag.group in groups:
+                scn.aglist_index = i
+                scn.assemblMe_last_aglist_index = scn.aglist_index
+                return
+        scn.aglist_index = -1
 
-bpy.app.handlers.scene_update_pre.append(handle_selections)
+@persistent
+def convert_velocity_value(scn):
+    for ag in scn.aglist:
+        if ag.objectVelocity != -1:
+            oldV = ag.objectVelocity
+            targetNumFrames = 51 - oldV
+            ag.velocity = 10 - (math.log(targetNumFrames, 2))
+            ag.objectVelocity = -1
 
 
 @persistent
-def convert_velocity_value(scene):
-    scn = bpy.context.scene
-    try:
-        assemblMeIsActive = bpy.props.assemblme_module_name in bpy.context.user_preferences.addons.keys()
-    except:
-        assemblMeIsActive = False
-    if assemblMeIsActive:
-        for ag in scn.aglist:
-            if ag.objectVelocity != -1:
-                oldV = ag.objectVelocity
-                targetNumFrames = 51 - oldV
-                ag.velocity = 10 - (math.log(targetNumFrames, 2))
-                ag.objectVelocity = -1
-
-bpy.app.handlers.load_post.append(convert_velocity_value)
-
-
-@persistent
-def handle_upconversion(scene):
-    scn = bpy.context.scene
+def handle_upconversion(scn):
     # update storage scene name
     for ag in scn.aglist:
         if createdWithUnsupportedVersion(ag):
@@ -113,5 +95,3 @@ def handle_upconversion(scene):
             if int(ag.version[2]) < 2:
                 if ag.group and ag.group.name.startswith("AssemblMe_animated_group"):
                     ag.group.name = "AssemblMe_{}_group".format(ag.name)
-
-bpy.app.handlers.load_post.append(handle_upconversion)

@@ -98,6 +98,11 @@ def register():
     bpy.props.objMinLoc = 0
     bpy.props.objMaxLoc = 0
 
+    # register app handlers
+    bpy.app.handlers.scene_update_pre.append(handle_selections)
+    bpy.app.handlers.load_post.append(convert_velocity_value)
+    bpy.app.handlers.load_post.append(handle_upconversion)
+
     # addon updater code and configurations
     addon_updater_ops.register(bl_info)
 
@@ -107,6 +112,11 @@ def unregister():
 
     # addon updater unregister
     addon_updater_ops.unregister()
+
+    # unregister app handlers
+    bpy.app.handlers.load_post.remove(handle_upconversion)
+    bpy.app.handlers.load_post.remove(convert_velocity_value)
+    bpy.app.handlers.scene_update_pre.remove(handle_selections)
 
     del bpy.props.z_upper_bound
     del bpy.props.z_lower_bound
