@@ -326,7 +326,6 @@ def confirmIter(object):
 def insertKeyframes(objs, keyframeType, frame, if_needed=False):
     """ insert key frames for given objects to given frames """
     objs = confirmIter(objs)
-    ct = time.time()
     options = set(["INSERTKEY_NEEDED"] if if_needed else [])
     for obj in objs:
         inserted = obj.keyframe_insert(data_path=keyframeType, frame=frame, options=options)

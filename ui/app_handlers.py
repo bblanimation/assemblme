@@ -78,6 +78,8 @@ def handle_selections(scn):
 
 @persistent
 def convert_velocity_value(scn):
+    if scn is None:
+        return
     for ag in scn.aglist:
         if ag.objectVelocity != -1:
             oldV = ag.objectVelocity
@@ -88,6 +90,8 @@ def convert_velocity_value(scn):
 
 @persistent
 def handle_upconversion(scn):
+    if scn is None:
+        return
     # update storage scene name
     for ag in scn.aglist:
         if createdWithUnsupportedVersion(ag):
