@@ -138,7 +138,7 @@ def register():
     bpy.props.objMaxLoc = 0
 
     # register app handlers
-    bpy.app.handlers.scene_update_pre.append(handle_selections)
+    # bpy.app.handlers.scene_update_pre.append(handle_selections)
     bpy.app.handlers.load_post.append(convert_velocity_value)
     bpy.app.handlers.load_post.append(handle_upconversion)
 
@@ -153,7 +153,7 @@ def unregister():
     # unregister app handlers
     bpy.app.handlers.load_post.remove(handle_upconversion)
     bpy.app.handlers.load_post.remove(convert_velocity_value)
-    bpy.app.handlers.scene_update_pre.remove(handle_selections)
+    # bpy.app.handlers.scene_update_pre.remove(handle_selections)
 
     del bpy.props.z_upper_bound
     del bpy.props.z_lower_bound
