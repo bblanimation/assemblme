@@ -60,7 +60,7 @@ class infoRestorePreset(bpy.types.Operator):
             bpy.ops.text.move(type='LINE_BEGIN')
 
         except:
-            handle_exception()
+            assemblme_handle_exception()
 
         return{"FINISHED"}
 

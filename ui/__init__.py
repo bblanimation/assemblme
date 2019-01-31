@@ -142,14 +142,14 @@ class ActionsPanel(Panel):
             row.operator("scene.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
         row = col.row(align=True)
         row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
-        if bpy.data.texts.find('AssemblMe_log') >= 0:
+        if bpy.data.texts.find('AssemblMe log') >= 0:
             split = layout.split(align=True, percentage = 0.9)
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.report_error", text="Report Error", icon="URL")
+            row.operator("scene.report_error", text="Report Error", icon="URL").addon_name = "AssemblMe"
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE")
+            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE").addon_name = "AssemblMe"
 
 class SettingsPanel(Panel):
     bl_space_type  = "VIEW_3D"

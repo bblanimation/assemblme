@@ -93,7 +93,7 @@ class animPresets(bpy.types.Operator):
                 default="None")
             scn.animPresetToDelete = selectedPreset
         except:
-            handle_exception()
+            assemblme_handle_exception()
 
         return{"FINISHED"}
 

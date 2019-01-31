@@ -53,7 +53,7 @@ class newGroupFromSelection(bpy.types.Operator):
             for obj in self.objs_to_move:
                 ag.group.objects.link(obj)
         except:
-            handle_exception()
+            assemblme_handle_exception()
 
         return{"FINISHED"}
 

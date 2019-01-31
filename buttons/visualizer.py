@@ -69,7 +69,7 @@ class visualizer(bpy.types.Operator):
                     v_obj.data.update()
                     scn.update()
             except:
-                handle_exception()
+                assemblme_handle_exception()
 
         return{"PASS_THROUGH"}
 
@@ -94,9 +94,20 @@ class visualizer(bpy.types.Operator):
                 self._timer = wm.event_timer_add(.02, context.window)
                 wm.modal_handler_add(self)
         except:
-            handle_exception()
+            assemblme_handle_exception()
 
         return{"RUNNING_MODAL"}
+
+    def cancel(self, context):
+        # remove timer
+        context.window_manager.event_timer_remove(self._timer)
+        # delete visualizer object and mesh
+        bpy.data.objects.remove(self.visualizerObj, True)
+        bpy.data.meshes.remove(self.m, True)
+        # remove visualizer group
+        if groupExists("AssemblMe_visualizer"):
+            vGroup = bpy.data.groups["AssemblMe_visualizer"]
+            bpy.data.groups.remove(vGroup, True)
 
     ################################################
     # initialization method
@@ -193,16 +204,5 @@ class visualizer(bpy.types.Operator):
             return False
         ag = getActiveContextInfo()[1]
         return ag.visualizerActive
-
-    def cancel(self, context):
-        # remove timer
-        context.window_manager.event_timer_remove(self._timer)
-        # delete visualizer object and mesh
-        bpy.data.objects.remove(self.visualizerObj, True)
-        bpy.data.meshes.remove(self.m, True)
-        # remove visualizer group
-        if groupExists("AssemblMe_visualizer"):
-            vGroup = bpy.data.groups["AssemblMe_visualizer"]
-            bpy.data.groups.remove(vGroup, True)
 
     #############################################

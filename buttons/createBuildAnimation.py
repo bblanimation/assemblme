@@ -46,7 +46,7 @@ class createBuildAnimation(bpy.types.Operator):
         try:
             self.createAnim()
         except:
-            handle_exception()
+            assemblme_handle_exception()
             return{"CANCELLED"}
         return{"FINISHED"}
 

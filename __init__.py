@@ -38,6 +38,7 @@ from .functions import getPresetTuples
 from . import addon_updater_ops
 from .buttons.presets import *
 from .lib.preferences import *
+from .lib.reportError import *
 
 
 def register():
