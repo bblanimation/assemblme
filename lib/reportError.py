@@ -68,7 +68,7 @@ class SCENE_OT_report_error(bpy.types.Operator):
     ###################################################
     # class variables
 
-    addon_name = StringProperty()
+    addon_name: StringProperty()
 
     #############################################
 
@@ -89,6 +89,6 @@ class SCENE_OT_close_report_error(bpy.types.Operator):
     ###################################################
     # class variables
 
-    addon_name = StringProperty()
+    addon_name: StringProperty()
 
     #############################################

@@ -211,7 +211,7 @@ class ASSEMBLME_OT_uilist_print_all_items(bpy.types.Operator):
 
 
 # set source to active button
-class ASSEMBLME_OT_uilist_set_source_group_to_active(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_set_to_active(bpy.types.Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
     bl_description = "Set collection name to next collection in active object"

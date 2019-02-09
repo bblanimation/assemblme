@@ -23,6 +23,7 @@ from .aglist_actions import *
 from .aglist_utils import *
 from .aglist_attrs import *
 from .app_handlers import *
+from .timers import *
 from ..functions import *
 props = bpy.props
 
