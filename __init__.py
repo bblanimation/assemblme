@@ -119,7 +119,8 @@ def unregister():
     addon_updater_ops.unregister()
 
     # register timers
-    bpy.app.timers.unregister(handle_selections)
+    if bpy.app.timers.is_registered(handle_selections):
+        bpy.app.timers.unregister(handle_selections)
 
     # unregister app handlers
     bpy.app.handlers.load_post.remove(handle_upconversion)
