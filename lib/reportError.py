@@ -21,12 +21,13 @@ import os
 
 # Blender imports
 import bpy
-props = bpy.props
+import addon_utils
+from bpy.props import StringProperty
 
 # Addon imports
 from ..functions import *
 
-class ASSEMBLME_OT_report_error(bpy.types.Operator):
+class SCENE_OT_report_error(bpy.types.Operator):
     """Report a bug via an automatically generated issue ticket"""              # blender will use this as a tooltip for menu items and buttons.
     bl_idname = "assemblme.report_error"                                        # unique identifier for buttons and menu items to reference.
     bl_label = "Report Error"                                                   # display name in the interface.
@@ -37,24 +38,41 @@ class ASSEMBLME_OT_report_error(bpy.types.Operator):
 
     def execute(self, context):
         # set up file paths
-        libraryServersPath = os.path.join(getLibraryPath(), "error_log")
+        libraryServersPath = os.path.join(getLibraryPath(), "error_log", self.txt_name)
         # write necessary debugging information to text file
-        writeErrorToFile(libraryServersPath, 'AssemblMe_log', props.assemblme_version)
+        writeErrorToFile(libraryServersPath, bpy.data.texts[self.addon_name + " log"].as_string(), str(self.version)[1:-1], self.github_path)
         # open error report in UI with text editor
         lastType = changeContext(context, "TEXT_EDITOR")
         try:
-            bpy.ops.text.open(filepath=os.path.join(libraryServersPath, "AssemblMe_error_report.txt"))
+            bpy.ops.text.open(filepath=libraryServersPath)
             bpy.context.space_data.show_word_wrap = True
-            self.report({"INFO"}, "Opened 'AssemblMe_error_report.txt'")
+            self.report({"INFO"}, "Opened '{txt_name}'".format(txt_name=self.txt_name))
             bpy.props.needsUpdating = True
         except:
             changeContext(context, lastType)
-            self.report({"ERROR"}, "ERROR: Could not open 'AssemblMe_error_report.txt'. If the problem persists, try reinstalling the add-on.")
+            self.report({"ERROR"}, "ERROR: Could not open '{txt_name}'. If the problem persists, try reinstalling the add-on.".format(txt_name=self.txt_name))
         return{"FINISHED"}
+
+    ################################################
+    # initialization method
+
+    def __init__(self):
+        # get version and github_path
+        for mod in addon_utils.modules():
+            if mod.bl_info.get("name", "") == self.addon_name:
+                self.version = mod.bl_info.get("version", "")
+                self.github_path = mod.bl_info.get("tracker_url", "")
+                break
+        self.txt_name = self.addon_name + "_error_report.txt"
+
+    ###################################################
+    # class variables
+
+    addon_name = StringProperty()
 
     #############################################
 
-class ASSEMBLME_OT_close_report_error(bpy.types.Operator):
+class SCENE_OT_close_report_error(bpy.types.Operator):
     """Deletes error report from blender's memory (still exists in file system)"""    # blender will use this as a tooltip for menu items and buttons.
     bl_idname = "assemblme.close_report_error"                                        # unique identifier for buttons and menu items to reference.
     bl_label = "Close Report Error"                                                   # display name in the interface.
@@ -64,8 +82,13 @@ class ASSEMBLME_OT_close_report_error(bpy.types.Operator):
     # Blender Operator methods
 
     def execute(self, context):
-        txt = bpy.data.texts['AssemblMe_log']
-        bpy.data.texts.remove(txt, True)
+        txt = bpy.data.texts[self.addon_name + " log"]
+        bpy.data.texts.remove(txt, do_unlink=True)
         return{"FINISHED"}
+
+    ###################################################
+    # class variables
+
+    addon_name = StringProperty()
 
     #############################################

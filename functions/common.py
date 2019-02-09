@@ -35,15 +35,15 @@ from mathutils import Vector, Euler, Matrix
 from bpy.types import Object, Scene
 props = bpy.props
 
-
 # https://github.com/CGCookie/retopoflow
 def bversion():
     bversion = '%03d.%03d.%03d' % (bpy.app.version[0], bpy.app.version[1], bpy.app.version[2])
     return bversion
 
 
-def stopWatch(text, value, precision=2):
+def stopWatch(text, lastTime, precision=5):
     """From seconds to Days;Hours:Minutes;Seconds"""
+    value = time.time()-lastTime
 
     valueD = (((value/365)/24)/60)
     Days = int(valueD)
@@ -144,7 +144,7 @@ def remove_item(ls, item):
 
 
 def tag_redraw_areas(areaTypes=["ALL"]):
-    areaTypes = confirmIter(areaTypes)
+    areaTypes = confirmList(areaTypes)
     for area in bpy.context.screen.areas:
         for areaType in areaTypes:
             if areaType == "ALL" or area.type == areaType:
@@ -288,6 +288,7 @@ def rreplace(s, old, new, occurrence=1):
 
 
 def round_nearest(num, divisor):
+    """ round to nearest multiple of 'divisor' """
     rem = num % divisor
     if rem > divisor / 2:
         return round_up(num, divisor)
@@ -296,10 +297,12 @@ def round_nearest(num, divisor):
 
 
 def round_up(num, divisor):
+    """ round up to nearest multiple of 'divisor' """
     return num + divisor - (num % divisor)
 
 
 def round_down(num, divisor):
+    """ round down to nearest multiple of 'divisor' """
     return num - (num % divisor)
 
 
@@ -361,11 +364,15 @@ def openLayer(layerNum, scn=None):
 
 
 def deselectAll():
-    bpy.ops.object.select_all(action='DESELECT')
+    for obj in bpy.context.selected_objects:
+        if obj.select:
+            obj.select = False
 
 
-def selectAll():
-    bpy.ops.object.select_all(action='SELECT')
+def selectAll(hidden=False):
+    for obj in bpy.context.scene.objects:
+        if not obj.select and (not obj.hide or hidden):
+            obj.select = True
 
 
 def hide(objs):
@@ -388,14 +395,12 @@ def setActiveObj(obj, scene=None):
     bpy.context.object = obj
 
 
-def select(objList=[], active=None, deselect:bool=False, only:bool=False, scene:Scene=None):
+def select(objList, active:bool=False, deselect:bool=False, only:bool=False, scene:Scene=None):
     """ selects objs in list and deselects the rest """
-    # initialize vars
-    if objList is None and active is None:
-        return True
+    # confirm objList is a list of objects
     objList = confirmList(objList)
     # deselect all if selection is exclusive
-    if only and not deselect and len(objList) > 0:
+    if only and not deselect:
         deselectAll()
     # select/deselect objects in list
     for obj in objList:
@@ -403,7 +408,7 @@ def select(objList=[], active=None, deselect:bool=False, only:bool=False, scene:
             obj.select = not deselect
     # set active object
     if active:
-        setActiveObj(objList[0] if type(active) == bool else active, scene=scene)
+        setActiveObj(objList[0], scene=scene)
     return True
 
 
@@ -412,7 +417,7 @@ def delete(objs):
     for obj in objs:
         if obj is None:
             continue
-        bpy.data.objects.remove(obj, True)
+        bpy.data.objects.remove(obj, do_unlink=True)
 
 
 def duplicate(obj, linked=False, link_to_scene=False):
@@ -519,10 +524,10 @@ def showErrorMessage(message, wrap=80):
     return
 
 
-def handle_exception(plugin_name="AssemblMe", report_button_loc="Brick Models"):
-    errormsg = print_exception('%(plugin_name)s_log' % locals())
+def handle_exception(log_name, report_button_loc):
+    errormsg = print_exception(log_name)
     # if max number of exceptions occur within threshold of time, abort!
-    errorStr = "Something went wrong. Please start an error report with us so we can fix it! (press the 'Report a Bug' button under the '%(report_button_loc)s' dropdown menu of %(plugin_name)s)" % locals()
+    errorStr = "Something went wrong. Please start an error report with us so we can fix it! ('%(report_button_loc)s')" % locals()
     print('\n'*5)
     print('-'*100)
     print(errorStr)
@@ -531,8 +536,7 @@ def handle_exception(plugin_name="AssemblMe", report_button_loc="Brick Models"):
     showErrorMessage(errorStr, wrap=240)
 
 
-# http://stackoverflow.com/questions/14519177/python-exception-handling-line-number
-def print_exception(txtName, showError=False):
+def getExceptionMessage():
     exc_type, exc_obj, tb = sys.exc_info()
 
     errormsg = 'EXCEPTION (%s): %s\n' % (exc_type, exc_obj)
@@ -545,15 +549,24 @@ def print_exception(txtName, showError=False):
             errormsg += '         %s\n' % (filename)
         errormsg += '%03d %04d:%s() %s\n' % (i, lineno, funcname, line.strip())
 
+    return errormsg
+
+
+# http://stackoverflow.com/questions/14519177/python-exception-handling-line-number
+def print_exception(txtName, showError=False, errormsg=None):
+    errormsg = getExceptionMessage() if errormsg is None else errormsg
+
     print(errormsg)
 
-    if txtName not in bpy.data.texts:
-        # create a log file for error writing
-        bpy.ops.text.new()
-        bpy.data.texts[-1].name = txtName
+    # create a log file for error writing
+    txt = bpy.data.texts.get(txtName)
+    if txt is None:
+        txt = bpy.data.texts.new(txtName)
+    else:
+        txt.clear()
 
     # write error to log text object
-    bpy.data.texts[txtName].write(errormsg + '\n')
+    txt.write(errormsg + '\n')
 
     if showError:
         showErrorMessage(errormsg, wrap=240)
@@ -589,7 +602,7 @@ def update_progress(job_title, progress):
 
 
 def apply_transform(obj):
-    # select(obj, only=True, active=True)
+    # select(obj, active=True, only=True)
     # bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     loc, rot, scale = obj.matrix_world.decompose()
     obj.matrix_world = Matrix.Identity(4)
@@ -603,34 +616,32 @@ def apply_transform(obj):
 
 
 def parent_clear(objs, apply_transform=True):
-    # select(objs, only=True, active=True)
+    # select(objs, active=True, only=True)
     # bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
     objs = confirmIter(objs)
     if apply_transform:
         for obj in objs:
             obj.rotation_mode = "XYZ"
-            loc = obj.matrix_world.to_translation()
-            rot = obj.matrix_world.to_euler()
-            scale = obj.matrix_world.to_scale()
+            loc, rot, scale = obj.matrix_world.decompose()
             obj.location = loc
-            obj.rotation_euler = rot
+            obj.rotation_euler = rot.to_euler()
             obj.scale = scale
     for obj in objs:
         obj.parent = None
 
 
-def writeErrorToFile(errorReportPath, txtName, addonVersion):
+def writeErrorToFile(error_report_path:str, error_log:str, addon_version:str, github_path:str):
     # write error to log text object
-    if not os.path.exists(errorReportPath):
-        os.makedirs(errorReportPath)
-    fullFilePath = os.path.join(errorReportPath, "AssemblMe_error_report.txt")
-    f = open(fullFilePath, "w")
-    f.write("\nPlease copy the following form and paste it into a new issue at https://github.com/bblanimation/assemblme/issues")
+    error_report_dir = os.path.dirname(error_report_path)
+    if not os.path.exists(error_report_dir):
+        os.makedirs(error_report_dir)
+    f = open(error_report_path, "w")
+    f.write("\nPlease copy the following form and paste it into a new issue at " + github_path)
     f.write("\n\nDon't forget to include a description of your problem! The more information you provide (what you were trying to do, what action directly preceeded the error, etc.), the easier it will be for us to squash the bug.")
     f.write("\n\n### COPY EVERYTHING BELOW THIS LINE ###\n")
     f.write("\nDescription of the Problem:\n")
     f.write("\nBlender Version: " + bversion())
-    f.write("\nAddon Version: " + addonVersion)
+    f.write("\nAddon Version: " + addon_version)
     f.write("\nPlatform Info:")
     f.write("\n   system   = " + platform.system())
     f.write("\n   platform = " + platform.platform())
@@ -638,6 +649,27 @@ def writeErrorToFile(errorReportPath, txtName, addonVersion):
     f.write("\n   python   = " + platform.python_version())
     f.write("\nError:")
     try:
-        f.write("\n" + bpy.data.texts[txtName].as_string())
+        f.write("\n" + error_log)
     except KeyError:
         f.write(" No exception found")
+
+
+def root_path():
+    return os.path.abspath(os.sep)
+
+
+def splitpath(path):
+    folders = []
+    while 1:
+        path, folder = os.path.split(path)
+        if folder != "":
+            folders.append(folder)
+        else:
+            if path != "": folders.append(path)
+            break
+    return folders[::-1]
+
+def apply_modifiers(obj, settings="PREVIEW"):
+    m = obj.to_mesh(bpy.context.scene, True, "PREVIEW")
+    obj.modifiers.clear()
+    obj.data = m

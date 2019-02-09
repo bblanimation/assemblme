@@ -49,7 +49,7 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
         try:
             self.startOver()
         except:
-            handle_exception()
+            assemblme_handle_exception()
         return{"FINISHED"}
 
     ###################################################

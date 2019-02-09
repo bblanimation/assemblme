@@ -86,7 +86,7 @@ def collUpdate(self, context):
                 if c.name == "AssemblMe_{}_collection".format(ag0.name):
                     success = True
             if not success:
-                bpy.data.collections.remove(c, True)
+                bpy.data.collections.remove(c, do_unlink=True)
 
 
 def setMeshesOnly(self, context):

@@ -77,7 +77,7 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
             props.z_upper_bound = None
             props.z_lower_bound = None
         except:
-            handle_exception()
+            assemblme_handle_exception()
 
         return{"FINISHED"}
 

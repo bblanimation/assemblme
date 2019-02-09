@@ -21,10 +21,10 @@ import time
 from ..functions import *
 props = bpy.props
 
-class ASSEMBLME_OT_new_collection_from_selection(bpy.types.Operator):
-    """Create new collection containing selected objects, and set as collection to assemble""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "assemblme.new_collection_from_selection"                       # unique identifier for buttons and menu items to reference.
-    bl_label = "New Collection"                                                 # display name in the interface.
+class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
+    """Create new group containing selected objects, and set as group to assemble""" # blender will use this as a tooltip for menu items and buttons.
+    bl_idname = "scene.new_group_from_selection"                                # unique identifier for buttons and menu items to reference.
+    bl_label = "New Group"                                                      # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
     ################################################
@@ -43,15 +43,15 @@ class ASSEMBLME_OT_new_collection_from_selection(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn, ag = getActiveContextInfo()
-            # create new animated collection
-            newCollName = "AssemblMe_{}_collection".format(ag.name)
-            overwriteColl = bpy.data.collections.get(newCollName)
-            if overwriteColl is not None:
-                bpy.data.collections.remove(overwriteColl)
-            ag.collection = bpy.data.collections.new(newCollName)
+            # create new animated group
+            newGroupName = "AssemblMe_{}_group".format(ag.name)
+            overwriteGroup = bpy.data.groups.get(newGroupName)
+            if overwriteGroup is not None:
+                bpy.data.groups.remove(overwriteGroup)
+            ag.group = bpy.data.groups.new(newGroupName)
             # add selected objects to new group
             for obj in self.objs_to_move:
-                ag.collection.objects.link(obj)
+                ag.group.objects.link(obj)
         except:
             assemblme_handle_exception()
 

@@ -21,6 +21,7 @@ import sys
 import time
 import os
 import traceback
+from os.path import join, dirname, abspath
 from shutil import copyfile
 from math import *
 
@@ -125,7 +126,7 @@ def getPresetTuples(fileNames=None, transferDefaults=False):
 
 
 def transferDefaultsToPresetsFolder(presetsPath):
-    defaultPresetsPath = os.path.join(bpy.props.assemblme_module_path, "lib", "default_presets")
+    defaultPresetsPath = join(dirname(dirname(abspath(__file__))), "lib", "default_presets")
     fileNames = getFileNames(defaultPresetsPath)
     if not os.path.exists(presetsPath):
         os.mkdir(presetsPath)
@@ -380,26 +381,5 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
 
     return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
 
-
-def writeErrorToFile(errorReportPath, txtName, addonVersion):
-    # write error to log text object
-    if not os.path.exists(errorReportPath):
-        os.makedirs(errorReportPath)
-    fullFilePath = os.path.join(errorReportPath, "AssemblMe_error_report.txt")
-    f = open(fullFilePath, "w")
-    f.write("\nPlease copy the following form and paste it into a new issue at https://github.com/bblanimation/assemblme/issues")
-    f.write("\n\nDon't forget to include a description of your problem! The more information you provide (what you were trying to do, what action directly preceeded the error, etc.), the easier it will be for us to squash the bug.")
-    f.write("\n\n### COPY EVERYTHING BELOW THIS LINE ###\n")
-    f.write("\nDescription of the Problem:\n")
-    f.write("\nBlender Version: " + bversion())
-    f.write("\nAddon Version: " + addonVersion)
-    f.write("\nPlatform Info:")
-    f.write("\n   sysname = " + str(os.uname()[0]))
-    f.write("\n   release = " + str(os.uname()[2]))
-    f.write("\n   version = " + str(os.uname()[3]))
-    f.write("\n   machine = " + str(os.uname()[4]))
-    f.write("\nError:")
-    try:
-        f.write("\n" + bpy.data.texts[txtName].as_string())
-    except:
-        f.write(" No exception found")
+def assemblme_handle_exception():
+    handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")

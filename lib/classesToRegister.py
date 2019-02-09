@@ -12,7 +12,8 @@ from .ui import *
 from .buttons import *
 from .buttons.presets import *
 from .functions import getPresetTuples
-from .lib.preferences import *
+from .preferences import *
+from .reportError import *
 
 
 classes = [
@@ -22,8 +23,6 @@ classes = [
     buttons.newCollection.ASSEMBLME_OT_new_collection_from_selection,
     buttons.presets.ASSEMBLME_OT_anim_presets,
     buttons.refreshBuildAnimationLength.ASSEMBLME_OT_refresh_anim_length,
-    buttons.reportError.ASSEMBLME_OT_report_error,
-    buttons.reportError.ASSEMBLME_OT_close_report_error,
     buttons.startOver.ASSEMBLME_OT_start_over,
     buttons.visualizer.ASSEMBLME_OT_visualizer,
     # assemblme/ui/aglist_attrs
@@ -31,12 +30,12 @@ classes = [
     # assemblme/ui/aglist_actions
     ASSEMBLME_OT_uilist_actions,
     ASSEMBLME_UL_uilist_items,
-    ASSEMBLME_OT_uilist_copySettingsToOthers,
-    ASSEMBLME_OT_uilist_copySettings,
-    ASSEMBLME_OT_uilist_pasteSettings,
-    ASSEMBLME_OT_uilist_printAllItems,
-    ASSEMBLME_OT_uilist_setSourceCollToActive,
-    ASSEMBLME_OT_uilist_clearAllItems,
+    ASSEMBLME_OT_uilist_copy_settings_to_others,
+    ASSEMBLME_OT_uilist_copy_settings,
+    ASSEMBLME_OT_uilist_paste_settings,
+    ASSEMBLME_OT_uilist_print_all_items,
+    ASSEMBLME_OT_uilist_set_source_coll_to_active,
+    ASSEMBLME_OT_uilist_clear_all_items,
     # assemblme/ui
     ASSEMBLME_MT_basic_menu,
     ASSEMBLME_PT_animations,
@@ -46,4 +45,6 @@ classes = [
     ASSEMBLME_PT_preset_manager,
     # assemblme/lib
     ASSEMBLME_PT_preferences,
+    SCENE_OT_report_error,
+    SCENE_OT_close_report_error,
 ]

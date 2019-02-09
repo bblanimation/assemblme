@@ -77,7 +77,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                     self.report({"WARNING"}, "Preset '" + scn.animPresetToDelete + "' does not exist.")
                     return{"CANCELLED"}
 
-            presetNames = getPresetTuples(fileNames)
+            presetNames = getPresetTuples(fileNames=fileNames)
             bpy.types.Scene.animPreset = bpy.props.EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
@@ -93,7 +93,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                 default="None")
             scn.animPresetToDelete = selectedPreset
         except:
-            handle_exception()
+            assemblme_handle_exception()
 
         return{"FINISHED"}
 

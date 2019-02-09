@@ -69,7 +69,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                     v_obj.data.update()
                     scn.update()
             except:
-                handle_exception()
+                assemblme_handle_exception()
 
         return{"PASS_THROUGH"}
 
@@ -97,9 +97,20 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self._timer = wm.event_timer_add(.02, window=context.window)
                 wm.modal_handler_add(self)
         except:
-            handle_exception()
+            assemblme_handle_exception()
 
         return{"RUNNING_MODAL"}
+
+    def cancel(self, context):
+        # remove timer
+        context.window_manager.event_timer_remove(self._timer)
+        # delete visualizer object and mesh
+        bpy.data.objects.remove(self.visualizerObj, do_unlink=True)
+        bpy.data.meshes.remove(self.m, True)
+        # remove visualizer group
+        if collExists("AssemblMe_visualizer"):
+            vColl = bpy.data.collections["AssemblMe_visualizer"]
+            bpy.data.collections.remove(vColl, do_unlink=True)
 
     ################################################
     # initialization method
@@ -113,9 +124,12 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         else:
             # create visualizer object
             self.m = bpy.data.meshes.new('AssemblMe_visualizer_m')
-            self.visualizerObj = bpy.data.objects.new('AssemblMe_visualizer', self.m)
-        # store instance of the visualizer
-        ASSEMBLME_OT_visualizer.instance = self
+            self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
+            self.visualizerObj.hide_select = True
+            self.visualizerObj.hide_render = True
+            # # put in new group
+            # vGroup = bpy.data.groups.new("AssemblMe_visualizer")
+            # vGroup.objects.link(self.visualizerObj)
 
     #############################################
     # class methods
@@ -191,16 +205,5 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             return False
         ag = getActiveContextInfo()[1]
         return ag.visualizerActive
-
-    def cancel(self, context):
-        # remove timer
-        context.window_manager.event_timer_remove(self._timer)
-        # delete visualizer object and mesh
-        bpy.data.objects.remove(self.visualizerObj, True)
-        bpy.data.meshes.remove(self.m, True)
-        # remove visualizer group
-        if collExists("AssemblMe_visualizer"):
-            vColl = bpy.data.collections["AssemblMe_visualizer"]
-            bpy.data.collections.remove(vColl, True)
 
     #############################################

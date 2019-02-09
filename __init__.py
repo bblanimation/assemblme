@@ -26,22 +26,23 @@ bl_info = {
     "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
     "category"    : "Animation"}
 
-# system imports
+# System imports
 import os
 
-# blender imports
+# Blender imports
 import bpy
 from bpy.props import *
 from bpy.types import Scene
 from bpy.utils import register_class, unregister_class
 
-# updater import
-from . import addon_updater_ops
+# Addon import
 from .ui import *
 from .buttons import *
-from .buttons.presets import *
 from .functions import getPresetTuples
+from .buttons.presets import *
 from .lib.preferences import *
+from .lib.reportError import *
+from . import addon_updater_ops
 
 
 classes = [
@@ -83,7 +84,6 @@ def register():
         register_class(cls)
 
     bpy.props.assemblme_module_name = __name__
-    bpy.props.assemblme_module_path = os.path.dirname(os.path.abspath(__file__))
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
     bpy.props.assemblme_preferences = bpy.context.preferences.addons[__package__].preferences
 
@@ -101,7 +101,7 @@ def register():
         description="Full name of new custom preset",
         default="")
     Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
-    presetNames = getPresetTuples(transferDefaults=True)
+    presetNames = getPresetTuples(transferDefaults=not bpy.app.background)
     Scene.animPreset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
@@ -180,7 +180,6 @@ def unregister():
 
     del bpy.props.assemblme_preferences
     del bpy.props.assemblme_version
-    del bpy.props.assemblme_module_path
     del bpy.props.assemblme_module_name
 
     for cls in reversed(classes):
