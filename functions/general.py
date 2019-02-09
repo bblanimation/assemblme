@@ -21,6 +21,7 @@ import sys
 import time
 import os
 import traceback
+from os.path import join, dirname, abspath
 from shutil import copyfile
 from math import *
 
@@ -125,7 +126,7 @@ def getPresetTuples(fileNames=None, transferDefaults=False):
 
 
 def transferDefaultsToPresetsFolder(presetsPath):
-    defaultPresetsPath = os.path.join(bpy.props.assemblme_module_path, "lib", "default_presets")
+    defaultPresetsPath = join(dirname(dirname(abspath(__file__))), "lib", "default_presets")
     fileNames = getFileNames(defaultPresetsPath)
     if not os.path.exists(presetsPath):
         os.mkdir(presetsPath)

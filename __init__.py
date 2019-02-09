@@ -26,63 +26,65 @@ bl_info = {
     "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
     "category"    : "Animation"}
 
-# system imports
-import bpy
+# System imports
 import os
-from bpy.props import *
-from .ui import *
-from .buttons import *
-from .functions import getPresetTuples
 
-# updater import
-from . import addon_updater_ops
+# Blender imports
+import bpy
+from bpy.props import *
+from bpy.types import Scene
+
+# Addon import
 from .buttons.presets import *
 from .lib.preferences import *
 from .lib.reportError import *
+from .ui import *
+from .buttons import *
+from .functions import getPresetTuples
+from . import addon_updater_ops
 
 
 def register():
     bpy.utils.register_module(__name__)
 
     bpy.props.assemblme_module_name = __name__
-    bpy.props.assemblme_module_path = os.path.dirname(os.path.abspath(__file__))
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
     bpy.props.assemblme_preferences = bpy.context.user_preferences.addons[__package__].preferences
 
-    bpy.types.Scene.assemblme_copy_from_id = IntProperty(default=-1)
+    Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
     # items used by selection app handler
-    bpy.types.Scene.assemblMe_runningOperation = BoolProperty(default=False)
-    bpy.types.Scene.assemblMe_last_layers = StringProperty(default="")
-    bpy.types.Scene.assemblMe_last_aglist_index = IntProperty(default=-2)
-    bpy.types.Scene.assemblMe_active_object_name = StringProperty(default="")
-    bpy.types.Scene.assemblMe_last_active_object_name = StringProperty(default="")
+    Scene.assemblMe_runningOperation = BoolProperty(default=False)
+    Scene.assemblMe_last_layers = StringProperty(default="")
+    Scene.assemblMe_last_aglist_index = IntProperty(default=-2)
+    Scene.assemblMe_active_object_name = StringProperty(default="")
+    Scene.assemblMe_last_active_object_name = StringProperty(default="")
 
-    bpy.types.Scene.newPresetName = StringProperty(
+    Scene.newPresetName = StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
-    bpy.types.Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
-    presetNames = getPresetTuples(transferDefaults=True)
-    bpy.types.Scene.animPreset = EnumProperty(
+    Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
+    presetNames = getPresetTuples(transferDefaults=not bpy.app.background)
+    Scene.animPreset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
         items=presetNames,
         update=updateAnimPreset,
         default="None")
-    bpy.types.Scene.animPresetToDelete = EnumProperty(
+    Scene.animPresetToDelete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
         items=bpy.types.Scene.animPreset[1]['items'],
         default="None")
 
-    bpy.types.Scene.visualizerScale = FloatProperty(
+    Scene.visualizerScale = FloatProperty(
         name="Scale",
         description="Scale of layer orientation visualizer",
         precision=1,
         min=0.1, max=16,
         default=10)
-    bpy.types.Scene.visualizerRes = FloatProperty(
+    Scene.visualizerRes = FloatProperty(
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
@@ -90,8 +92,8 @@ def register():
         default=0.25)
 
     # list properties
-    bpy.types.Scene.aglist = CollectionProperty(type=AssemblMe_AnimatedGroups)
-    bpy.types.Scene.aglist_index = IntProperty(default=-1)
+    Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_groups)
+    Scene.aglist_index = IntProperty(default=-1)
 
     # Session properties
     bpy.props.z_upper_bound = None
@@ -109,8 +111,6 @@ def register():
 
 
 def unregister():
-    Scn = bpy.types.Scene
-
     # addon updater unregister
     addon_updater_ops.unregister()
 
@@ -124,27 +124,26 @@ def unregister():
     del bpy.props.objMinLoc
     del bpy.props.objMaxLoc
 
-    del Scn.aglist_index
-    del Scn.aglist
+    del Scene.aglist_index
+    del Scene.aglist
 
-    del Scn.visualizerRes
-    del Scn.visualizerScale
+    del Scene.visualizerRes
+    del Scene.visualizerScale
 
-    del Scn.animPresetToDelete
-    del Scn.animPreset
-    del Scn.newPresetName
+    del Scene.animPresetToDelete
+    del Scene.animPreset
+    del Scene.newPresetName
 
-    del Scn.assemblMe_last_active_object_name
-    del Scn.assemblMe_active_object_name
-    del Scn.assemblMe_last_aglist_index
-    del Scn.assemblMe_last_layers
-    del Scn.assemblMe_runningOperation
+    del Scene.assemblMe_last_active_object_name
+    del Scene.assemblMe_active_object_name
+    del Scene.assemblMe_last_aglist_index
+    del Scene.assemblMe_last_layers
+    del Scene.assemblMe_runningOperation
 
-    del Scn.assemblme_copy_from_id
+    del Scene.assemblme_copy_from_id
 
     del bpy.props.assemblme_preferences
     del bpy.props.assemblme_version
-    del bpy.props.assemblme_module_path
     del bpy.props.assemblme_module_name
 
     bpy.utils.unregister_module(__name__)

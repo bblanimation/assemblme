@@ -83,7 +83,7 @@ class SCENE_OT_close_report_error(bpy.types.Operator):
 
     def execute(self, context):
         txt = bpy.data.texts[self.addon_name + " log"]
-        bpy.data.texts.remove(txt, True)
+        bpy.data.texts.remove(txt, do_unlink=True)
         return{"FINISHED"}
 
     ###################################################

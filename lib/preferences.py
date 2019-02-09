@@ -26,7 +26,7 @@ from bpy.types import AddonPreferences
 # updater import
 from .. import addon_updater_ops
 
-class AssemblMePreferences(AddonPreferences):
+class ASSEMBLME_PT_preferences(AddonPreferences):
     # bl_idname = __name__
     bl_idname = __package__[:__package__.index(".lib")]
 

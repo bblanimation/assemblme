@@ -25,7 +25,7 @@ props = bpy.props
 # Addon imports
 from ..functions import *
 
-class startOver(bpy.types.Operator):
+class ASSEMBLME_OT_start_over(bpy.types.Operator):
     """Clear animation from objects moved in last 'Create Build Animation' action""" # blender will use this as a tooltip for menu items and buttons.
     bl_idname = "scene.start_over"                                              # unique identifier for buttons and menu items to reference.
     bl_label = "Start Over"                                                     # display name in the interface.

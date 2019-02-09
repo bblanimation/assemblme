@@ -28,7 +28,7 @@ from ..functions import *
 from .aglist_utils import *
 
 # Create custom property group
-class AssemblMe_AnimatedGroups(bpy.types.PropertyGroup):
+class ASSEMBLME_UL_animated_groups(bpy.types.PropertyGroup):
     name = StringProperty(update=uniquifyName)
     id = IntProperty()
     idx = IntProperty()

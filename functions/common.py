@@ -416,7 +416,7 @@ def delete(objs):
     for obj in objs:
         if obj is None:
             continue
-        bpy.data.objects.remove(obj, True)
+        bpy.data.objects.remove(obj, do_unlink=True)
 
 
 def duplicate(obj, linked=False, link_to_scene=False):

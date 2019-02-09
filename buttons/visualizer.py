@@ -26,7 +26,7 @@ props = bpy.props
 # Addon imports
 from ..functions import *
 
-class visualizer(bpy.types.Operator):
+class ASSEMLBME_OT_visualizer(bpy.types.Operator):
     """Visualize the layer orientation with a plane"""                          # blender will use this as a tooltip for menu items and buttons.
     bl_idname = "scene.visualize_layer_orientation"                             # unique identifier for buttons and menu items to reference.
     bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
@@ -102,12 +102,12 @@ class visualizer(bpy.types.Operator):
         # remove timer
         context.window_manager.event_timer_remove(self._timer)
         # delete visualizer object and mesh
-        bpy.data.objects.remove(self.visualizerObj, True)
-        bpy.data.meshes.remove(self.m, True)
+        bpy.data.objects.remove(self.visualizerObj, do_unlink=True)
+        bpy.data.meshes.remove(self.m, do_unlink=True)
         # remove visualizer group
         if groupExists("AssemblMe_visualizer"):
             vGroup = bpy.data.groups["AssemblMe_visualizer"]
-            bpy.data.groups.remove(vGroup, True)
+            bpy.data.groups.remove(vGroup, do_unlink=True)
 
     ################################################
     # initialization method
@@ -126,8 +126,6 @@ class visualizer(bpy.types.Operator):
             # put in new group
             vGroup = bpy.data.groups.new("AssemblMe_visualizer")
             vGroup.objects.link(self.visualizerObj)
-        # not sure what this does, to be honest
-        visualizer.instance = self
 
     #############################################
     # class methods

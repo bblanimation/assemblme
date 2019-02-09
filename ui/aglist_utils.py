@@ -86,7 +86,7 @@ def groupUpdate(self, context):
                 if g.name == "AssemblMe_{}_group".format(ag0.name):
                     success = True
             if not success:
-                bpy.data.groups.remove(g, True)
+                bpy.data.groups.remove(g, do_unlink=True)
 
 
 def setMeshesOnly(self, context):

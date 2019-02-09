@@ -26,7 +26,7 @@ props = bpy.props
 # Addon imports
 from ..functions import *
 
-class animPresets(bpy.types.Operator):
+class ASSEMBLME_OT_animation_presets(bpy.types.Operator):
     """Create new preset with current animation settings"""                     # blender will use this as a tooltip for menu items and buttons.
     bl_idname = "scene.animation_presets"                                       # unique identifier for buttons and menu items to reference.
     bl_label = "Animation Presets"                                              # display name in the interface.
@@ -77,7 +77,7 @@ class animPresets(bpy.types.Operator):
                     self.report({"WARNING"}, "Preset '" + scn.animPresetToDelete + "' does not exist.")
                     return{"CANCELLED"}
 
-            presetNames = getPresetTuples(fileNames)
+            presetNames = getPresetTuples(fileNames=fileNames)
             bpy.types.Scene.animPreset = bpy.props.EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",

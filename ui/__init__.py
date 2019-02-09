@@ -96,10 +96,10 @@ class AnimationsPanel(Panel):
             ag = scn.aglist[scn.aglist_index]
             if ag.animated:
                 n = ag.group.name
-                col1.label("Group Name:")
-                col1.label("%(n)s" % locals())
+                col1.label(text="Group Name:")
+                col1.label(text="%(n)s" % locals())
             else:
-                col1.label("Group Name:")
+                col1.label(text="Group Name:")
                 split = col1.split(align=True, percentage=0.85)
                 col = split.column(align=True)
                 col.prop_search(ag, "group", bpy.data, "groups", text="")
@@ -188,7 +188,7 @@ class SettingsPanel(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.label("Animation:")
+        row.label(text="Animation:")
         row = col.row(align=True)
         if ag.orientRandom > 0.005:
             approx = "~"
@@ -206,14 +206,14 @@ class SettingsPanel(Panel):
         col = box.column(align=True)
         if scn.animPreset == "Follow Curve":
             row = col.row(align=True)
-            row.label("Path Object:")
+            row.label(text="Path Object:")
             row = col.row(align=True)
             row.prop(ag, "pathObject")
         else:
             split = col.split(align=False, percentage = 0.5)
             col1 = split.column(align=True)
             row = col1.row(align=True)
-            row.label("Location Offset:")
+            row.label(text="Location Offset:")
             row = col1.row(align=True)
             row.prop(ag, "xLocOffset")
             row = col1.row(align=True)
@@ -228,7 +228,7 @@ class SettingsPanel(Panel):
 
             col1 = split.column(align=True)
             row = col1.row(align=True)
-            row.label("Rotation Offset:")
+            row.label(text="Rotation Offset:")
             row = col1.row(align=True)
             row.prop(ag, "xRotOffset")
             row = col1.row(align=True)
@@ -242,7 +242,7 @@ class SettingsPanel(Panel):
 
         col1 = box.column(align=True)
         row = col1.row(align=True)
-        row.label("Layer Orientation:")
+        row.label(text="Layer Orientation:")
         row = col1.row(align=True)
         split = row.split(align=True, percentage=0.9)
         row = split.row(align=True)
@@ -263,7 +263,7 @@ class SettingsPanel(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.label("Build Type:")
+        row.label(text="Build Type:")
         row = col.row(align=True)
         row.prop(ag, "buildType", text="")
         row = col.row(align=True)
@@ -271,7 +271,7 @@ class SettingsPanel(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.label("Advanced:")
+        row.label(text="Advanced:")
         row = col.row(align=True)
         row.prop(ag, "skipEmptySelections")
         row = col.row(align=True)
@@ -306,7 +306,7 @@ class InterfacePanel(Panel):
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label("Visualizer:")
+        row.label(text="Visualizer:")
         row = col.row(align=True)
         row.prop(scn, "visualizerScale")
         row.prop(scn, "visualizerRes")
@@ -335,7 +335,7 @@ class presetManager(Panel):
         if scn.aglist_index != -1:
             col = layout.column(align=True)
             row = col.row(align=True)
-            row.label("Create New Preset:")
+            row.label(text="Create New Preset:")
             row = col.row(align=True)
             split = row.split(align=True, percentage = 0.7)
             col = split.column(align=True)
@@ -345,7 +345,7 @@ class presetManager(Panel):
             col.operator("scene.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label("Remove Existing Preset:")
+        row.label(text="Remove Existing Preset:")
         row = col.row(align=True)
         split = row.split(align=True, percentage = 0.7)
         col = split.column(align=True)
