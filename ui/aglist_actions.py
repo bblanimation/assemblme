@@ -115,7 +115,7 @@ class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
 # draw
 # -------------------------------------------------------------------
 
-class ASSEMBLME_UL_items(UIList):
+class ASSEMBLME_UL_uilist_items(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types
@@ -211,7 +211,7 @@ class ASSEMBLME_OT_uilist_print_all_items(bpy.types.Operator):
 
 
 # set source to active button
-class ASSEMBLME_OT_uilist_set_source_group_to_active(bpy.types.Operator):
+class ASSEMBLME_OT_uilist_set_to_active(bpy.types.Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
     bl_description = "Set group name to next group in active object"
