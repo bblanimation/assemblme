@@ -61,12 +61,12 @@ def handle_selections(scn):
         group = ag.group
         if group is not None and len(group.objects) > 0:
             select(list(group.objects), active=group.objects[0])
-            scn.assemblMe_last_active_object_name = scn.objects.active.name
+            scn.assemblMe_last_active_object_name = bpy.context.active_object.name
     # open LEGO model settings for active object if active object changes
-    elif scn.objects.active and scn.assemblMe_last_active_object_name != scn.objects.active.name and ( scn.aglist_index == -1 or scn.aglist[scn.aglist_index].group is not None):# and scn.objects.active.type == "MESH":
-        scn.assemblMe_last_active_object_name = scn.objects.active.name
+    elif bpy.context.active_object and scn.assemblMe_last_active_object_name != bpy.context.active_object.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].group is not None):# and bpy.context.active_object.type == "MESH":
+        scn.assemblMe_last_active_object_name = bpy.context.active_object.name
         groups = []
-        for g in scn.objects.active.users_group:
+        for g in bpy.context.active_object.users_group:
             groups.append(g)
         for i in range(len(scn.aglist)):
             ag = scn.aglist[i]
