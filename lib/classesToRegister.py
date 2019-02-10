@@ -26,14 +26,14 @@ classes = [
     # assemblme/ui/aglist_attrs
     ASSEMBLME_UL_animated_collections,
     # assemblme/ui/aglist_actions
-    ASSEMBLME_OT_uilist_actions,
-    ASSEMBLME_UL_uilist_items,
-    ASSEMBLME_OT_uilist_copy_settings_to_others,
-    ASSEMBLME_OT_uilist_copy_settings,
-    ASSEMBLME_OT_uilist_paste_settings,
-    ASSEMBLME_OT_uilist_print_all_items,
-    ASSEMBLME_OT_uilist_set_to_active,
-    ASSEMBLME_OT_uilist_clear_all_items,
+    AGLIST_OT_list_action,
+    AGLIST_OT_copy_settings_to_others,
+    AGLIST_OT_copy_settings,
+    AGLIST_OT_paste_settings,
+    AGLIST_OT_set_to_active,
+    AGLIST_OT_print_all_items,
+    AGLIST_OT_clear_all_items,
+    AGLIST_UL_items,
     # assemblme/ui
     ASSEMBLME_MT_basic_menu,
     ASSEMBLME_PT_animations,

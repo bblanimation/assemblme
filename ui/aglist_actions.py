@@ -29,7 +29,7 @@ from ..functions import *
 from ..buttons.visualizer import *
 
 # ui list item actions
-class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
+class AGLIST_OT_list_action(bpy.types.Operator):
     bl_idname = "aglist.list_action"
     bl_label = "List Action"
 
@@ -111,26 +111,9 @@ class ASSEMBLME_OT_uilist_actions(bpy.types.Operator):
 
         return {"FINISHED"}
 
-# -------------------------------------------------------------------
-# draw
-# -------------------------------------------------------------------
-
-class ASSEMBLME_UL_uilist_items(UIList):
-
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        # Make sure your code supports all 3 layout types
-        if self.layout_type in {'GRID'}:
-            layout.alignment = 'CENTER'
-        split = layout.split(factor=0.9)
-        split.prop(item, "name", text="", emboss=False, translate=False, icon='MOD_BUILD')
-
-    def invoke(self, context, event):
-        pass
-
-
 # copy settings from current index to all other indices
-class ASSEMBLME_OT_uilist_copy_settings_to_others(bpy.types.Operator):
-    bl_idname = "aglist.copy_to_others"
+class AGLIST_OT_copy_settings_to_others(bpy.types.Operator):
+    bl_idname = "aglist.copy_settings_to_others"
     bl_label = "Copy Settings to Other Animations"
     bl_description = "Copies the settings from the current animation to all other animations"
 
@@ -154,7 +137,7 @@ class ASSEMBLME_OT_uilist_copy_settings_to_others(bpy.types.Operator):
 
 
 # copy settings from current index to memory
-class ASSEMBLME_OT_uilist_copy_settings(bpy.types.Operator):
+class AGLIST_OT_copy_settings(bpy.types.Operator):
     bl_idname = "aglist.copy_settings"
     bl_label = "Copy Settings from Current Animation"
     bl_description = "Stores the ID of the current animation for pasting"
@@ -174,7 +157,7 @@ class ASSEMBLME_OT_uilist_copy_settings(bpy.types.Operator):
 
 
 # paste settings from index in memory to current index
-class ASSEMBLME_OT_uilist_paste_settings(bpy.types.Operator):
+class AGLIST_OT_paste_settings(bpy.types.Operator):
     bl_idname = "aglist.paste_settings"
     bl_label = "Paste Settings to Current animation"
     bl_description = "Pastes the settings from stored animation ID to the current index"
@@ -197,21 +180,8 @@ class ASSEMBLME_OT_uilist_paste_settings(bpy.types.Operator):
         return{'FINISHED'}
 
 
-# print button
-class ASSEMBLME_OT_uilist_print_all_items(bpy.types.Operator):
-    bl_idname = "aglist.print_list"
-    bl_label = "Print List"
-    bl_description = "Print all items to the console"
-
-    def execute(self, context):
-        scn = context.scene
-        for i in scn.aglist:
-            print (i.source_name, i.id)
-        return{'FINISHED'}
-
-
 # set source to active button
-class ASSEMBLME_OT_uilist_set_to_active(bpy.types.Operator):
+class AGLIST_OT_set_to_active(bpy.types.Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
     bl_description = "Set collection name to next collection in active object"
@@ -242,9 +212,22 @@ class ASSEMBLME_OT_uilist_set_to_active(bpy.types.Operator):
         return{'FINISHED'}
 
 
+# print button
+class AGLIST_OT_print_all_items(bpy.types.Operator):
+    bl_idname = "aglist.print_all_items"
+    bl_label = "Print List"
+    bl_description = "Print all items to the console"
+
+    def execute(self, context):
+        scn = context.scene
+        for i in scn.aglist:
+            print (i.source_name, i.id)
+        return{'FINISHED'}
+
+
 # clear button
-class ASSEMBLME_OT_uilist_clear_all_items(bpy.types.Operator):
-    bl_idname = "aglist.clear_list"
+class AGLIST_OT_clear_all_items(bpy.types.Operator):
+    bl_idname = "aglist.clear_all_items"
     bl_label = "Clear List"
     bl_description = "Clear all items in the list"
 
@@ -263,3 +246,20 @@ class ASSEMBLME_OT_uilist_clear_all_items(bpy.types.Operator):
             self.report({'INFO'}, "Nothing to remove")
 
         return{'FINISHED'}
+
+
+# -------------------------------------------------------------------
+# draw
+# -------------------------------------------------------------------
+
+class AGLIST_UL_items(UIList):
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        # Make sure your code supports all 3 layout types
+        if self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+        split = layout.split(factor=0.9)
+        split.prop(item, "name", text="", emboss=False, translate=False, icon='MOD_BUILD')
+
+    def invoke(self, context, event):
+        pass

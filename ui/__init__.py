@@ -37,7 +37,7 @@ class ASSEMBLME_MT_basic_menu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("aglist.copy_to_others", icon="COPY_ID", text="Copy Settings to Others")
+        layout.operator("aglist.copy_settings_to_others", icon="COPY_ID", text="Copy Settings to Others")
         layout.operator("aglist.copy_settings", icon="COPYDOWN", text="Copy Settings")
         layout.operator("aglist.paste_settings", icon="PASTEDOWN", text="Paste Settings")
 
@@ -77,7 +77,7 @@ class ASSEMBLME_PT_animations(Panel):
         else:
             rows = 4
         row = layout.row()
-        row.template_list("ASSEMBLME_UL_uilist_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
+        row.template_list("AGLIST_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
 
         col = row.column(align=True)
         col.operator("aglist.list_action", icon='ADD', text="").action = 'ADD'
