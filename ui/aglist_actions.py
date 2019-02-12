@@ -192,13 +192,13 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
         scn = context.scene
         if scn.aglist_index == -1:
             return False
-        if bpy.context.object is None:
+        if bpy.context.active_object is None:
             return False
         return True
 
     def execute(self, context):
         scn, ag = getActiveContextInfo()
-        active_object = bpy.context.object
+        active_object = bpy.context.active_object
         if len(active_object.users_collection) == 0:
             self.report({"INFO"}, "Active object has no parent collections.")
             return {"CANCELLED"}

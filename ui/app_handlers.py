@@ -63,12 +63,12 @@ def isCollectionVisible(scn, ag):
 #         coll = ag.collection
 #         if coll is not None and len(coll.objects) > 0:
 #             select(list(coll.objects), active=coll.objects[0])
-#             scn.assemblMe_last_active_object_name = bpy.context.object.name
+#             scn.assemblMe_last_active_object_name = bpy.context.active_object.name
 #     # open LEGO model settings for active object if active object changes
-#     elif bpy.context.object and scn.assemblMe_last_active_object_name != bpy.context.object.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and bpy.context.object.type == "MESH":
-#         scn.assemblMe_last_active_object_name = bpy.context.object.name
+#     elif bpy.context.active_object and scn.assemblMe_last_active_object_name != bpy.context.active_object.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and bpy.context.active_object.type == "MESH":
+#         scn.assemblMe_last_active_object_name = bpy.context.active_object.name
 #         colls = []
-#         for c in bpy.context.object.users_collection:
+#         for c in bpy.context.active_object.users_collection:
 #             colls.append(c)
 #         for i in range(len(scn.aglist)):
 #             ag = scn.aglist[i]
