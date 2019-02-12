@@ -22,7 +22,7 @@ import time
 import bpy
 
 # Addon imports
-from ..functions.common import stopWatch
+from ..functions.common import stopwatch
 
 
 # https://github.com/CGCookie/retopoflow
@@ -34,7 +34,7 @@ def timed_call(label, precision=2):
             time_end = time.time()
 
             time_delta = time_end - time_beg
-            stopWatch(label, time_delta, precision=precision)
+            stopwatch(label, time_delta, precision=precision)
             return ret
         return wrapped
     return wrapper
