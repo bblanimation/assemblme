@@ -77,7 +77,7 @@ class AnimationsPanel(Panel):
         else:
             rows = 4
         row = layout.row()
-        row.template_list("ASSEMBLME_UL_uilist_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
+        row.template_list("ASSEMBLME_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
 
         col = row.column(align=True)
         col.operator("aglist.list_action", icon='ZOOMIN', text="").action = 'ADD'

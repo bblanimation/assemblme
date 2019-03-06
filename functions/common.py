@@ -400,30 +400,28 @@ def setActiveObj(obj:Object, scene:Scene=None):
     scene.objects.active = obj
 
 
-def select(objList, active:bool=False, deselect:bool=False, only:bool=False, scene:Scene=None):
+def select(objList, active:bool=False, only:bool=False):
     """ selects objs in list (deselects the rest if 'only') """
     # confirm objList is a list of objects
     objList = confirmIter(objList)
     # deselect all if selection is exclusive
-    if only and not deselect:
-        deselectAll()
+    if only: deselectAll()
     # select/deselect objects in list
     for obj in objList:
-        if obj is not None:
-            obj.select = not deselect
+        if obj is not None and not obj.select:
+            obj.select = True
     # set active object
-    if active:
-        setActiveObj(objList[0], scene=scene)
+    if active: setActiveObj(objList[0])
 
 
-# def deselect(objList, scene:Scene=None):
-#     """ selects objs in list and deselects the rest """
-#     # confirm objList is a list of objects
-#     objList = confirmIter(objList)
-#     # select/deselect objects in list
-#     for obj in objList:
-#         if obj is not None:
-#             obj.select = False
+def deselect(objList):
+    """ deselects objs in list """
+    # confirm objList is a list of objects
+    objList = confirmList(objList)
+    # select/deselect objects in list
+    for obj in objList:
+        if obj is not None and obj.select:
+            obj.select = False
 
 
 def delete(objs):
@@ -620,22 +618,22 @@ def update_progress(job_title:str, progress:float):
     sys.stdout.flush()
 
 
-def apply_transform(obj:Object):
-    """ efficiently apply object transformation """
-    # select(obj, active=True, only=True)
-    # bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+def apply_transform(obj:Object, location:bool=True, rotation:bool=True, scale:bool=True):
     loc, rot, scale = obj.matrix_world.decompose()
     obj.matrix_world = Matrix.Identity(4)
     m = obj.data
     s_mat_x = Matrix.Scale(scale.x, 4, Vector((1, 0, 0)))
     s_mat_y = Matrix.Scale(scale.y, 4, Vector((0, 1, 0)))
     s_mat_z = Matrix.Scale(scale.z, 4, Vector((0, 0, 1)))
-    m.transform(s_mat_x * s_mat_y * s_mat_z)
-    m.transform(rot.to_matrix().to_4x4())
-    m.transform(Matrix.Translation(loc))
+    if scale:    m.transform(s_mat_x * s_mat_y * s_mat_z)
+    else:        obj.scale = scale
+    if rotation: m.transform(rot.to_matrix().to_4x4())
+    else:        obj.rotation_euler = rot.to_euler()
+    if location: m.transform(Matrix.Translation(loc))
+    else:        obj.location = loc
 
 
-def parent_clear(objs, apply_transform=True):
+def parent_clear(objs, apply_transform:bool=True):
     """ efficiently clear parent """
     # select(objs, active=True, only=True)
     # bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
@@ -681,7 +679,6 @@ def root_path():
 
 
 def splitpath(path):
-    print(os.path.splitpath(path))
     folders = []
     while 1:
         path, folder = os.path.split(path)
@@ -690,7 +687,6 @@ def splitpath(path):
         else:
             if path != "": folders.append(path)
             break
-    print(folders[::-1])
     return folders[::-1]
 
 def apply_modifiers(obj, settings="PREVIEW"):
