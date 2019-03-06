@@ -252,7 +252,7 @@ class AGLIST_OT_clear_all_items(bpy.types.Operator):
 # draw
 # -------------------------------------------------------------------
 
-class AGLIST_UL_items(UIList):
+class ASSEMBLME_UL_items(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types

@@ -33,7 +33,7 @@ classes = [
     AGLIST_OT_set_to_active,
     AGLIST_OT_print_all_items,
     AGLIST_OT_clear_all_items,
-    AGLIST_UL_items,
+    ASSEMBLME_UL_items,
     # assemblme/ui
     ASSEMBLME_MT_basic_menu,
     ASSEMBLME_PT_animations,
