@@ -22,61 +22,60 @@ from bpy.app.handlers import persistent
 from ..functions import *
 from mathutils import Vector, Euler
 
-def isCollectionVisible(scn, ag):
-    return False, None
-    # TODO: rewrite to check if collection is visible
-    scn = bpy.context.scene
-    objectsOnActiveLayers = []
-    objects = scn.objects
-    for i in range(20):
-        # get objects on current layer if layer is active for object and scene
-        objectsOnActiveLayers += [ob for ob in objects if ob.layers[i] and scn.layers[i]]
-    for obj in objectsOnActiveLayers:
-        if ag.collection in obj.users_collection:
-            return True, obj
-    return False, None
+# def isGroupVisible(scn, ag):
+#     scn = bpy.context.scene
+#     objectsOnActiveLayers = []
+#     objects = scn.objects
+#     for i in range(20):
+#         # get objects on current layer if layer is active for object and scene
+#         objectsOnActiveLayers += [ob for ob in objects if ob.layers[i] and scn.layers[i]]
+#     for obj in objectsOnActiveLayers:
+#         users_collection = obj.users_collection if b280() else obj.users_group
+#         if ag.collection in users_collection:
+#             return True, obj
+#     return False, None
 
-# @persistent
-# def handle_selections(scn):
-#     # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
-#     if scn.assemblMe_last_layers != str(list(scn.layers)):
-#         scn.assemblMe_last_layers = str(list(scn.layers))
-#         curCollVisible = False
-#         if scn.aglist_index != -1:
-#             ag0 = scn.aglist[scn.aglist_index]
-#             curCollVisible,_ = isCollectionVisible(scn, ag0)
-#         if not curCollVisible or scn.aglist_index == -1:
-#             setIndex = False
-#             for i,ag in enumerate(scn.aglist):
-#                 if i != scn.aglist_index:
-#                     nextCollVisible,obj = isCollectionVisible(scn, ag)
-#                     if nextCollVisible and bpy.context.active_object == obj:
-#                         scn.aglist_index = i
-#                         setIndex = True
-#                         break
-#             if not setIndex:
-#                 scn.aglist_index = -1
-#     # select and make source or LEGO model active if scn.aglist_index changes
-#     elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
-#         scn.assemblMe_last_aglist_index = scn.aglist_index
-#         ag = scn.aglist[scn.aglist_index]
-#         coll = ag.collection
-#         if coll is not None and len(coll.objects) > 0:
-#             select(list(coll.objects), active=coll.objects[0])
-#             scn.assemblMe_last_active_object_name = bpy.context.active_object.name
-#     # open LEGO model settings for active object if active object changes
-#     elif bpy.context.active_object and scn.assemblMe_last_active_object_name != bpy.context.active_object.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and bpy.context.active_object.type == "MESH":
-#         scn.assemblMe_last_active_object_name = bpy.context.active_object.name
-#         colls = []
-#         for c in bpy.context.active_object.users_collection:
-#             colls.append(c)
-#         for i in range(len(scn.aglist)):
-#             ag = scn.aglist[i]
-#             if ag.collection in colls:
-#                 scn.aglist_index = i
-#                 scn.assemblMe_last_aglist_index = scn.aglist_index
-#                 return
-#         scn.aglist_index = -1
+@persistent
+def handle_selections(scn):
+    # # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
+    # if scn.assemblMe_last_layers != str(list(scn.layers)):
+    #     scn.assemblMe_last_layers = str(list(scn.layers))
+    #     curGroupVisible = False
+    #     if scn.aglist_index != -1:
+    #         ag0 = scn.aglist[scn.aglist_index]
+    #         curGroupVisible,_ = isGroupVisible(scn, ag0)
+    #     if not curGroupVisible or scn.aglist_index == -1:
+    #         setIndex = False
+    #         for i,ag in enumerate(scn.aglist):
+    #             if i != scn.aglist_index:
+    #                 nextGroupVisible,obj = isGroupVisible(scn, ag)
+    #                 if nextGroupVisible and bpy.context.active_object == obj:
+    #                     scn.aglist_index = i
+    #                     setIndex = True
+    #                     break
+    #         if not setIndex:
+    #             scn.aglist_index = -1
+    # select and make source or LEGO model active if scn.aglist_index changes
+    elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
+        scn.assemblMe_last_aglist_index = scn.aglist_index
+        ag = scn.aglist[scn.aglist_index]
+        group = ag.collection
+        if group is not None and len(group.objects) > 0:
+            select(list(group.objects), active=group.objects[0])
+            scn.assemblMe_last_active_object_name = bpy.context.active_object.name
+    # open LEGO model settings for active object if active object changes
+    elif bpy.context.active_object and scn.assemblMe_last_active_object_name != bpy.context.active_object.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and bpy.context.active_object.type == "MESH":
+        scn.assemblMe_last_active_object_name = bpy.context.active_object.name
+        groups = []
+        for g in bpy.context.active_object.users_group:
+            groups.append(g)
+        for i in range(len(scn.aglist)):
+            ag = scn.aglist[i]
+            if ag.collection in groups:
+                scn.aglist_index = i
+                scn.assemblMe_last_aglist_index = scn.aglist_index
+                return
+        scn.aglist_index = -1
 
 @persistent
 def convert_velocity_value(scn):
@@ -99,8 +98,9 @@ def handle_upconversion(scn):
         if createdWithUnsupportedVersion(ag):
             # convert from v1_1 to v1_2
             if int(ag.version[2]) < 2:
-                if ag.group and ag.group.name.startswith("AssemblMe_animated_group"):
-                    ag.group.name = "AssemblMe_{}_group".format(ag.name)
+                if ag.collection and ag.collection.name.startswith("AssemblMe_animated_group"):
+                    ag.collection.name = "AssemblMe_{}_group".format(ag.name)
             # convert from v1_2 to v1_3
             if int(ag.version[2]) < 2:
-                ag.collection = bpy.data.collections.get(ag.group_name)
+                collections = bpy.data.collections if b280() else bpy.data.groups
+                ag.collection = collections.get(ag.group_name)

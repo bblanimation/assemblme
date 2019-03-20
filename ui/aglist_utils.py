@@ -75,8 +75,9 @@ def collUpdate(self, context):
             if ag1 != ag0 and ag1.collection is ag0.collection:
                 ag0.collection = None
                 scn.aglist_index = i
-    # get rid of unused collections created by AssemblMe
-    for c in bpy.data.collections:
+    # get rid of unused groups created by AssemblMe
+    collections = bpy.data.collections if b280() else bpy.data.groups
+    for c in collections:
         if c.name.startswith("AssemblMe_"):
             success = False
             for i in range(len(scn.aglist)):
@@ -84,17 +85,16 @@ def collUpdate(self, context):
                 if c.name == "AssemblMe_{}_collection".format(ag0.name):
                     success = True
             if not success:
-                bpy.data.collections.remove(c, do_unlink=True)
+                collections.remove(c, do_unlink=True)
 
 
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
-    curColl = ag.collection
     removedObjs = []
-    if curColl is not None and ag.meshOnly:
-        for obj in curColl.objects:
+    if ag.collection is not None and ag.meshOnly:
+        for obj in ag.collection.objects:
             if obj.type != "MESH":
-                curColl.objects.unlink(obj)
+                ag.collection.objects.unlink(obj)
                 removedObjs.append(obj)
     if ag.animated:
         # set current_frame to animation start frame

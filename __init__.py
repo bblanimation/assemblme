@@ -40,6 +40,7 @@ from .ui import *
 from .functions import getPresetTuples
 from .buttons.presets import *
 from .lib.classesToRegister import classes
+from .lib.timers import *
 if not b280():
     from . import addon_updater_ops_2_7 as addon_updater_ops
 else:
@@ -104,12 +105,12 @@ def register():
     bpy.props.objMaxLoc = 0
 
     # register app handlers
-    # bpy.app.handlers.scene_update_pre.append(handle_selections)
+    if b280():
+        bpy.app.timers.register(handle_selections)
+    else:
+        bpy.app.handlers.scene_update_pre.append(handle_selections)
     bpy.app.handlers.load_post.append(convert_velocity_value)
     bpy.app.handlers.load_post.append(handle_upconversion)
-
-    # register timers
-    bpy.app.timers.register(handle_selections)
 
     # addon updater code and configurations
     addon_updater_ops.register(bl_info)
@@ -119,14 +120,14 @@ def unregister():
     # addon updater unregister
     addon_updater_ops.unregister()
 
-    # register timers
-    if bpy.app.timers.is_registered(handle_selections):
-        bpy.app.timers.unregister(handle_selections)
-
     # unregister app handlers
     bpy.app.handlers.load_post.remove(handle_upconversion)
     bpy.app.handlers.load_post.remove(convert_velocity_value)
-    # bpy.app.handlers.scene_update_pre.remove(handle_selections)
+    if b280():
+        if bpy.app.timers.is_registered(handle_selections):
+            bpy.app.timers.unregister(handle_selections)
+    else:
+        bpy.app.handlers.scene_update_pre.remove(handle_selections)
 
     del bpy.props.z_upper_bound
     del bpy.props.z_lower_bound

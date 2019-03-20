@@ -15,4 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+<<<<<<< HEAD
 __all__ = [ "createBuildAnimation", "startOver", "refreshBuildAnimationLength", "visualizer", "presets", "newCollection", "infoRestorePreset"]
+=======
+__all__ = [ "createBuildAnimation", "startOver", "refreshBuildAnimationLength", "visualizer", "presets", "newGroupFromSelection", "infoRestorePreset"]
+>>>>>>> master

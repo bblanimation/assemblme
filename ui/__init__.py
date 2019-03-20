@@ -99,15 +99,14 @@ class ASSEMBLME_PT_animations(Panel):
             row.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="Create New Animation").action = 'ADD'
         else:
             ag = scn.aglist[scn.aglist_index]
+            col1.label(text="Collection Name:" if b280() else "Group Name:")
             if ag.animated:
                 n = ag.collection.name
-                col1.label(text="Collection Name:")
                 col1.label(text="%(n)s" % locals())
             else:
-                col1.label(text="Collection Name:")
                 split = layout_split(col1, factor=0.85)
                 col = split.column(align=True)
-                col.prop_search(ag, "collection", bpy.data, "collections", text="")
+                col.prop_search(ag, "collection", bpy.data, "collections" if b280() else "groups", text="")
                 col = split.column(align=True)
                 col.operator("aglist.set_to_active", text="", icon="GROUP" if b280() else "EDIT")
                 if ag.collection is None:

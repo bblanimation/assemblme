@@ -82,13 +82,12 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
         # set up other variables
         ag.lastLayerVelocity = getObjectVelocity()
-        origColl = ag.collection
         self.origFrame = scn.frame_current
         if self.action == "UPDATE":
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
-        # clear animation data from all objects in animation collection
-        clearAnimation(origColl.objects)
+        # clear animation data from all objects in ag.collection
+        clearAnimation(ag.collection.objects)
 
         ### BEGIN ANIMATION GENERATION ###
         # populate self.listZValues
@@ -138,18 +137,19 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
     def isValid(self, scn, ag):
         if ag.collection is None:
-            self.report({"WARNING"}, "No collection name specified")
+            self.report({"WARNING"}, "No collection name specified" if b280() else "No group name specified")
             return False
         if len(ag.collection.objects) == 0:
-            self.report({"WARNING"}, "Collection contains no objects!")
+            self.report({"WARNING"}, "Collection contains no objects!" if b280() else "Group contains no objects!")
             return False
         # make sure no objects in this collection are part of another AssemblMe animation
         for i in range(len(scn.aglist)):
             if i == scn.aglist_index or not scn.aglist[i].animated:
                 continue
-            g = scn.aglist[i].collection
+            c = scn.aglist[i].collection
             for obj in self.objects_to_move:
-                if g in obj.users_collection:
+                users_collection = obj.users_collection if b280() else obj.users_group
+                if c in users_collection:
                     self.report({"ERROR"}, "Some objects in this collection are part of another AssemblMe animation")
                     return False
         return True
