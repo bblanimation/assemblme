@@ -27,7 +27,7 @@ from ..functions import *
 
 class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     """Select objects layer by layer and shift by given values"""               # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.create_build_animation"                                  # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.create_build_animation"                              # unique identifier for buttons and menu items to reference.
     bl_label = "Create Build Animation"                                         # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 

@@ -28,7 +28,7 @@ from ..functions import *
 
 class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     """Visualize the layer orientation with a plane"""                          # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.visualize_layer_orientation"                             # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.visualize_layer_orientation"                         # unique identifier for buttons and menu items to reference.
     bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
@@ -81,6 +81,9 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.full_disable(context)
                 return{"FINISHED"}
             else:
+                # ensure visualizer is hidden from render and selection
+                self.visualizerObj.hide_select = True
+                self.visualizerObj.hide_render = True
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
                 if ag.group is not None:
@@ -91,7 +94,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.zOrient = None
                 # create timer for modal
                 wm = context.window_manager
-                self._timer = wm.event_timer_add(.02, context.window)
+                self._timer = wm.event_timer_add(.02, window=context.window)
                 wm.modal_handler_add(self)
         except:
             assemblme_handle_exception()
@@ -111,8 +114,6 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             # create visualizer object
             m = bpy.data.meshes.new("AssemblMe_visualizer_m")
             self.visualizerObj = bpy.data.objects.new("AssemblMe_visualizer", m)
-            self.visualizerObj.hide_select = True
-            self.visualizerObj.hide_render = True
 
     #############################################
     # class methods
