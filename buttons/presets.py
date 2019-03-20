@@ -21,6 +21,7 @@ from shutil import copyfile
 
 # Blender imports
 import bpy
+from bpy.props import EnumProperty
 
 # Addon imports
 from ..functions import *
@@ -77,7 +78,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                     return{"CANCELLED"}
 
             presetNames = getPresetTuples(fileNames=fileNames)
-            bpy.types.Scene.animPreset = bpy.props.EnumProperty(
+            bpy.types.Scene.animPreset = EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
                 items=presetNames,
@@ -85,7 +86,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                 default="None")
             scn.animPreset = selectedPreset
 
-            bpy.types.Scene.animPresetToDelete = bpy.props.EnumProperty(
+            bpy.types.Scene.animPresetToDelete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=presetNames,
@@ -99,7 +100,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     ###################################################
     # class variables
 
-    action = bpy.props.EnumProperty(
+    action = EnumProperty(
         items=(
             ('CREATE', "Create", ""),
             ('REMOVE', "Remove", ""),

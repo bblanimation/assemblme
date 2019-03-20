@@ -22,7 +22,6 @@
 import bpy
 from bpy.props import *
 from bpy.types import Panel, UIList
-props = bpy.props
 
 # Addon imports
 from ..functions import *
@@ -33,7 +32,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
     bl_idname = "aglist.list_action"
     bl_label = "List Action"
 
-    action = bpy.props.EnumProperty(
+    action = EnumProperty(
         items=(
             ('UP', "Up", ""),
             ('DOWN', "Down", ""),
@@ -198,7 +197,7 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
 
     def execute(self, context):
         scn, ag = getActiveContextInfo()
-        active_object = context.active_object
+        active_object = bpy.context.active_object
         if len(active_object.users_group) == 0:
             self.report({"INFO"}, "Active object has no linked groups.")
             return {"CANCELLED"}

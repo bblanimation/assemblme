@@ -113,7 +113,7 @@ def unregister():
     # addon updater unregister
     addon_updater_ops.unregister()
 
-    # unregister app handlers & timers
+    # unregister app handlers
     bpy.app.handlers.load_post.remove(handle_upconversion)
     bpy.app.handlers.load_post.remove(convert_velocity_value)
     bpy.app.handlers.scene_update_pre.remove(handle_selections)

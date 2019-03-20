@@ -20,7 +20,7 @@ import time
 
 # Blender imports
 import bpy
-props = bpy.props
+from bpy.props import *
 
 # Addon imports
 from ..functions import *
@@ -60,7 +60,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     ###################################################
     # class variables
 
-    action = bpy.props.EnumProperty(
+    action = EnumProperty(
         items=(
             ("CREATE", "Create", ""),
             ("UPDATE", "Update", ""),

@@ -27,11 +27,11 @@ from math import *
 
 # Blender imports
 import bpy
+from bpy.props import *
 props = bpy.props
 
 # Addon imports
 from .common import *
-# from .common_mesh_generate import *
 
 
 def getActiveContextInfo(ag_idx=None):
@@ -254,14 +254,14 @@ def updateAnimPreset(self, context):
             print(errorString)
             presetNames = getPresetTuples()
 
-            bpy.types.Scene.animPreset = bpy.props.EnumProperty(
+            bpy.types.Scene.animPreset = EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
                 items=presetNames,
                 update=updateAnimPreset,
                 default="None")
 
-            bpy.types.Scene.animPresetToDelete = bpy.props.EnumProperty(
+            bpy.types.Scene.animPresetToDelete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=presetNames,
