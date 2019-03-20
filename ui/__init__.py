@@ -15,18 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# system imports
+# System imports
+# NONE!
+
+# Blender imports
 import bpy
 from bpy.types import Panel
 from bpy.props import *
+
+# Addon imports
 from .aglist_actions import *
 from .aglist_utils import *
 from .aglist_attrs import *
 from .app_handlers import *
 from ..functions import *
-
-# updater import
-from .. import addon_updater_ops
+if bversion() < '002.080.00':
+    from .. import addon_updater_ops_2_7 as addon_updater_ops
+else:
+    from .. import addon_updater_ops_2_8 as addon_updater_ops
 
 class ASSEMBLME_MT_copy_paste_menu(bpy.types.Menu):
     bl_idname = "ASSEMBLME_MT_copy_paste_menu"
