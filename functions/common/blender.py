@@ -30,7 +30,7 @@ try:
 except ImportError:
     ViewLayer = None
 
-# module imports
+# Module imports
 from .python_utils import confirmIter, confirmList
 from .wrappers import blender_version_wrapper
 
@@ -50,9 +50,23 @@ def get_addon_preferences():
     """ get preferences for current addon """
     if not hasattr(get_addon_preferences, 'prefs'):
         folderpath, foldername = os.path.split(get_addon_directory())
+        addons = get_preferences().addons
         if not addons[foldername].preferences: return None
         get_addon_preferences.prefs = addons[foldername].preferences
     return get_addon_preferences.prefs
+
+
+def get_addon_directory():
+    """ get root directory of current addon """
+    addons = get_preferences().addons
+    folderpath = os.path.dirname(os.path.abspath(__file__))
+    while folderpath:
+        folderpath,foldername = os.path.split(folderpath)
+        if foldername in {'common','functions','addons'}: continue
+        if foldername in addons: break
+    else:
+        raise NameError("Did not find addon directory")
+    return os.path.join(folderpath, foldername)
 
 
 #################### OBJECTS ####################
@@ -236,10 +250,16 @@ def unlink_object(o:Object):
 
 @blender_version_wrapper('<=','2.79')
 def safeLink(obj:Object, protect:bool=False):
-    scn = bpy.context.scene
-    link_object(obj)
-    obj.protected = protect
+    # link object to scene
+    try:
+        link_object(obj)
+    except RuntimeError:
+        pass
+    # remove fake user from object data
     obj.use_fake_user = False
+    # protect object from deletion (useful in Bricker addon)
+    if hasattr(obj, "protected"):
+        obj.protected = protect
 @blender_version_wrapper('>=','2.80')
 def safeLink(obj:Object, protect:bool=False, collections=None):
     # link object to target collections (scene collection by default)

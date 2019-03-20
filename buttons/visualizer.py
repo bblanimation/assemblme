@@ -104,25 +104,20 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         return{"RUNNING_MODAL"}
 
     def cancel(self, context):
-        # remove timer
         context.window_manager.event_timer_remove(self._timer)
-        # delete visualizer object and mesh
-        bpy.data.objects.remove(self.visualizerObj, do_unlink=True)
-        bpy.data.meshes.remove(self.m, True)
+        self.full_disable(context)
 
     ################################################
     # initialization method
 
     def __init__(self):
-        obj = bpy.data.objects.get("AssemblMe_visualizer")
-        if obj:
-            # set self.visualizer and self.m with existing data
-            self.visualizerObj = obj
-            self.m = self.visualizerObj.data
-        else:
+        self.visualizerObj = bpy.data.objects.get("AssemblMe_visualizer")
+        if self.visualizerObj is None:
             # create visualizer object
-            self.m = bpy.data.meshes.new('AssemblMe_visualizer_m')
-            self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
+            m = bpy.data.meshes.new("AssemblMe_visualizer_m")
+            self.visualizerObj = bpy.data.objects.new("AssemblMe_visualizer", m)
+            self.visualizerObj.hide_select = True
+            self.visualizerObj.hide_render = True
 
     #############################################
     # class methods
@@ -169,15 +164,16 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         self.report({"INFO"}, "Visualizer enabled... ('ESC' to disable)")
         # add proper mesh data to visualizer object
         self.loadLatticeMesh(context)
-        # unhide visualizer object
-        scn.collection.objects.link(self.visualizerObj)
+        # link visualizer object to scene
+        safeLink(self.visualizerObj)
+        unhide(self.visualizerObj)
         ag.visualizerActive = True
 
     def full_disable(self, context):
         """ disables visualizer """
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
-        # unlink visualizer object to scene
+        # unlink visualizer object
         safeUnlink(self.visualizerObj)
         # disable visualizer icon
         for ag in bpy.context.scene.aglist:

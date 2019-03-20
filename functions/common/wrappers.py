@@ -21,7 +21,7 @@ import time
 # Blender imports
 import bpy
 
-# module imports
+# Module imports
 from .reporting import stopwatch
 
 
