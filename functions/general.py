@@ -42,7 +42,7 @@ def getActiveContextInfo(ag_idx=None):
 
 
 def saveBackupFile(self):
-    if bpy.props.assemblme_preferences.autoSaveOnStartOver:
+    if get_addon_preferences().autoSaveOnStartOver:
         if bpy.data.filepath == '':
             self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
             return{"CANCELLED"}
@@ -110,7 +110,7 @@ def getFileNames(dir):
 def getPresetTuples(fileNames=None, transferDefaults=False):
     if not fileNames:
         # initialize presets path
-        path = bpy.props.assemblme_preferences.presetsFilepath
+        path = get_addon_preferences().presetsFilepath
         # set up presets folder and transfer default presets
         if not os.path.exists(path):
             os.makedirs(path)
@@ -238,7 +238,7 @@ def updateAnimPreset(self, context):
     scn = bpy.context.scene
     if scn.animPreset != "None":
         import importlib.util
-        pathToFile = os.path.join(bpy.props.assemblme_preferences.presetsFilepath, scn.animPreset + ".py")
+        pathToFile = os.path.join(get_addon_preferences().presetsFilepath, scn.animPreset + ".py")
         if os.path.isfile(pathToFile):
             spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
             foo = importlib.util.module_from_spec(spec)

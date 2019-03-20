@@ -252,13 +252,13 @@ class AGLIST_OT_clear_all_items(bpy.types.Operator):
 # draw
 # -------------------------------------------------------------------
 
-class AGLIST_UL_items(UIList):
+class ASSEMBLME_UL_items(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types
         if self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
-        split = layout.split(factor=0.9)
+        split = layout.split(percentage=0.9)
         split.prop(item, "name", text="", emboss=False, translate=False, icon='MOD_BUILD')
 
     def invoke(self, context, event):
