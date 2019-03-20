@@ -140,19 +140,17 @@ class ASSEMBLME_PT_actions(Panel):
         row = col.row(align=True)
         if not ag.animated:
             row.active = ag.group is not None
-            row.operator("assemblme.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
-        else:
-            row.operator("assemblme.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
+        row.operator("assemblme.create_build_animation", text="Create Build Animation" if not ag.animated else "Update Build Animation", icon="MOD_BUILD")
         row = col.row(align=True)
         row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:
             split = layout_split(layout, factor=0.9)
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.report_error", text="Report Error", icon="URL").addon_name = "AssemblMe"
+            row.operator("scene.report_error", text="Report Error", icon="URL")
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE").addon_name = "AssemblMe"
+            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE")
 
 class ASSEMBLME_PT_settings(Panel):
     bl_space_type  = "VIEW_3D"
@@ -328,7 +326,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
             row = col.row(align=True)
             row.label(text="Create New Preset:")
             row = col.row(align=True)
-        split = layout_split(row, factor=0.7)
+            split = layout_split(row, factor=0.7)
             col = split.column(align=True)
             col.prop(scn, "newPresetName", text="")
             col = split.column(align=True)

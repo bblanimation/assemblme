@@ -56,17 +56,12 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     def __init__(self):
         scn, ag = getActiveContextInfo()
         self.objects_to_move = [obj for obj in ag.group.objects if not ag.meshOnly or obj.type == "MESH"]
+        self.action = "CREATE" if not ag.animated else "UPDATE"
 
     ###################################################
     # class variables
 
-    action = EnumProperty(
-        items=(
-            ("CREATE", "Create", ""),
-            ("UPDATE", "Update", ""),
-            ("GET_LEN", "Get Length", ""),
-        )
-    )
+    # NONE!
 
     ###################################################
     # class methods
