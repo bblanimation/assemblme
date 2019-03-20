@@ -56,7 +56,7 @@ def handle_selections(scn):
     #         if not setIndex:
     #             scn.aglist_index = -1
     # select and make source or LEGO model active if scn.aglist_index changes
-    elif scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
+    if scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
         scn.assemblMe_last_aglist_index = scn.aglist_index
         ag = scn.aglist[scn.aglist_index]
         group = ag.collection

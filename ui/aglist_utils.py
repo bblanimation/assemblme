@@ -67,7 +67,7 @@ def uniquifyName(self, context):
         ag.name = name
 
 
-def groupUpdate(self, context):
+def collectionUpdate(self, context):
     scn, ag0 = getActiveContextInfo()
     # verify model doesn't exist with that name
     if ag0.collection is not None:

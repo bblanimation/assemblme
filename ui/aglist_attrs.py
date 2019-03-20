@@ -34,10 +34,10 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     idx = IntProperty()
 
     collection = PointerProperty(
-        type=bpy.types.Group,
-        name="Object Group",
+        type=bpy.types.Collection if b280() else bpy.types.Group,
+        name="Object Collection" if b280() else "Object Group",
         description="Group of objects to animate",
-        update=groupUpdate)
+        update=collectionUpdate)
 
     firstFrame = IntProperty(
         name="Start",

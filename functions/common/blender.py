@@ -263,7 +263,7 @@ def safeLink(obj:Object, protect:bool=False):
 @blender_version_wrapper('>=','2.80')
 def safeLink(obj:Object, protect:bool=False, collections=None):
     # link object to target collections (scene collection by default)
-    collections = collections or [scn.collection]
+    collections = collections or [bpy.context.scene.collection]
     for coll in collections:
         try:
             coll.objects.link(obj)

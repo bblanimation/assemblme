@@ -19,7 +19,7 @@
 import bpy
 from bpy.app.handlers import persistent
 import os
-from .functions.common.blender import b280, get_preferences, layout_split
+from .functions.common.blender import * #b280, get_preferences, layout_split
 
 # updater import, import safely
 # Prevents popups for users with invalid python installs e.g. missing libraries
@@ -301,7 +301,7 @@ class OBJECT_OT_addon_updater_update_target(bpy.types.Operator):
 			layout.label(text="Updater error")
 			return
 		split = layout_split(layout, factor=0.66)
-        subcol = split.column()
+		subcol = split.column()
 		subcol.label(text="Select install version")
 		subcol = split.column()
 		subcol.prop(self, "target", text="")

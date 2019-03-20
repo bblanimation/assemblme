@@ -19,7 +19,7 @@
 import bpy
 from bpy.app.handlers import persistent
 import os
-from .functions.common.blender import b280, get_preferences, layout_split
+from .functions.common.blender import * #b280, get_preferences, layout_split
 
 # updater import, import safely
 # Prevents popups for users with invalid python installs e.g. missing libraries
