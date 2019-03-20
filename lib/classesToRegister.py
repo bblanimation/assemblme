@@ -11,10 +11,7 @@ from .preferences import *
 from .reportError import *
 from ..ui import *
 from ..buttons import *
-if not b280():
-    from .. import addon_updater_ops_2_7 as addon_updater_ops
-else:
-    from .. import addon_updater_ops_2_8 as addon_updater_ops
+from .. import addon_updater_ops
 
 
 classes = [

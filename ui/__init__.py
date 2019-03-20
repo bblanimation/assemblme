@@ -30,10 +30,7 @@ from .aglist_attrs import *
 from .app_handlers import *
 from .timers import *
 from ..functions import *
-if not b280():
-    from .. import addon_updater_ops_2_7 as addon_updater_ops
-else:
-    from .. import addon_updater_ops_2_8 as addon_updater_ops
+from .. import addon_updater_ops
 
 class ASSEMBLME_MT_copy_paste_menu(bpy.types.Menu):
     bl_idname = "ASSEMBLME_MT_copy_paste_menu"

@@ -40,10 +40,7 @@ from .ui import *
 from .functions import getPresetTuples
 from .buttons.presets import *
 from .lib.classesToRegister import classes
-if not b280():
-    from . import addon_updater_ops_2_7 as addon_updater_ops
-else:
-    from . import addon_updater_ops_2_8 as addon_updater_ops
+from . import addon_updater_ops
 
 
 def register():
