@@ -142,7 +142,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         if len(ag.collection.objects) == 0:
             self.report({"WARNING"}, "Collection contains no objects!" if b280() else "Group contains no objects!")
             return False
-        # make sure no objects in this group are part of another AssemblMe animation
+        # make sure no objects in this collection are part of another AssemblMe animation
         for i in range(len(scn.aglist)):
             if i == scn.aglist_index or not scn.aglist[i].animated:
                 continue

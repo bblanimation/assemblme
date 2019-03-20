@@ -27,7 +27,7 @@ classes = [
     startOver.ASSEMBLME_OT_start_over,
     visualizer.ASSEMBLME_OT_visualizer,
     # assemblme/ui/aglist_attrs
-    ASSEMBLME_UL_animated_groups,
+    ASSEMBLME_UL_animated_collections,
     # assemblme/ui/aglist_actions
     AGLIST_OT_list_action,
     AGLIST_OT_copy_settings_to_others,

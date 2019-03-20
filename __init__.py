@@ -95,7 +95,7 @@ def register():
         default=0.25)
 
     # list properties
-    Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_groups)
+    Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_collections)
     Scene.aglist_index = IntProperty(default=-1)
 
     # Session properties
