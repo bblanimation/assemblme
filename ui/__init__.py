@@ -80,7 +80,7 @@ class ASSEMBLME_PT_animations(Panel):
         col = row.column(align=True)
         col.operator("aglist.list_action", icon='ZOOMIN', text="").action = 'ADD'
         col.operator("aglist.list_action", icon='ZOOMOUT', text="").action = 'REMOVE'
-        col.menu("AssemblMe_specials_menu", icon='DOWNARROW_HLT', text="")
+        col.menu("ASSEMBLME_MT_copy_paste_menu", icon='DOWNARROW_HLT', text="")
         if len(scn.aglist) > 1:
             col.separator()
             col.operator("aglist.list_action", icon='TRIA_UP', text="").action = 'UP'
