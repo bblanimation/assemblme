@@ -33,7 +33,7 @@ class ASSEMBLME_UL_animated_groups(bpy.types.PropertyGroup):
     id = IntProperty()
     idx = IntProperty()
 
-    group = PointerProperty(
+    collection = PointerProperty(
         type=bpy.types.Group,
         name="Object Group",
         description="Group of objects to animate",

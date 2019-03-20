@@ -98,18 +98,17 @@ class ASSEMBLME_PT_animations(Panel):
             row.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="Create New Animation").action = 'ADD'
         else:
             ag = scn.aglist[scn.aglist_index]
+            col1.label(text="Collection Name:" if b280() else "Group Name:")
             if ag.animated:
-                n = ag.group.name
-                col1.label(text="Group Name:")
+                n = ag.collection.name
                 col1.label(text="%(n)s" % locals())
             else:
-                col1.label(text="Group Name:")
                 split = layout_split(col1, factor=0.85)
                 col = split.column(align=True)
-                col.prop_search(ag, "group", bpy.data, "groups", text="")
+                col.prop_search(ag, "collection", bpy.data, "collections" if b280() else "groups", text="")
                 col = split.column(align=True)
                 col.operator("aglist.set_to_active", text="", icon="GROUP" if b280() else "EDIT")
-                if ag.group is None:
+                if ag.collection is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
                     row.operator("assemblme.new_group_from_selection", icon='ADD' if b280() else 'ZOOMIN', text="From Selection")
@@ -139,7 +138,7 @@ class ASSEMBLME_PT_actions(Panel):
         col = layout.column(align=True)
         row = col.row(align=True)
         if not ag.animated:
-            row.active = ag.group is not None
+            row.active = ag.collection is not None
         row.operator("assemblme.create_build_animation", text="Create Build Animation" if not ag.animated else "Update Build Animation", icon="MOD_BUILD")
         row = col.row(align=True)
         row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")

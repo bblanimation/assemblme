@@ -57,9 +57,8 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
 
     @timed_call("Time Elapsed")
     def startOver(self):
-        # set up origGroup variable
+        # initialize vars
         scn, ag = getActiveContextInfo()
-        origGroup = ag.group
 
         # save backup of blender file if enabled in user prefs
         saveBackupFile(self)
@@ -71,10 +70,10 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
         # clear objMinLoc and objMaxLoc
         props.objMinLoc, props.objMaxLoc = 0, 0
 
-        # clear animation data from all objects in 'AssemblMe_all_objects_moved' group
-        if origGroup is not None:
-            print("\nClearing animation data from " + str(len(origGroup.objects)) + " objects.")
-            clearAnimation(origGroup.objects)
+        # clear animation data from all objects in 'AssemblMe_all_objects_moved' group/collection
+        if ag.collection is not None:
+            print("\nClearing animation data from " + str(len(ag.collection.objects)) + " objects.")
+            clearAnimation(ag.collection.objects)
 
         # set current_frame to original current_frame
         bpy.context.scene.frame_set(self.origFrame)

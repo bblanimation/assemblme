@@ -19,7 +19,7 @@ bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
     "version"     : (1, 2, 2),
-    "blender"     : (2, 79, 0),
+    "blender"     : (2, 80, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     "wiki_url"    : "https://www.blendermarket.com/products/assemblme",
@@ -40,6 +40,7 @@ from .ui import *
 from .functions import getPresetTuples
 from .buttons.presets import *
 from .lib.classesToRegister import classes
+from .lib.timers import *
 if not b280():
     from . import addon_updater_ops_2_7 as addon_updater_ops
 else:
@@ -104,7 +105,10 @@ def register():
     bpy.props.objMaxLoc = 0
 
     # register app handlers
-    bpy.app.handlers.scene_update_pre.append(handle_selections)
+    if b280():
+        bpy.app.timers.register(handle_selections)
+    else:
+        bpy.app.handlers.scene_update_pre.append(handle_selections)
     bpy.app.handlers.load_post.append(convert_velocity_value)
     bpy.app.handlers.load_post.append(handle_upconversion)
 
@@ -119,7 +123,11 @@ def unregister():
     # unregister app handlers
     bpy.app.handlers.load_post.remove(handle_upconversion)
     bpy.app.handlers.load_post.remove(convert_velocity_value)
-    bpy.app.handlers.scene_update_pre.remove(handle_selections)
+    if b280():
+        if bpy.app.timers.is_registered(handle_selections):
+            bpy.app.timers.unregister(handle_selections)
+    else:
+        bpy.app.handlers.scene_update_pre.remove(handle_selections)
 
     del bpy.props.z_upper_bound
     del bpy.props.z_lower_bound

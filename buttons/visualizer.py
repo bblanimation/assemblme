@@ -86,7 +86,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.visualizerObj.hide_render = True
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                if ag.group is not None:
+                if ag.collection is not None:
                     self.createAnim()
                 # enable visualizer
                 self.enable(context)

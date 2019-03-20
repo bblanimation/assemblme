@@ -65,9 +65,9 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             if not ag.animated:
                 if ASSEMBLME_OT_visualizer.enabled():
                     ASSEMBLME_OT_visualizer.disable()
-                curGroup = ag.group
-                if curGroup is not None:
-                    bpy.data.groups.remove(curGroup, do_unlink=True)
+                if ag.collection is not None:
+                    collections = bpy.data.collections if b280() else bpy.data.groups
+                    collections.remove(ag.collection, do_unlink=True)
                     bpy.context.area.tag_redraw()
                 if len(scn.aglist) - 1 == scn.aglist_index:
                     scn.aglist_index -= 1
@@ -206,7 +206,7 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
         else:
             ag.lastActiveObjectName = active_object.name
             ag.activeGroupIndex = 0
-        ag.group = active_object.users_group[ag.activeGroupIndex]
+        ag.collection = active_object.users_group[ag.activeGroupIndex]
 
         return{'FINISHED'}
 
