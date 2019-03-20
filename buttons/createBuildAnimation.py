@@ -21,7 +21,6 @@ import time
 # Blender imports
 import bpy
 from bpy.props import *
-props = bpy.props
 
 # Addon imports
 from ..functions import *
