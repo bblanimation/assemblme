@@ -26,7 +26,7 @@ from bpy.types import AddonPreferences
 # Addon imports
 from ..ui import *
 from ..buttons import *
-if bversion() < '002.080.00':
+if not b280():
     from .. import addon_updater_ops_2_7 as addon_updater_ops
 else:
     from .. import addon_updater_ops_2_8 as addon_updater_ops
