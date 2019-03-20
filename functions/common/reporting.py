@@ -166,6 +166,10 @@ def bversion(short:bool=True):
     return bver_short if short else bver_long
 
 
+def b280():
+    return bpy.app.version >= (2,80,0)
+
+
 def writeErrorToFile(error_report_path:str, error_log:str, addon_version:str, github_path:str):
     # write error to log text object
     error_report_dir = os.path.dirname(error_report_path)

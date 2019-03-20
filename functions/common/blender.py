@@ -447,3 +447,11 @@ def getItemByID(collection:bpy.types.CollectionProperty, id:int):
             success = True
             break
     return item if success else None
+
+
+@blender_version_wrapper('<=','2.79')
+def layout_split(layout, align=True, factor=0.5):
+    return layout.split(align=align, percentage=factor)
+@blender_version_wrapper('>=','2.80')
+def layout_split(layout, align=True, factor=0.5):
+    return layout.split(align=align, factor=factor)

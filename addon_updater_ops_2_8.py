@@ -19,6 +19,7 @@
 import bpy
 from bpy.app.handlers import persistent
 import os
+from .functions.common.blender import b280, get_preferences, layout_split
 
 # updater import, import safely
 # Prevents popups for users with invalid python installs e.g. missing libraries
@@ -47,20 +48,6 @@ except Exception as e:
 	updater = Singleton_updater_none()
 	updater.error = "Error initializing updater module"
 	updater.error_msg = str(e)
-
-# https://github.com/CGCookie/retopoflow
-def bversion(short:bool=True):
-    """ return Blender version string """
-    major,minor,rev = bpy.app.version
-    bver_long = '%03d.%03d.%03d' % (major,minor,rev)
-    bver_short = '%d.%02d' % (major, minor)
-    return bver_short if short else bver_long
-
-def get_preferences():
-    if bversion() < '002.080.00':
-	    return bpy.context.user_preferences
-	else:
-	    return bpy.context.preferences
 
 # Must declare this before classes are loaded
 # otherwise the bl_idname's will not match and have errors.
@@ -313,11 +300,8 @@ class OBJECT_OT_addon_updater_update_target(bpy.types.Operator):
 		if updater.invalidupdater == True:
 			layout.label(text="Updater error")
 			return
-        if bversion() < '002.080.00':
-			split = layout.split(percentage=0.66)
-		else:
-			split = layout.split(factor=0.66)
-		subcol = split.column()
+		split = layout_split(layout, factor=0.66)
+        subcol = split.column()
 		subcol.label(text="Select install version")
 		subcol = split.column()
 		subcol.prop(self, "target", text="")
@@ -846,10 +830,7 @@ def update_settings_ui(self, context, element=None):
 			row.label(text="Restart blender to complete update", icon="ERROR")
 			return
 
-    if bversion() < '002.080.00':
-		split = row.split(percentage=0.3)
-	else:
-		split = row.split(factor=0.3)
+	split = layout_split(row, factor=0.3)
 	subcol = split.column()
 	subcol.prop(settings, "auto_check_update")
 	subcol = split.column()
@@ -1164,7 +1145,7 @@ def select_link_function(self, tag):
 
 	return link
 
-	
+
 # -----------------------------------------------------------------------------
 # Register, should be run in the register module itself
 # -----------------------------------------------------------------------------

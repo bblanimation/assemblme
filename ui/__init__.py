@@ -29,7 +29,7 @@ from .aglist_utils import *
 from .aglist_attrs import *
 from .app_handlers import *
 from ..functions import *
-if bversion() < '002.080.00':
+if not b280():
     from .. import addon_updater_ops_2_7 as addon_updater_ops
 else:
     from .. import addon_updater_ops_2_8 as addon_updater_ops
@@ -47,7 +47,7 @@ class ASSEMBLME_MT_copy_paste_menu(bpy.types.Menu):
 
 class ASSEMBLME_PT_animations(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Animations"
     bl_idname      = "ASSEMBLME_PT_animations"
     bl_context     = "objectmode"
@@ -84,8 +84,8 @@ class ASSEMBLME_PT_animations(Panel):
         row.template_list("ASSEMBLME_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
 
         col = row.column(align=True)
-        col.operator("aglist.list_action", icon='ZOOMIN', text="").action = 'ADD'
-        col.operator("aglist.list_action", icon='ZOOMOUT', text="").action = 'REMOVE'
+        col.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="").action = 'ADD'
+        col.operator("aglist.list_action", icon='REMOVE' if b280() else 'ZOOMOUT', text="").action = 'REMOVE'
         col.menu("ASSEMBLME_MT_copy_paste_menu", icon='DOWNARROW_HLT', text="")
         if len(scn.aglist) > 1:
             col.separator()
@@ -95,7 +95,7 @@ class ASSEMBLME_PT_animations(Panel):
         col1 = layout.column(align=True)
         if scn.aglist_index == -1:
             row = col1.row(align=True)
-            row.operator("aglist.list_action", icon='ZOOMIN', text="Create New Animation").action = 'ADD'
+            row.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="Create New Animation").action = 'ADD'
         else:
             ag = scn.aglist[scn.aglist_index]
             if ag.animated:
@@ -104,24 +104,23 @@ class ASSEMBLME_PT_animations(Panel):
                 col1.label(text="%(n)s" % locals())
             else:
                 col1.label(text="Group Name:")
-                split = col1.split(align=True, percentage=0.85)
+                split = layout_split(col1, factor=0.85)
                 col = split.column(align=True)
                 col.prop_search(ag, "group", bpy.data, "groups", text="")
                 col = split.column(align=True)
-                col.operator("aglist.set_to_active", text="", icon="EDIT")
+                col.operator("aglist.set_to_active", text="", icon="GROUP" if b280() else "EDIT")
                 if ag.group is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
-                    row.operator("assemblme.new_group_from_selection", icon='ZOOMIN', text="From Selection")
+                    row.operator("assemblme.new_group_from_selection", icon='ADD' if b280() else 'ZOOMIN', text="From Selection")
 
 class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Actions"
     bl_idname      = "ASSEMBLME_PT_actions"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -147,7 +146,7 @@ class ASSEMBLME_PT_actions(Panel):
         row = col.row(align=True)
         row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find('AssemblMe_log') >= 0:
-            split = layout.split(align=True, percentage = 0.9)
+            split = layout_split(layout, factor=0.9)
             col = split.column(align=True)
             row = col.row(align=True)
             row.operator("scene.report_error", text="Report Error", icon="URL").addon_name = "AssemblMe"
@@ -157,12 +156,11 @@ class ASSEMBLME_PT_actions(Panel):
 
 class ASSEMBLME_PT_settings(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Settings"
     bl_idname      = "ASSEMBLME_PT_settings"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -208,7 +206,7 @@ class ASSEMBLME_PT_settings(Panel):
             row = col.row(align=True)
             row.prop(ag, "pathObject")
         else:
-            split = col.split(align=False, percentage = 0.5)
+            split = layout_split(col, align=False, factor=0.5)
             col1 = split.column(align=True)
             row = col1.row(align=True)
             row.label(text="Location Offset:")
@@ -242,7 +240,7 @@ class ASSEMBLME_PT_settings(Panel):
         row = col1.row(align=True)
         row.label(text="Layer Orientation:")
         row = col1.row(align=True)
-        split = row.split(align=True, percentage=0.9)
+        split = layout_split(row, factor=0.9)
         row = split.row(align=True)
         col = row.column(align=True)
         col.prop(ag, "xOrient")
@@ -277,13 +275,12 @@ class ASSEMBLME_PT_settings(Panel):
 
 class ASSEMBLME_PT_interface(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Interface"
     bl_idname      = "ASSEMBLME_PT_interface"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -308,13 +305,12 @@ class ASSEMBLME_PT_interface(Panel):
 
 class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Preset Manager"
     bl_idname      = "ASSEMBLME_PT_preset_manager"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -332,17 +328,17 @@ class ASSEMBLME_PT_preset_manager(Panel):
             row = col.row(align=True)
             row.label(text="Create New Preset:")
             row = col.row(align=True)
-            split = row.split(align=True, percentage = 0.7)
+        split = layout_split(row, factor=0.7)
             col = split.column(align=True)
             col.prop(scn, "newPresetName", text="")
             col = split.column(align=True)
             col.active = scn.newPresetName != ""
-            col.operator("assemblme.anim_presets", text="Create", icon="ZOOMIN").action = "CREATE"
+            col.operator("assemblme.anim_presets", text="Create", icon="ADD" if b280() else "ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
         row.label(text="Remove Existing Preset:")
         row = col.row(align=True)
-        split = row.split(align=True, percentage = 0.7)
+        split = layout_split(row, factor=0.7)
         col = split.column(align=True)
         col.prop(scn, "animPresetToDelete", text="")
         col = split.column(align=True)
