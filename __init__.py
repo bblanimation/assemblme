@@ -40,7 +40,10 @@ from .ui import *
 from .functions import getPresetTuples
 from .buttons.presets import *
 from .lib.classesToRegister import classes
-from . import addon_updater_ops
+if bversion() < '002.080.00':
+    from . import addon_updater_ops_2_7 as addon_updater_ops
+else:
+    from . import addon_updater_ops_2_8 as addon_updater_ops
 
 
 def register():
