@@ -27,11 +27,11 @@ from math import *
 
 # Blender imports
 import bpy
+from bpy.props import *
 props = bpy.props
 
 # Addon imports
 from .common import *
-# from .common_mesh_generate import *
 
 
 def getActiveContextInfo(ag_idx=None):
@@ -42,7 +42,7 @@ def getActiveContextInfo(ag_idx=None):
 
 
 def saveBackupFile(self):
-    if bpy.props.assemblme_preferences.autoSaveOnStartOver:
+    if get_addon_preferences().autoSaveOnStartOver:
         if bpy.data.filepath == '':
             self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
             return{"CANCELLED"}
@@ -110,7 +110,7 @@ def getFileNames(dir):
 def getPresetTuples(fileNames=None, transferDefaults=False):
     if not fileNames:
         # initialize presets path
-        path = bpy.props.assemblme_preferences.presetsFilepath
+        path = get_addon_preferences().presetsFilepath
         # set up presets folder and transfer default presets
         if not os.path.exists(path):
             os.makedirs(path)
@@ -238,7 +238,7 @@ def updateAnimPreset(self, context):
     scn = bpy.context.scene
     if scn.animPreset != "None":
         import importlib.util
-        pathToFile = os.path.join(bpy.props.assemblme_preferences.presetsFilepath, scn.animPreset + ".py")
+        pathToFile = os.path.join(get_addon_preferences().presetsFilepath, scn.animPreset + ".py")
         if os.path.isfile(pathToFile):
             spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
             foo = importlib.util.module_from_spec(spec)
@@ -254,14 +254,14 @@ def updateAnimPreset(self, context):
             print(errorString)
             presetNames = getPresetTuples()
 
-            bpy.types.Scene.animPreset = bpy.props.EnumProperty(
+            bpy.types.Scene.animPreset = EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
                 items=presetNames,
                 update=updateAnimPreset,
                 default="None")
 
-            bpy.types.Scene.animPresetToDelete = bpy.props.EnumProperty(
+            bpy.types.Scene.animPresetToDelete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=presetNames,
@@ -351,13 +351,13 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
                     #     # NOTE: Solution 1 - currently limited to at most 360 degrees
                     #     xr, yr, zr = getOffsetRotation(Vector((0,0,0)))
                     #     inv_mat = obj.matrix_world.inverted()
-                    #     xAxis = inv_mat * Vector((1, 0, 0))
-                    #     yAxis = inv_mat * Vector((0, 1, 0))
-                    #     zAxis = inv_mat * Vector((0, 0, 1))
+                    #     xAxis = mathutils_mult(inv_mat, Vector((1, 0, 0)))
+                    #     yAxis = mathutils_mult(inv_mat, Vector((0, 1, 0)))
+                    #     zAxis = mathutils_mult(inv_mat, Vector((0, 0, 1)))
                     #     xMat = Matrix.Rotation(xr, 4, xAxis)
                     #     yMat = Matrix.Rotation(yr, 4, yAxis)
                     #     zMat = Matrix.Rotation(zr, 4, zAxis)
-                    #     obj.matrix_local = zMat * yMat * xMat * obj.matrix_local
+                    #     obj.matrix_local = mathutils_mult(zMat, yMat, xMat, obj.matrix_local)
                     # else:
                     obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
@@ -382,4 +382,4 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
     return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
 
 def assemblme_handle_exception():
-    handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")
+    handle_exception(log_name="AssemblMe_log", report_button_loc="AssemblMe > Animations > Report Error")

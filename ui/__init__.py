@@ -15,39 +15,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# system imports
+# System imports
+# NONE!
+
+# Blender imports
 import bpy
 from bpy.types import Panel
 from bpy.props import *
+
+# Addon imports
 from .aglist_actions import *
 from .aglist_utils import *
 from .aglist_attrs import *
 from .app_handlers import *
+from .timers import *
 from ..functions import *
-props = bpy.props
+if not b280():
+    from .. import addon_updater_ops_2_7 as addon_updater_ops
+else:
+    from .. import addon_updater_ops_2_8 as addon_updater_ops
 
-# updater import
-from .. import addon_updater_ops
-
-class BasicMenu(bpy.types.Menu):
-    bl_idname = "AssemblMe_specials_menu"
+class ASSEMBLME_MT_copy_paste_menu(bpy.types.Menu):
+    bl_idname = "ASSEMBLME_MT_copy_paste_menu"
     bl_label = "Select"
 
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("aglist.copy_to_others", icon="COPY_ID", text="Copy Settings to Others")
+        layout.operator("aglist.copy_settings_to_others", icon="COPY_ID", text="Copy Settings to Others")
         layout.operator("aglist.copy_settings", icon="COPYDOWN", text="Copy Settings")
         layout.operator("aglist.paste_settings", icon="PASTEDOWN", text="Paste Settings")
 
-class AnimationsPanel(Panel):
+class ASSEMBLME_PT_animations(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Animations"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_animations"
+    bl_idname      = "ASSEMBLME_PT_animations"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -60,8 +65,8 @@ class AnimationsPanel(Panel):
 
         if bversion() < '002.079.00':
             col = layout.column(align=True)
-            col.label('ERROR: upgrade needed', icon='ERROR')
-            col.label('AssemblMe requires Blender 2.79+')
+            col.label(text="ERROR: upgrade needed", icon="ERROR")
+            col.label(text="AssemblMe requires Blender 2.79+")
             return
 
         # Call to check for update in background
@@ -80,9 +85,9 @@ class AnimationsPanel(Panel):
         row.template_list("ASSEMBLME_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
 
         col = row.column(align=True)
-        col.operator("aglist.list_action", icon='ZOOMIN', text="").action = 'ADD'
-        col.operator("aglist.list_action", icon='ZOOMOUT', text="").action = 'REMOVE'
-        col.menu("AssemblMe_specials_menu", icon='DOWNARROW_HLT', text="")
+        col.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="").action = 'ADD'
+        col.operator("aglist.list_action", icon='REMOVE' if b280() else 'ZOOMOUT', text="").action = 'REMOVE'
+        col.menu("ASSEMBLME_MT_copy_paste_menu", icon='DOWNARROW_HLT', text="")
         if len(scn.aglist) > 1:
             col.separator()
             col.operator("aglist.list_action", icon='TRIA_UP', text="").action = 'UP'
@@ -91,33 +96,31 @@ class AnimationsPanel(Panel):
         col1 = layout.column(align=True)
         if scn.aglist_index == -1:
             row = col1.row(align=True)
-            row.operator("aglist.list_action", icon='ZOOMIN', text="Create New Animation").action = 'ADD'
+            row.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="Create New Animation").action = 'ADD'
         else:
             ag = scn.aglist[scn.aglist_index]
+            col1.label(text="Collection Name:" if b280() else "Group Name:")
             if ag.animated:
-                n = ag.group.name
-                col1.label(text="Group Name:")
+                n = ag.collection.name
                 col1.label(text="%(n)s" % locals())
             else:
-                col1.label(text="Group Name:")
-                split = col1.split(align=True, percentage=0.85)
+                split = layout_split(col1, factor=0.85)
                 col = split.column(align=True)
-                col.prop_search(ag, "group", bpy.data, "groups", text="")
+                col.prop_search(ag, "collection", bpy.data, "collections" if b280() else "groups", text="")
                 col = split.column(align=True)
-                col.operator("aglist.set_to_active", icon="EDIT", text="")
-                if ag.group is None:
+                col.operator("aglist.set_to_active", text="", icon="GROUP" if b280() else "EDIT")
+                if ag.collection is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
-                    row.operator("scene.new_group_from_selection", icon='ZOOMIN', text="From Selection")
+                    row.operator("assemblme.new_group_from_selection", icon='ADD' if b280() else 'ZOOMIN', text="From Selection")
 
-class ActionsPanel(Panel):
+class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Actions"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_actions"
+    bl_idname      = "ASSEMBLME_PT_actions"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -136,29 +139,26 @@ class ActionsPanel(Panel):
         col = layout.column(align=True)
         row = col.row(align=True)
         if not ag.animated:
-            row.active = ag.group is not None
-            row.operator("scene.create_build_animation", text="Create Build Animation", icon="MOD_BUILD").action = "CREATE"
-        else:
-            row.operator("scene.create_build_animation", text="Update Build Animation", icon="MOD_BUILD").action = "UPDATE"
+            row.active = ag.collection is not None
+        row.operator("assemblme.create_build_animation", text="Create Build Animation" if not ag.animated else "Update Build Animation", icon="MOD_BUILD")
         row = col.row(align=True)
-        row.operator("scene.start_over", text="Start Over", icon="RECOVER_LAST")
-        if bpy.data.texts.find('AssemblMe log') >= 0:
-            split = layout.split(align=True, percentage = 0.9)
+        row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
+        if bpy.data.texts.find('AssemblMe_log') >= 0:
+            split = layout_split(layout, factor=0.9)
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.report_error", text="Report Error", icon="URL").addon_name = "AssemblMe"
+            row.operator("scene.report_error", text="Report Error", icon="URL")
             col = split.column(align=True)
             row = col.row(align=True)
-            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE").addon_name = "AssemblMe"
+            row.operator("scene.close_report_error", text="", icon="PANEL_CLOSE")
 
-class SettingsPanel(Panel):
+class ASSEMBLME_PT_settings(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Settings"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_settings"
+    bl_idname      = "ASSEMBLME_PT_settings"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -174,12 +174,6 @@ class SettingsPanel(Panel):
         layout = self.layout
         scn, ag = getActiveContextInfo()
 
-        if bversion() < '002.075.00':
-            col = layout.column(align=True)
-            col.label('ERROR: upgrade needed', icon='ERROR')
-            col.label('AssemblMe requires Blender 2.75+')
-            return
-
         col = layout.column(align=True)
         row = col.row(align=True)
         row.prop(scn, "animPreset", text="Preset")
@@ -194,7 +188,7 @@ class SettingsPanel(Panel):
             approx = "~"
         else:
             approx = ""
-        row.operator("scene.refresh_build_animation_length", text="Duration: " + approx + str(ag.animLength) + " frames", icon="FILE_REFRESH")
+        row.operator("assemblme.refresh_anim_length", text="Duration: " + approx + str(ag.animLength) + " frames", icon="FILE_REFRESH")
         row = col.row(align=True)
         row.prop(ag, "firstFrame")
         row = col.row(align=True)
@@ -210,7 +204,7 @@ class SettingsPanel(Panel):
             row = col.row(align=True)
             row.prop(ag, "pathObject")
         else:
-            split = col.split(align=False, percentage = 0.5)
+            split = layout_split(col, align=False, factor=0.5)
             col1 = split.column(align=True)
             row = col1.row(align=True)
             row.label(text="Location Offset:")
@@ -244,17 +238,14 @@ class SettingsPanel(Panel):
         row = col1.row(align=True)
         row.label(text="Layer Orientation:")
         row = col1.row(align=True)
-        split = row.split(align=True, percentage=0.9)
+        split = layout_split(row, factor=0.9)
         row = split.row(align=True)
         col = row.column(align=True)
         col.prop(ag, "xOrient")
         col = row.column(align=True)
         col.prop(ag, "yOrient")
         col = split.column(align=True)
-        if ag.visualizerActive:
-            col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF")
-        else:
-            col.operator("scene.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_ON")
+        col.operator("assemblme.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF" if ag.visualizerActive else "RESTRICT_VIEW_ON")
         row = col1.row(align=True)
         row.prop(ag, "orientRandom")
         col1 = box.column(align=True)
@@ -280,15 +271,14 @@ class SettingsPanel(Panel):
         row.prop(ag, "meshOnly")
 
 
-class InterfacePanel(Panel):
+class ASSEMBLME_PT_interface(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Interface"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_interface"
+    bl_idname      = "ASSEMBLME_PT_interface"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -311,15 +301,14 @@ class InterfacePanel(Panel):
         row.prop(scn, "visualizerScale")
         row.prop(scn, "visualizerRes")
 
-class presetManager(Panel):
+class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI" if b280() else "TOOLS"
     bl_label       = "Preset Manager"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_preset_manager"
+    bl_idname      = "ASSEMBLME_PT_preset_manager"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
-    COMPAT_ENGINES = {"CYCLES", "BLENDER_RENDER"}
 
     @classmethod
     def poll(cls, context):
@@ -337,22 +326,22 @@ class presetManager(Panel):
             row = col.row(align=True)
             row.label(text="Create New Preset:")
             row = col.row(align=True)
-            split = row.split(align=True, percentage = 0.7)
+            split = layout_split(row, factor=0.7)
             col = split.column(align=True)
             col.prop(scn, "newPresetName", text="")
             col = split.column(align=True)
             col.active = scn.newPresetName != ""
-            col.operator("scene.animation_presets", text="Create", icon="ZOOMIN").action = "CREATE"
+            col.operator("assemblme.anim_presets", text="Create", icon="ADD" if b280() else "ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
         row.label(text="Remove Existing Preset:")
         row = col.row(align=True)
-        split = row.split(align=True, percentage = 0.7)
+        split = layout_split(row, factor=0.7)
         col = split.column(align=True)
         col.prop(scn, "animPresetToDelete", text="")
         col = split.column(align=True)
         col.active = scn.animPresetToDelete != "None"
-        col.operator("scene.animation_presets", text="Remove", icon="X").action = "REMOVE"
+        col.operator("assemblme.anim_presets", text="Remove", icon="X").action = "REMOVE"
         col = layout.column(align=True)
         row = col.row(align=True)
-        col.operator("scene.info_restore_preset", text="Restore Presets", icon="INFO")
+        col.operator("assemblme.info_restore_preset", text="Restore Presets", icon="INFO")

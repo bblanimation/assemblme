@@ -21,14 +21,14 @@ from shutil import copyfile
 
 # Blender imports
 import bpy
-props = bpy.props
+from bpy.props import EnumProperty
 
 # Addon imports
 from ..functions import *
 
-class ASSEMBLME_OT_animation_presets(bpy.types.Operator):
+class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     """Create new preset with current animation settings"""                     # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.animation_presets"                                       # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.anim_presets"                                        # unique identifier for buttons and menu items to reference.
     bl_label = "Animation Presets"                                              # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
@@ -47,7 +47,7 @@ class ASSEMBLME_OT_animation_presets(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn = bpy.context.scene
-            path = bpy.props.assemblme_preferences.presetsFilepath
+            path = get_addon_preferences().presetsFilepath
             fileNames = getFileNames(path)
             selectedPreset = "None"
             if self.action == "CREATE":
@@ -78,7 +78,7 @@ class ASSEMBLME_OT_animation_presets(bpy.types.Operator):
                     return{"CANCELLED"}
 
             presetNames = getPresetTuples(fileNames=fileNames)
-            bpy.types.Scene.animPreset = bpy.props.EnumProperty(
+            bpy.types.Scene.animPreset = EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
                 items=presetNames,
@@ -86,7 +86,7 @@ class ASSEMBLME_OT_animation_presets(bpy.types.Operator):
                 default="None")
             scn.animPreset = selectedPreset
 
-            bpy.types.Scene.animPresetToDelete = bpy.props.EnumProperty(
+            bpy.types.Scene.animPresetToDelete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=presetNames,
@@ -100,7 +100,7 @@ class ASSEMBLME_OT_animation_presets(bpy.types.Operator):
     ###################################################
     # class variables
 
-    action = bpy.props.EnumProperty(
+    action = EnumProperty(
         items=(
             ('CREATE', "Create", ""),
             ('REMOVE', "Remove", ""),
@@ -112,7 +112,7 @@ class ASSEMBLME_OT_animation_presets(bpy.types.Operator):
 
     def writeNewPreset(self, presetName):
         scn, ag = getActiveContextInfo()
-        presetsFilepath = bpy.props.assemblme_preferences.presetsFilepath
+        presetsFilepath = get_addon_preferences().presetsFilepath
         if not os.path.exists(presetsFilepath):
             os.makedirs(presetsFilepath)
         newPresetPath = os.path.join(presetsFilepath, presetName + ".py")

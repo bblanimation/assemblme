@@ -28,7 +28,7 @@ from ..functions import *
 
 class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     """Visualize the layer orientation with a plane"""                          # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.visualize_layer_orientation"                             # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.visualize_layer_orientation"                         # unique identifier for buttons and menu items to reference.
     bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
@@ -43,14 +43,14 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
         if event.type == "TIMER":
             if context.scene.aglist_index == -1:
-                self.full_disable(context, setInactive=False)
+                self.full_disable(context)
                 return{"CANCELLED"}
             scn, ag = getActiveContextInfo()
             try:
                 v_obj = self.visualizerObj
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
-                    self.full_disable(context, setInactive=False)
+                    self.full_disable(context)
                     return{"CANCELLED"}
                 # if new build animation created, update visualizer animation
                 if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
@@ -81,9 +81,12 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.full_disable(context)
                 return{"FINISHED"}
             else:
+                # ensure visualizer is hidden from render and selection
+                self.visualizerObj.hide_select = True
+                self.visualizerObj.hide_render = True
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                if ag.group is not None:
+                if ag.collection is not None:
                     self.createAnim()
                 # enable visualizer
                 self.enable(context)
@@ -91,7 +94,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.zOrient = None
                 # create timer for modal
                 wm = context.window_manager
-                self._timer = wm.event_timer_add(.02, context.window)
+                self._timer = wm.event_timer_add(.02, window=context.window)
                 wm.modal_handler_add(self)
         except:
             assemblme_handle_exception()
@@ -99,33 +102,18 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         return{"RUNNING_MODAL"}
 
     def cancel(self, context):
-        # remove timer
         context.window_manager.event_timer_remove(self._timer)
-        # delete visualizer object and mesh
-        bpy.data.objects.remove(self.visualizerObj, do_unlink=True)
-        bpy.data.meshes.remove(self.m, do_unlink=True)
-        # remove visualizer group
-        if groupExists("AssemblMe_visualizer"):
-            vGroup = bpy.data.groups["AssemblMe_visualizer"]
-            bpy.data.groups.remove(vGroup, do_unlink=True)
+        self.full_disable(context)
 
     ################################################
     # initialization method
 
     def __init__(self):
-        if groupExists("AssemblMe_visualizer"):
-            # set self.visualizer and self.m with existing data
-            self.visualizerObj = bpy.data.groups["AssemblMe_visualizer"].objects[0]
-            self.m = self.visualizerObj.data
-        else:
+        self.visualizerObj = bpy.data.objects.get("AssemblMe_visualizer")
+        if self.visualizerObj is None:
             # create visualizer object
-            self.m = bpy.data.meshes.new('AssemblMe_visualizer_m')
-            self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
-            self.visualizerObj.hide_select = True
-            self.visualizerObj.hide_render = True
-            # put in new group
-            vGroup = bpy.data.groups.new("AssemblMe_visualizer")
-            vGroup.objects.link(self.visualizerObj)
+            m = bpy.data.meshes.new("AssemblMe_visualizer_m")
+            self.visualizerObj = bpy.data.objects.new("AssemblMe_visualizer", m)
 
     #############################################
     # class methods
@@ -173,20 +161,18 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         # add proper mesh data to visualizer object
         self.loadLatticeMesh(context)
         # link visualizer object to scene
-        scn.objects.link(self.visualizerObj)
+        safeLink(self.visualizerObj)
         unhide(self.visualizerObj)
         ag.visualizerActive = True
 
-    def full_disable(self, context, setInactive=True):
+    def full_disable(self, context):
         """ disables visualizer """
-        scn = bpy.context.scene
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
-        # unlink visualizer object to scene
-        if self.visualizerObj.name in scn.objects.keys():
-            scn.objects.unlink(self.visualizerObj)
-        if setInactive:
-            ag = getActiveContextInfo()[1]
+        # unlink visualizer object
+        safeUnlink(self.visualizerObj)
+        # disable visualizer icon
+        for ag in bpy.context.scene.aglist:
             ag.visualizerActive = False
 
     @staticmethod

@@ -15,16 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# system imports
-import bpy
+# System imports
 import os
+
+# Blender imports
+import bpy
 from bpy.props import *
-from ..ui import *
-from ..buttons import *
 from bpy.types import AddonPreferences
 
-# updater import
-from .. import addon_updater_ops
+# Addon imports
+from ..ui import *
+from ..buttons import *
+if not b280():
+    from .. import addon_updater_ops_2_7 as addon_updater_ops
+else:
+    from .. import addon_updater_ops_2_8 as addon_updater_ops
 
 class ASSEMBLME_PT_preferences(AddonPreferences):
     # bl_idname = __name__
@@ -49,24 +54,24 @@ class ASSEMBLME_PT_preferences(AddonPreferences):
             default=False)
 
 	# addon updater preferences
-    auto_check_update = bpy.props.BoolProperty(
+    auto_check_update = BoolProperty(
         name = "Auto-check for Update",
         description = "If enabled, auto-check for updates using an interval",
         default = False)
-    updater_intrval_months = bpy.props.IntProperty(
+    updater_intrval_months = IntProperty(
         name='Months',
         description = "Number of months between checking for updates",
         default=0, min=0)
-    updater_intrval_days = bpy.props.IntProperty(
+    updater_intrval_days = IntProperty(
         name='Days',
         description = "Number of days between checking for updates",
         default=7, min=0)
-    updater_intrval_hours = bpy.props.IntProperty(
+    updater_intrval_hours = IntProperty(
         name='Hours',
         description = "Number of hours between checking for updates",
         min=0, max=23,
         default=0)
-    updater_intrval_minutes = bpy.props.IntProperty(
+    updater_intrval_minutes = IntProperty(
         name='Minutes',
         description = "Number of minutes between checking for updates",
         min=0, max=59,

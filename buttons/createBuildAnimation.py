@@ -20,14 +20,14 @@ import time
 
 # Blender imports
 import bpy
-props = bpy.props
+from bpy.props import *
 
 # Addon imports
 from ..functions import *
 
 class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     """Select objects layer by layer and shift by given values"""               # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.create_build_animation"                                  # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.create_build_animation"                              # unique identifier for buttons and menu items to reference.
     bl_label = "Create Build Animation"                                         # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
@@ -55,18 +55,13 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
     def __init__(self):
         scn, ag = getActiveContextInfo()
-        self.objects_to_move = [obj for obj in ag.group.objects if not ag.meshOnly or obj.type == "MESH"]
+        self.objects_to_move = [obj for obj in ag.collection.objects if not ag.meshOnly or obj.type == "MESH"]
+        self.action = "CREATE" if not ag.animated else "UPDATE"
 
     ###################################################
     # class variables
 
-    action = bpy.props.EnumProperty(
-        items=(
-            ("CREATE", "Create", ""),
-            ("UPDATE", "Update", ""),
-            ("GET_LEN", "Get Length", ""),
-        )
-    )
+    # NONE!
 
     ###################################################
     # class methods
@@ -87,13 +82,12 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
         # set up other variables
         ag.lastLayerVelocity = getObjectVelocity()
-        origGroup = ag.group
         self.origFrame = scn.frame_current
         if self.action == "UPDATE":
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
-        # clear animation data from all objects in ag.group
-        clearAnimation(origGroup.objects)
+        # clear animation data from all objects in ag.collection
+        clearAnimation(ag.collection.objects)
 
         ### BEGIN ANIMATION GENERATION ###
         # populate self.listZValues
@@ -142,20 +136,21 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
             ag.animated = True
 
     def isValid(self, scn, ag):
-        if ag.group is None:
-            self.report({"WARNING"}, "No group name specified")
+        if ag.collection is None:
+            self.report({"WARNING"}, "No collection name specified" if b280() else "No group name specified")
             return False
-        if len(ag.group.objects) == 0:
-            self.report({"WARNING"}, "Group contains no objects!")
+        if len(ag.collection.objects) == 0:
+            self.report({"WARNING"}, "Collection contains no objects!" if b280() else "Group contains no objects!")
             return False
-        # make sure no objects in this group are part of another AssemblMe animation
+        # make sure no objects in this collection are part of another AssemblMe animation
         for i in range(len(scn.aglist)):
             if i == scn.aglist_index or not scn.aglist[i].animated:
                 continue
-            g = scn.aglist[i].group
+            c = scn.aglist[i].collection
             for obj in self.objects_to_move:
-                if g in obj.users_group:
-                    self.report({"ERROR"}, "Some objects in this group are part of another AssemblMe animation")
+                users_collection = obj.users_collection if b280() else obj.users_group
+                if c in users_collection:
+                    self.report({"ERROR"}, "Some objects in this collection are part of another AssemblMe animation")
                     return False
         return True
 

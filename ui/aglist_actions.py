@@ -22,7 +22,6 @@
 import bpy
 from bpy.props import *
 from bpy.types import Panel, UIList
-props = bpy.props
 
 # Addon imports
 from ..functions import *
@@ -33,7 +32,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
     bl_idname = "aglist.list_action"
     bl_label = "List Action"
 
-    action = bpy.props.EnumProperty(
+    action = EnumProperty(
         items=(
             ('UP', "Up", ""),
             ('DOWN', "Down", ""),
@@ -66,9 +65,9 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             if not ag.animated:
                 if ASSEMBLME_OT_visualizer.enabled():
                     ASSEMBLME_OT_visualizer.disable()
-                curGroup = ag.group
-                if curGroup is not None:
-                    bpy.data.groups.remove(curGroup, do_unlink=True)
+                if ag.collection is not None:
+                    collections = bpy.data.collections if b280() else bpy.data.groups
+                    collections.remove(ag.collection, do_unlink=True)
                     bpy.context.area.tag_redraw()
                 if len(scn.aglist) - 1 == scn.aglist_index:
                     scn.aglist_index -= 1
@@ -184,7 +183,7 @@ class AGLIST_OT_paste_settings(bpy.types.Operator):
 class AGLIST_OT_set_to_active(bpy.types.Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
-    bl_description = "Set group name to next group in active object"
+    bl_description = "Set to next collection containing active object" if b280() else "Set to next group containing active object"
 
     @classmethod
     def poll(cls, context):
@@ -198,16 +197,17 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
 
     def execute(self, context):
         scn, ag = getActiveContextInfo()
-        active_object = context.active_object
-        if len(active_object.users_group) == 0:
-            self.report({"INFO"}, "Active object has no linked groups.")
+        active_object = bpy.context.active_object
+        obj_users = active_object.users_collection if b280() else active_object.users_group
+        if len(obj_users) == 0:
+            self.report({"INFO"}, "Active object has no parent collections" if b280() else "Active object has no linked groups.")
             return {"CANCELLED"}
         if ag.lastActiveObjectName == active_object.name:
-            ag.activeGroupIndex = (ag.activeGroupIndex + 1) % len(active_object.users_group)
+            ag.activeUserIndex = (ag.activeUserIndex + 1) % len(obj_users)
         else:
             ag.lastActiveObjectName = active_object.name
-            ag.activeGroupIndex = 0
-        ag.group = active_object.users_group[ag.activeGroupIndex]
+            ag.activeUserIndex = 0
+        ag.collection = obj_users[ag.activeUserIndex]
 
         return{'FINISHED'}
 
@@ -252,13 +252,13 @@ class AGLIST_OT_clear_all_items(bpy.types.Operator):
 # draw
 # -------------------------------------------------------------------
 
-class AGLIST_UL_items(UIList):
+class ASSEMBLME_UL_items(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types
         if self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
-        split = layout.split(factor=0.9)
+        split = layout_split(layout, align=False, factor=0.9)
         split.prop(item, "name", text="", emboss=False, translate=False, icon='MOD_BUILD')
 
     def invoke(self, context, event):

@@ -28,16 +28,16 @@ from ..functions import *
 from .aglist_utils import *
 
 # Create custom property group
-class ASSEMBLME_UL_animated_groups(bpy.types.PropertyGroup):
+class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     name = StringProperty(update=uniquifyName)
     id = IntProperty()
     idx = IntProperty()
 
-    group = PointerProperty(
-        type=bpy.types.Group,
-        name="Object Group",
+    collection = PointerProperty(
+        type=bpy.types.Collection if b280() else bpy.types.Group,
+        name="Object Collection" if b280() else "Object Group",
         description="Group of objects to animate",
-        update=groupUpdate)
+        update=collectionUpdate)
 
     firstFrame = IntProperty(
         name="Start",
@@ -222,5 +222,5 @@ class ASSEMBLME_UL_animated_groups(bpy.types.PropertyGroup):
         default=False)
 
     lastActiveObjectName = StringProperty(default="")
-    activeGroupIndex = IntProperty(default=0)
+    activeUserIndex = IntProperty(default=0)
     version = StringProperty(default="1.1.6")

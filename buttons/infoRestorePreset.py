@@ -28,8 +28,8 @@ from ..functions import *
 
 class ASSEMBLME_OT_info_restore_preset(bpy.types.Operator):
     """Clear animation from objects moved in last 'Create Build Animation' action""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.info_restore_preset"                                     # unique identifier for buttons and menu items to reference.
-    bl_label = "Info Restore Preset"                                                     # display name in the interface.
+    bl_idname = "assemblme.info_restore_preset"                                 # unique identifier for buttons and menu items to reference.
+    bl_label = "Info Restore Preset"                                            # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
     ################################################

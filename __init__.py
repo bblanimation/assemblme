@@ -19,7 +19,7 @@ bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
     "version"     : (1, 2, 2),
-    "blender"     : (2, 79, 0),
+    "blender"     : (2, 80, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     "wiki_url"    : "https://www.blendermarket.com/products/assemblme",
@@ -33,23 +33,25 @@ import os
 import bpy
 from bpy.props import *
 from bpy.types import Scene
+from bpy.utils import register_class, unregister_class
 
 # Addon import
-from .buttons.presets import *
-from .lib.preferences import *
-from .lib.reportError import *
 from .ui import *
-from .buttons import *
 from .functions import getPresetTuples
-from . import addon_updater_ops
+from .buttons.presets import *
+from .lib.classesToRegister import classes
+if not b280():
+    from . import addon_updater_ops_2_7 as addon_updater_ops
+else:
+    from . import addon_updater_ops_2_8 as addon_updater_ops
 
 
 def register():
-    bpy.utils.register_module(__name__)
+    for cls in classes:
+        register_class(cls)
 
     bpy.props.assemblme_module_name = __name__
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
-    bpy.props.assemblme_preferences = bpy.context.user_preferences.addons[__package__].preferences
 
     Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
@@ -75,7 +77,7 @@ def register():
     Scene.animPresetToDelete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
-        items=bpy.types.Scene.animPreset[1]['items'],
+        items=Scene.animPreset[1]['items'],
         default="None")
 
     Scene.visualizerScale = FloatProperty(
@@ -92,7 +94,7 @@ def register():
         default=0.25)
 
     # list properties
-    Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_groups)
+    Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_collections)
     Scene.aglist_index = IntProperty(default=-1)
 
     # Session properties
@@ -102,7 +104,10 @@ def register():
     bpy.props.objMaxLoc = 0
 
     # register app handlers
-    bpy.app.handlers.scene_update_pre.append(handle_selections)
+    if b280():
+        bpy.app.timers.register(handle_selections)
+    else:
+        bpy.app.handlers.scene_update_pre.append(handle_selections)
     bpy.app.handlers.load_post.append(convert_velocity_value)
     bpy.app.handlers.load_post.append(handle_upconversion)
 
@@ -117,7 +122,11 @@ def unregister():
     # unregister app handlers
     bpy.app.handlers.load_post.remove(handle_upconversion)
     bpy.app.handlers.load_post.remove(convert_velocity_value)
-    bpy.app.handlers.scene_update_pre.remove(handle_selections)
+    if b280():
+        if bpy.app.timers.is_registered(handle_selections):
+            bpy.app.timers.unregister(handle_selections)
+    else:
+        bpy.app.handlers.scene_update_pre.remove(handle_selections)
 
     del bpy.props.z_upper_bound
     del bpy.props.z_lower_bound
@@ -142,11 +151,11 @@ def unregister():
 
     del Scene.assemblme_copy_from_id
 
-    del bpy.props.assemblme_preferences
     del bpy.props.assemblme_version
     del bpy.props.assemblme_module_name
 
-    bpy.utils.unregister_module(__name__)
+    for cls in reversed(classes):
+        unregister_class(cls)
 
 if __name__ == "__main__":
     register()

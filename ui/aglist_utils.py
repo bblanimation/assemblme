@@ -20,8 +20,6 @@
 
 # Blender imports
 import bpy
-# from bpy.props import *
-# props = bpy.props
 
 # Addon imports
 from ..functions import *
@@ -69,34 +67,34 @@ def uniquifyName(self, context):
         ag.name = name
 
 
-def groupUpdate(self, context):
+def collectionUpdate(self, context):
     scn, ag0 = getActiveContextInfo()
     # verify model doesn't exist with that name
-    if ag0.group is not None:
+    if ag0.collection is not None:
         for i,ag1 in enumerate(scn.aglist):
-            if ag1 != ag0 and ag1.group is ag0.group:
-                ag0.group = None
+            if ag1 != ag0 and ag1.collection is ag0.collection:
+                ag0.collection = None
                 scn.aglist_index = i
     # get rid of unused groups created by AssemblMe
-    for g in bpy.data.groups:
-        if g.name.startswith("AssemblMe_"):
+    collections = bpy.data.collections if b280() else bpy.data.groups
+    for c in collections:
+        if c.name.startswith("AssemblMe_"):
             success = False
             for i in range(len(scn.aglist)):
                 ag0 = scn.aglist[i]
-                if g.name == "AssemblMe_{}_group".format(ag0.name):
+                if c.name == "AssemblMe_{}_collection".format(ag0.name):
                     success = True
             if not success:
-                bpy.data.groups.remove(g, do_unlink=True)
+                collections.remove(c, do_unlink=True)
 
 
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
-    curGroup = ag.group
     removedObjs = []
-    if curGroup is not None and ag.meshOnly:
-        for obj in curGroup.objects:
+    if ag.collection is not None and ag.meshOnly:
+        for obj in ag.collection.objects:
             if obj.type != "MESH":
-                curGroup.objects.unlink(obj)
+                ag.collection.objects.unlink(obj)
                 removedObjs.append(obj)
     if ag.animated:
         # set current_frame to animation start frame
