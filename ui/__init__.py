@@ -112,7 +112,7 @@ class ASSEMBLME_PT_animations(Panel):
                 if ag.collection is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
-                    row.operator("assemblme.new_collection_from_selection", icon='ADD' if b280() else 'ZOOMIN', text="From Selection")
+                    row.operator("assemblme.new_group_from_selection", icon='ADD' if b280() else 'ZOOMIN', text="From Selection")
 
 class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"

@@ -29,7 +29,6 @@ from .aglist_utils import *
 
 # Create custom property group
 class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
-<<<<<<< HEAD
     name: StringProperty(update=uniquifyName)
     id: IntProperty()
     idx: IntProperty()
@@ -41,19 +40,6 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         update=collectionUpdate)
 
     firstFrame: IntProperty(
-=======
-    name = StringProperty(update=uniquifyName)
-    id = IntProperty()
-    idx = IntProperty()
-
-    collection = PointerProperty(
-        type=bpy.types.Group,
-        name="Object Group",
-        description="Group of objects to animate",
-        update=groupUpdate)
-
-    firstFrame = IntProperty(
->>>>>>> master
         name="Start",
         description="First frame of the (dis)assembly animation",
         min=0, max=500000,
