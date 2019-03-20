@@ -24,7 +24,7 @@ import bmesh
 from mathutils import Vector, Euler, Matrix
 from bpy.types import Object
 
-# module imports
+# Module imports
 from .blender import is_smoke, is_adaptive
 from .maths import mathutils_mult
 from .python_utils import confirmIter

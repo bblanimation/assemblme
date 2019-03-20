@@ -21,7 +21,7 @@
 # Blender imports
 from mathutils import Matrix, Vector
 
-# module imports
+# Module imports
 from .wrappers import blender_version_wrapper
 
 
