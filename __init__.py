@@ -37,7 +37,10 @@ from bpy.utils import register_class, unregister_class
 
 # Addon import
 from .ui import *
+<<<<<<< HEAD
 # from .buttons import *
+=======
+>>>>>>> master
 from .functions import getPresetTuples
 from .buttons.presets import *
 from .lib.classesToRegister import classes
@@ -117,11 +120,15 @@ def unregister():
     # addon updater unregister
     addon_updater_ops.unregister()
 
+<<<<<<< HEAD
     # register timers
     if bpy.app.timers.is_registered(handle_selections):
         bpy.app.timers.unregister(handle_selections)
 
     # unregister app handlers
+=======
+    # unregister app handlers & timers
+>>>>>>> master
     bpy.app.handlers.load_post.remove(handle_upconversion)
     bpy.app.handlers.load_post.remove(convert_velocity_value)
     # bpy.app.handlers.scene_update_pre.remove(handle_selections)

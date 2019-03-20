@@ -6,12 +6,12 @@ chris@bblanimation.com
 Created by Christopher Gearhart
 """
 
-# updater import
-from .. import addon_updater_ops
-from ..ui import *
-from ..buttons import *
+# Addon imports
 from .preferences import *
 from .reportError import *
+from ..ui import *
+from ..buttons import *
+from .. import addon_updater_ops
 
 
 classes = [
@@ -35,7 +35,7 @@ classes = [
     AGLIST_OT_clear_all_items,
     ASSEMBLME_UL_items,
     # assemblme/ui
-    ASSEMBLME_MT_basic_menu,
+    ASSEMBLME_MT_copy_paste_menu,
     ASSEMBLME_PT_animations,
     ASSEMBLME_PT_actions,
     ASSEMBLME_PT_settings,

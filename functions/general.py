@@ -351,13 +351,13 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
                     #     # NOTE: Solution 1 - currently limited to at most 360 degrees
                     #     xr, yr, zr = getOffsetRotation(Vector((0,0,0)))
                     #     inv_mat = obj.matrix_world.inverted()
-                    #     xAxis = inv_mat * Vector((1, 0, 0))
-                    #     yAxis = inv_mat * Vector((0, 1, 0))
-                    #     zAxis = inv_mat * Vector((0, 0, 1))
+                    #     xAxis = mathutils_mult(inv_mat, Vector((1, 0, 0)))
+                    #     yAxis = mathutils_mult(inv_mat, Vector((0, 1, 0)))
+                    #     zAxis = mathutils_mult(inv_mat, Vector((0, 0, 1)))
                     #     xMat = Matrix.Rotation(xr, 4, xAxis)
                     #     yMat = Matrix.Rotation(yr, 4, yAxis)
                     #     zMat = Matrix.Rotation(zr, 4, zAxis)
-                    #     obj.matrix_local = zMat @ yMat @ xMat @ obj.matrix_local
+                    #     obj.matrix_local = mathutils_mult(zMat, yMat, xMat, obj.matrix_local)
                     # else:
                     obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
@@ -382,4 +382,4 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
     return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
 
 def assemblme_handle_exception():
-    handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")
+    handle_exception(log_name="AssemblMe_log", report_button_loc="AssemblMe > Animations > Report Error")

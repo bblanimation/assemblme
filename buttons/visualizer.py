@@ -84,8 +84,11 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 # ensure visualizer is hidden from render and selection
                 self.visualizerObj.hide_select = True
                 self.visualizerObj.hide_render = True
+<<<<<<< HEAD
                 # ensure visualizer is saved when unlinked from scene
                 self.visualizerObj.use_fake_user = True
+=======
+>>>>>>> master
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
                 if ag.collection is not None:
@@ -116,8 +119,6 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             # create visualizer object
             m = bpy.data.meshes.new("AssemblMe_visualizer_m")
             self.visualizerObj = bpy.data.objects.new("AssemblMe_visualizer", m)
-            self.visualizerObj.hide_select = True
-            self.visualizerObj.hide_render = True
 
     #############################################
     # class methods

@@ -25,13 +25,12 @@ from .aglist_attrs import *
 from .app_handlers import *
 from .timers import *
 from ..functions import *
-props = bpy.props
 
 # updater import
 from .. import addon_updater_ops
 
-class ASSEMBLME_MT_basic_menu(bpy.types.Menu):
-    bl_idname = "AssemblMe_specials_menu"
+class ASSEMBLME_MT_copy_paste_menu(bpy.types.Menu):
+    bl_idname = "ASSEMBLME_MT_copy_paste_menu"
     bl_label = "Select"
 
     def draw(self, context):
@@ -45,7 +44,7 @@ class ASSEMBLME_PT_animations(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "UI"
     bl_label       = "Animations"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_animations"
+    bl_idname      = "ASSEMBLME_PT_animations"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
 
@@ -60,8 +59,8 @@ class ASSEMBLME_PT_animations(Panel):
 
         if bversion() < '002.079.00':
             col = layout.column(align=True)
-            col.label(text='ERROR: upgrade needed', icon='ERROR')
-            col.label(text='AssemblMe requires Blender 2.79+')
+            col.label(text="ERROR: upgrade needed", icon="ERROR")
+            col.label(text="AssemblMe requires Blender 2.79+")
             return
 
         # Call to check for update in background
@@ -114,7 +113,7 @@ class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "UI"
     bl_label       = "Actions"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_actions"
+    bl_idname      = "ASSEMBLME_PT_actions"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
 
@@ -154,7 +153,7 @@ class ASSEMBLME_PT_settings(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "UI"
     bl_label       = "Settings"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_settings"
+    bl_idname      = "ASSEMBLME_PT_settings"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
 
@@ -273,7 +272,7 @@ class ASSEMBLME_PT_interface(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "UI"
     bl_label       = "Interface"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_interface"
+    bl_idname      = "ASSEMBLME_PT_interface"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
@@ -303,7 +302,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "UI"
     bl_label       = "Preset Manager"
-    bl_idname      = "VIEW3D_PT_tools_AssemblMe_preset_manager"
+    bl_idname      = "ASSEMBLME_PT_preset_manager"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
@@ -329,7 +328,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
             col.prop(scn, "newPresetName", text="")
             col = split.column(align=True)
             col.active = scn.newPresetName != ""
-            col.operator("assemblme.animation_presets", text="Create", icon="ADD").action = "CREATE"
+            col.operator("assemblme.anim_presets", text="Create", icon="ADD").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
         row.label(text="Remove Existing Preset:")
@@ -339,7 +338,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
         col.prop(scn, "animPresetToDelete", text="")
         col = split.column(align=True)
         col.active = scn.animPresetToDelete != "None"
-        col.operator("assemblme.animation_presets", text="Remove", icon="X").action = "REMOVE"
+        col.operator("assemblme.anim_presets", text="Remove", icon="X").action = "REMOVE"
         col = layout.column(align=True)
         row = col.row(align=True)
         col.operator("assemblme.info_restore_preset", text="Restore Presets", icon="INFO")

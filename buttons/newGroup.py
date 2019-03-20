@@ -15,15 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# system imports
+# System imports
 import bpy
+
+# Blender imports
 import time
+
+# Addon imports
 from ..functions import *
-props = bpy.props
 
 class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
     """Create new group containing selected objects, and set as group to assemble""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.new_group_from_selection"                                # unique identifier for buttons and menu items to reference.
+    bl_idname = "assemblme.new_group_from_selection"                            # unique identifier for buttons and menu items to reference.
     bl_label = "New Group"                                                      # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
 
