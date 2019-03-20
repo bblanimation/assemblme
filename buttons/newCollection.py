@@ -15,11 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# system imports
+# System imports
 import bpy
+
+# Blender imports
 import time
+
+# Addon imports
 from ..functions import *
-props = bpy.props
 
 class ASSEMBLME_OT_new_collection_from_selection(bpy.types.Operator):
     """Create new collection containing selected objects, and set as collection to assemble""" # blender will use this as a tooltip for menu items and buttons.
