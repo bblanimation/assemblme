@@ -49,20 +49,16 @@ def handle_selections():
     if scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
         scn.assemblMe_last_aglist_index = scn.aglist_index
         ag = scn.aglist[scn.aglist_index]
-        n = ag.collection_name
-        coll = bpy.data.collections.get(n)
+        coll = ag.collection
         if coll is not None and len(coll.objects) > 0:
             select(list(coll.objects), active=coll.objects[0])
             scn.assemblMe_last_active_object_name = obj.name
     # open LEGO model settings for active object if active object changes
-    elif obj and scn.assemblMe_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection_name != ""):# and obj.type == "MESH":
+    elif obj and scn.assemblMe_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and obj.type == "MESH":
         scn.assemblMe_last_active_object_name = obj.name
-        colls = []
-        for c in obj.users_collection:
-            colls.append(c.name)
         for i in range(len(scn.aglist)):
             ag = scn.aglist[i]
-            if ag.collection_name in colls:
+            if ag.collection in obj.users_collection:
                 scn.aglist_index = i
                 scn.assemblMe_last_aglist_index = scn.aglist_index
                 return 0.2

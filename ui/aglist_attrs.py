@@ -56,7 +56,7 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         name="Velocity",
         description="Speed of individual object layers (2^(10 - Velocity) = object animation duration in frames)",
         unit="VELOCITY",
-        min=0.001, max=10,
+        min=0.001, max=100,
         precision=1,
         step=1,
         default=6)

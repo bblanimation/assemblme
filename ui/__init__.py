@@ -104,7 +104,7 @@ class ASSEMBLME_PT_animations(Panel):
                 col = split.column(align=True)
                 col.prop_search(ag, "collection", bpy.data, "collections", text="")
                 col = split.column(align=True)
-                col.operator("aglist.set_to_active", text="")
+                col.operator("aglist.set_to_active", text="", icon="GROUP")
                 if ag.collection is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
