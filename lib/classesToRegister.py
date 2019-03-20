@@ -18,7 +18,7 @@ classes = [
     # assemblme/buttons
     createBuildAnimation.ASSEMBLME_OT_create_build_animation,
     infoRestorePreset.ASSEMBLME_OT_info_restore_preset,
-    newCollection.ASSEMBLME_OT_new_collection_from_selection,
+    newGroup.ASSEMBLME_OT_new_collection_from_selection,
     presets.ASSEMBLME_OT_anim_presets,
     refreshBuildAnimationLength.ASSEMBLME_OT_refresh_anim_length,
     startOver.ASSEMBLME_OT_start_over,
