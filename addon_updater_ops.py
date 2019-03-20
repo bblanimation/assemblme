@@ -48,6 +48,20 @@ except Exception as e:
 	updater.error = "Error initializing updater module"
 	updater.error_msg = str(e)
 
+# https://github.com/CGCookie/retopoflow
+def bversion(short:bool=True):
+    """ return Blender version string """
+    major,minor,rev = bpy.app.version
+    bver_long = '%03d.%03d.%03d' % (major,minor,rev)
+    bver_short = '%d.%02d' % (major, minor)
+    return bver_short if short else bver_long
+
+def get_preferences():
+    if bversion() < '002.080.00':
+	    return bpy.context.user_preferences
+	else:
+	    return bpy.context.preferences
+
 # Must declare this before classes are loaded
 # otherwise the bl_idname's will not match and have errors.
 # Must be all lowercase and no spaces
@@ -180,7 +194,7 @@ class OBJECT_OT_addon_updater_check_now(bpy.types.Operator):
 			return {'CANCELLED'}
 
 		# apply the UI settings
-		settings = context.preferences.addons[__package__].preferences
+		settings = get_preferences().addons[__package__].preferences
 		updater.set_check_interval(enable=settings.auto_check_update,
 					months=settings.updater_intrval_months,
 					days=settings.updater_intrval_days,
@@ -300,7 +314,10 @@ class OBJECT_OT_addon_updater_update_target(bpy.types.Operator):
 		if updater.invalidupdater == True:
 			layout.label(text="Updater error")
 			return
-		split = layout.split(factor=0.66)
+        if bversion() < '002.080.00':
+			split = layout.split(percentage=0.66)
+		else:
+			split = layout.split(factor=0.66)
 		subcol = split.column()
 		subcol.label(text="Select install version")
 		subcol = split.column()
@@ -669,7 +686,7 @@ def check_for_update_background():
 		return
 
 	# apply the UI settings
-	addon_prefs = bpy.context.preferences.addons.get(__package__, None)
+	addon_prefs = get_preferences().addons.get(__package__, None)
 	if not addon_prefs:
 		return
 	settings = addon_prefs.preferences
@@ -700,7 +717,7 @@ def check_for_update_nonthreaded(self, context):
 	# only check if it's ready, ie after the time interval specified
 	# should be the async wrapper call here
 
-	settings = context.preferences.addons[__package__].preferences
+	settings = get_preferences().addons[__package__].preferences
 	updater.set_check_interval(enable=settings.auto_check_update,
 				months=settings.updater_intrval_months,
 				days=settings.updater_intrval_days,
@@ -777,7 +794,7 @@ def update_notice_box_ui(self, context):
 
 	if updater.update_ready != True: return
 
-	settings = context.preferences.addons[__package__].preferences
+	settings = get_preferences().addons[__package__].preferences
 	layout = self.layout
 	box = layout.box()
 	col = box.column(align=True)
@@ -817,7 +834,7 @@ def update_settings_ui(self, context, element=None):
 		box.label(text=updater.error_msg)
 		return
 
-	settings = context.preferences.addons[__package__].preferences
+	settings = get_preferences().addons[__package__].preferences
 
 	# auto-update settings
 	box.label(text="Updater Settings")
@@ -830,7 +847,10 @@ def update_settings_ui(self, context, element=None):
 			row.label(text="Restart blender to complete update", icon="ERROR")
 			return
 
-	split = row.split(factor=0.3)
+    if bversion() < '002.080.00':
+		split = row.split(percentage=0.3)
+	else:
+		split = row.split(factor=0.3)
 	subcol = split.column()
 	subcol.prop(settings, "auto_check_update")
 	subcol = split.column()
@@ -974,7 +994,7 @@ def update_settings_ui_condensed(self, context, element=None):
 		row.label(text=updater.error_msg)
 		return
 
-	settings = context.preferences.addons[__package__].preferences
+	settings = get_preferences().addons[__package__].preferences
 
 	# special case to tell user to restart blender, if set that way
 	if updater.auto_reload_post_update == False:
