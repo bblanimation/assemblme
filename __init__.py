@@ -50,7 +50,6 @@ def register():
 
     bpy.props.assemblme_module_name = __name__
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
-    bpy.props.assemblme_preferences = bpy.context.preferences.addons[__package__].preferences
 
     Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
@@ -150,7 +149,6 @@ def unregister():
 
     del Scene.assemblme_copy_from_id
 
-    del bpy.props.assemblme_preferences
     del bpy.props.assemblme_version
     del bpy.props.assemblme_module_name
 

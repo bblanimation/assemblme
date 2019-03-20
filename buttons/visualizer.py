@@ -43,14 +43,14 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
         if event.type == "TIMER":
             if context.scene.aglist_index == -1:
-                self.full_disable(context, setInactive=False)
+                self.full_disable(context)
                 return{"CANCELLED"}
             scn, ag = getActiveContextInfo()
             try:
                 v_obj = self.visualizerObj
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
-                    self.full_disable(context, setInactive=False)
+                    self.full_disable(context)
                     return{"CANCELLED"}
                 # if new build animation created, update visualizer animation
                 if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
@@ -109,10 +109,6 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         # delete visualizer object and mesh
         bpy.data.objects.remove(self.visualizerObj, do_unlink=True)
         bpy.data.meshes.remove(self.m, True)
-        # remove visualizer group
-        if collExists("AssemblMe_visualizer"):
-            vColl = bpy.data.collections["AssemblMe_visualizer"]
-            bpy.data.collections.remove(vColl, do_unlink=True)
 
     ################################################
     # initialization method
@@ -127,9 +123,6 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             # create visualizer object
             self.m = bpy.data.meshes.new('AssemblMe_visualizer_m')
             self.visualizerObj = bpy.data.objects.new('assemblMe_visualizer', self.m)
-            # # put in new group
-            # vGroup = bpy.data.groups.new("AssemblMe_visualizer")
-            # vGroup.objects.link(self.visualizerObj)
 
     #############################################
     # class methods
@@ -180,16 +173,14 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         scn.collection.objects.link(self.visualizerObj)
         ag.visualizerActive = True
 
-    def full_disable(self, context, setInactive=True):
+    def full_disable(self, context):
         """ disables visualizer """
-        scn = bpy.context.scene
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
-        # hide visualizer object
-        if self.visualizerObj in list(scn.collection.objects):
-            scn.collection.objects.unlink(self.visualizerObj)
-        if setInactive:
-            ag = getActiveContextInfo()[1]
+        # unlink visualizer object to scene
+        safeUnlink(self.visualizerObj)
+        # disable visualizer icon
+        for ag in bpy.context.scene.aglist:
             ag.visualizerActive = False
 
     @staticmethod

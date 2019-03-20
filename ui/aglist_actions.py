@@ -258,7 +258,7 @@ class ASSEMBLME_UL_items(UIList):
         # Make sure your code supports all 3 layout types
         if self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
-        split = layout.split(factor=0.9)
+        split = layout.split(percentage=0.9)
         split.prop(item, "name", text="", emboss=False, translate=False, icon='MOD_BUILD')
 
     def invoke(self, context, event):
