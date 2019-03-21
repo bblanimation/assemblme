@@ -1,4 +1,4 @@
-# Copyright (C) 2018 Christopher Gearhart
+# Copyright (C) 2019 Christopher Gearhart
 # chris@bblanimation.com
 # http://bblanimation.com/
 #
