@@ -32,7 +32,7 @@ addon_name = "AssemblMe"
 
 class SCENE_OT_report_error(bpy.types.Operator):
     """Report a bug via an automatically generated issue ticket"""              # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.report_error"                                            # unique identifier for buttons and menu items to reference.
+    bl_idname = "{}.report_error".format(addon_name.lower())                    # unique identifier for buttons and menu items to reference.
     bl_label = "Report Error"                                                   # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
@@ -72,7 +72,7 @@ class SCENE_OT_report_error(bpy.types.Operator):
 
 class SCENE_OT_close_report_error(bpy.types.Operator):
     """Deletes error report from blender's memory (still exists in file system)""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "scene.close_report_error"                                      # unique identifier for buttons and menu items to reference.
+    bl_idname = "{}.close_report_error".format(addon_name.lower())              # unique identifier for buttons and menu items to reference.
     bl_label = "Close Report Error"                                             # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 

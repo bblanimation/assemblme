@@ -38,6 +38,7 @@ from bpy.utils import register_class, unregister_class
 # Addon import
 from .ui import *
 from .functions import getPresetTuples
+from .functions.common import *
 from .buttons.presets import *
 from .lib.classesToRegister import classes
 from . import addon_updater_ops
@@ -45,6 +46,7 @@ from . import addon_updater_ops
 
 def register():
     for cls in classes:
+        make_annotation(cls)
         register_class(cls)
 
     bpy.props.assemblme_module_name = __name__

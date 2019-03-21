@@ -193,16 +193,16 @@ def deselectAll():
 
 @blender_version_wrapper('<=','2.79')
 def hide(obj:Object, viewport:bool=True, render:bool=True):
-    if obj.hide and viewport:
+    if not obj.hide and viewport:
         obj.hide = True
-    if obj.hide_render and render:
-        obj.hide_viewport = True
+    if not obj.hide_render and render:
+        obj.hide_render = True
 @blender_version_wrapper('>=','2.80')
 def hide(obj:Object, viewport:bool=True, render:bool=True):
-    if obj.hide_viewport and viewport:
+    if not obj.hide_viewport and viewport:
         obj.hide_viewport = True
-    if obj.hide_render and render:
-        obj.hide_viewport = True
+    if not obj.hide_render and render:
+        obj.hide_render = True
 
 
 @blender_version_wrapper('<=','2.79')
@@ -210,13 +210,13 @@ def unhide(obj:Object, viewport:bool=True, render:bool=True):
     if obj.hide and viewport:
         obj.hide = False
     if obj.hide_render and render:
-        obj.hide_render= False
+        obj.hide_render = False
 @blender_version_wrapper('>=','2.80')
 def unhide(obj:Object, viewport:bool=True, render:bool=True):
     if obj.hide_viewport and viewport:
         obj.hide_viewport = False
     if obj.hide_render and render:
-        obj.hide_render= False
+        obj.hide_render = False
 
 
 @blender_version_wrapper('>=','2.80')
@@ -249,7 +249,7 @@ def unlink_object(o:Object):
 
 
 @blender_version_wrapper('<=','2.79')
-def safeLink(obj:Object, protect:bool=False):
+def safeLink(obj:Object, protect:bool=False, collections=None):
     # link object to scene
     try:
         link_object(obj)
@@ -455,3 +455,29 @@ def layout_split(layout, align=True, factor=0.5):
 @blender_version_wrapper('>=','2.80')
 def layout_split(layout, align=True, factor=0.5):
     return layout.split(align=align, factor=factor)
+
+
+@blender_version_wrapper('<=','2.79')
+def bpy_collections():
+    return bpy.data.groups
+@blender_version_wrapper('>=','2.80')
+def bpy_collections():
+    return bpy.data.collections
+
+
+@blender_version_wrapper('<=','2.79')
+def make_annotations(cls):
+    """Does nothing in Blender 2.79"""
+    return cls
+@blender_version_wrapper('>=','2.80')
+def make_annotations(cls):
+    """Converts class fields to annotations in Blender 2.8"""
+    bl_props = {k: v for k, v in cls.__dict__.items() if isinstance(v, tuple)}
+    if bl_props:
+        if '__annotations__' not in cls.__dict__:
+            setattr(cls, '__annotations__', {})
+        annotations = cls.__dict__['__annotations__']
+        for k, v in bl_props.items():
+            annotations[k] = v
+            delattr(cls, k)
+    return cls
