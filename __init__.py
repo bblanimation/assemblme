@@ -46,7 +46,7 @@ from . import addon_updater_ops
 
 def register():
     for cls in classes:
-        make_annotation(cls)
+        make_annotations(cls)
         register_class(cls)
 
     bpy.props.assemblme_module_name = __name__
