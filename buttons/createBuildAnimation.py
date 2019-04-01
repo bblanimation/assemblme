@@ -44,7 +44,17 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            self.createAnim()
+            scn, ag = getActiveContextInfo()
+            # ensure operation can run
+            if not self.isValid(scn, ag):
+                return {"CANCELLED"}
+            # clear animation data from all objects in ag.collection
+            clearAnimation(ag.collection.objects)
+            # create current animation (and recreate any others for this collection that were cleared)
+            all_ags_for_collection = [ag0 for ag0 in scn.aglist if ag0 == ag or (ag0.collection == ag.collection and ag0.animated)]
+            for ag0 in all_ags_for_collection:
+                if ag0.collection == ag.collection and (ag0.animated or ag0 == ag):
+                    self.createAnim(scn, ag0)
         except:
             assemblme_handle_exception()
             return{"CANCELLED"}
@@ -56,7 +66,6 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     def __init__(self):
         scn, ag = getActiveContextInfo()
         self.objects_to_move = [obj for obj in ag.collection.objects if not ag.meshOnly or obj.type == "MESH"]
-        self.action = "CREATE" if not ag.animated else "UPDATE"
 
     ###################################################
     # class variables
@@ -67,40 +76,29 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     # class methods
 
     @timed_call("Time Elapsed")
-    def createAnim(self):
+    def createAnim(self, scn, ag):
         print("\ncreating build animation...")
-        # initialize vars
-        scn, ag = getActiveContextInfo()
-
-        # ensure operation can run
-        if not self.isValid(scn, ag):
-            return {"CANCELLED"}
-
-        # save backup of blender file
-        if self.action == "CREATE":
-            saveBackupFile(self)
 
         # set up other variables
-        ag.lastLayerVelocity = getObjectVelocity()
+        action = "UPDATE" if ag.animated else "CREATE"
+        ag.lastLayerVelocity = getObjectVelocity(ag)
         self.origFrame = scn.frame_current
-        if self.action == "UPDATE":
+        if action == "UPDATE":
             # set current_frame to animation start frame
             scn.frame_set(ag.frameWithOrigLoc)
-        # clear animation data from all objects in ag.collection
-        clearAnimation(ag.collection.objects)
 
         ### BEGIN ANIMATION GENERATION ###
         # populate self.listZValues
-        self.listZValues,rotXL,rotYL = getListZValues(self.objects_to_move)
+        self.listZValues,rotXL,rotYL = getListZValues(ag, self.objects_to_move)
 
         # set props.objMinLoc and props.objMaxLoc
-        setBoundsForVisualizer(self.listZValues)
+        setBoundsForVisualizer(ag, self.listZValues)
 
         # calculate how many frames the animation will last
-        ag.animLength = getAnimLength(self.objects_to_move, self.listZValues.copy(), ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
+        ag.animLength = getAnimLength(ag, self.objects_to_move, self.listZValues.copy(), ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
 
         # set first frame to animate from
-        self.curFrame = ag.firstFrame + (ag.animLength if ag.buildType == "Assemble" else 0)
+        self.curFrame = ag.firstFrame + (ag.animLength if ag.buildType == "ASSEMBLE" else 0)
 
         # set frameWithOrigLoc for 'Start Over' operation
         ag.frameWithOrigLoc = self.curFrame
@@ -110,15 +108,10 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         props.z_lower_bound = None
 
         # animate the objects
-        animationReturnDict = animateObjects(self.objects_to_move, self.listZValues, self.curFrame, ag.locInterpolationMode, ag.rotInterpolationMode)
-
-        # verify animateObjects() ran correctly
-        if animationReturnDict["errorMsg"] != None:
-            self.report({"ERROR"}, animationReturnDict["errorMsg"])
-            return{"CANCELLED"}
+        objects_moved, lastFrame = animateObjects(ag, self.objects_to_move, self.listZValues, self.curFrame, ag.locInterpolationMode, ag.rotInterpolationMode)
 
         # handle case where no object was ever selected (e.g. only camera passed to function).
-        if self.action == "CREATE" and ag.frameWithOrigLoc == animationReturnDict["lastFrame"]:
+        if action == "CREATE" and ag.frameWithOrigLoc == lastFrame:
             warningMsg = "No valid objects selected!"
             if ag.meshOnly:
                 warningMsg += " (Non-mesh objects ignored – see advanced settings)"
@@ -130,8 +123,10 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         props.z_lower_bound = None
 
         # set current_frame to original current_frame
+        ag.animBoundsStart = ag.firstFrame if ag.buildType == "ASSEMBLE" else ag.firstFrame
+        ag.animBoundsEnd   = ag.frameWithOrigLoc if ag.buildType == "ASSEMBLE" else lastFrame
         bpy.context.scene.frame_set(self.origFrame)
-        if self.action == "CREATE":
+        if action == "CREATE":
             disableRelationshipLines()
             ag.animated = True
 
@@ -142,11 +137,18 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         if len(ag.collection.objects) == 0:
             self.report({"WARNING"}, "Collection contains no objects!" if b280() else "Group contains no objects!")
             return False
+        # check if this would overlap with other animations
+        other_anim_ags = [ag0 for ag0 in scn.aglist if ag0 != ag and ag0.collection == ag.collection and ag0.animated]
+        for ag1 in other_anim_ags:
+            print(ag1.animBoundsStart, ag.firstFrame, ag1.animBoundsEnd)
+            if ag1.animBoundsStart <= ag.firstFrame and ag.firstFrame <= ag1.animBoundsEnd:
+                self.report({"WARNING"}, "Animation overlaps with another AssemblMe aninmation for this collection")
+                return False
         # make sure no objects in this collection are part of another AssemblMe animation
         for i in range(len(scn.aglist)):
-            if i == scn.aglist_index or not scn.aglist[i].animated:
-                continue
             c = scn.aglist[i].collection
+            if i == scn.aglist_index or not scn.aglist[i].animated or c.name == ag.collection.name:
+                continue
             for obj in self.objects_to_move:
                 users_collection = obj.users_collection if b280() else obj.users_group
                 if c in users_collection:

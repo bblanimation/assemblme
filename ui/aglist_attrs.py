@@ -185,9 +185,13 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     buildType = EnumProperty(
         name="Build Type",
         description="Choose whether to assemble or disassemble the objects",
-        items=[("Assemble", "Assemble", "Assemble the objects to current location"),
-              ("Disassemble", "Disassemble", "Disassemble objects from current location")],
-        default="Assemble")
+        items=[("ASSEMBLE", "Assemble", "Assemble the objects to current location"),
+               ("DISASSEMBLE", "Disassemble", "Disassemble objects from current location"),
+               # the following is for backwards compatibility with old assemblme presets
+               ("Assemble", "", ""),
+               ("Disassemble", "", "")],
+        update=handleOutdatedPreset,
+        default="ASSEMBLE")
     invertBuild = BoolProperty(
         name="Assemble from other direction",
         description="Invert the animation so that the objects start (dis)assembling from the other side",
@@ -208,6 +212,8 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         default=True)
 
     animated = BoolProperty(default=False)
+    animBoundsStart = IntProperty(default=-1)
+    animBoundsEnd = IntProperty(default=-1)
 
     ## DO THESE BELONG HERE??? ##
     frameWithOrigLoc = IntProperty(

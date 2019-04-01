@@ -18,7 +18,7 @@ def execute():
     ag.yOrient = 0.0
     ag.orientRandom = 0.2
     ag.layerHeight = 0.001
-    ag.buildType = 'Assemble'
+    ag.buildType = 'ASSEMBLE'
     ag.invertBuild = False
     ag.skipEmptySelections = True
     ag.useGlobal = True

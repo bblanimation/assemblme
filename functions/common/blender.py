@@ -184,10 +184,7 @@ def deselectAll():
 @blender_version_wrapper('>=','2.80')
 def deselectAll():
     """ deselects all objs in scene """
-    try:
-        selected_objects = bpy.context.selected_objects
-    except AttributeError:
-        selected_objects = [obj for obj in bpy.context.view_layer.objects if obj.select_get()]
+    selected_objects = bpy.context.selected_objects if hasattr(bpy.context, "selected_objects") else [obj for obj in bpy.context.view_layer.objects if obj.select_get()]
     deselect(selected_objects)
 
 
@@ -232,11 +229,13 @@ def isObjVisibleInViewport(obj:Object):
 
 
 @blender_version_wrapper('<=','2.79')
-def link_object(o:Object):
-    bpy.context.scene.objects.link(o)
+def link_object(o:Object, scene:Scene=None):
+    scene = scene or bpy.context.scene
+    scene.objects.link(o)
 @blender_version_wrapper('>=','2.80')
-def link_object(o:Object):
-    bpy.context.scene.collection.objects.link(o)
+def link_object(o:Object, scene:Scene=None):
+    scene = scene or bpy.context.scene
+    scene.collection.objects.link(o)
 
 
 @blender_version_wrapper('<=','2.79')
@@ -347,18 +346,12 @@ def is_adaptive(ob:Object):
 def tag_redraw_areas(areaTypes:iter=["ALL"]):
     """ run tag_redraw for given area types """
     areaTypes = confirmList(areaTypes)
-    for area in bpy.context.screen.areas:
-        for areaType in areaTypes:
-            if areaType == "ALL" or area.type == areaType:
-                area.tag_redraw()
-
-
-def tag_redraw_viewport_in_all_screens():
-    """redraw the 3D viewport in all screens (bypasses bpy.context.screen)"""
-    for screen in bpy.data.screens:
+    screens = [bpy.context.screen] if bpy.context.screen else bpy.data.screens
+    for screen in screens:
         for area in screen.areas:
-            if area.type == "VIEW_3D":
-                area.tag_redraw()
+            for areaType in areaTypes:
+                if areaType == "ALL" or area.type == areaType:
+                    area.tag_redraw()
 
 
 @blender_version_wrapper("<=", "2.79")
@@ -386,6 +379,24 @@ def changeContext(context, areaType:str):
     lastAreaType = context.area.type
     context.area.type = areaType
     return lastAreaType
+
+
+def AssembleOverrideContextForView3dOps():
+    """
+    Iterates through the blender GUI's areas & regions to find the View3D space
+    NOTE: context override can only be used with bpy.ops that were called from a window/screen with a view3d space
+    """
+    win      = bpy.context.window
+    scr      = win.screen
+    areas3d  = [area for area in scr.areas if area.type == 'VIEW_3D']
+    region   = [region for region in areas3d[0].regions if region.type == 'WINDOW']
+    override = {'window':win,
+                'screen':scr,
+                'area'  :areas3d[0],
+                'region':region[0],
+                'scene' :bpy.context.scene,
+                }
+    return override
 
 
 @blender_version_wrapper('<=','2.79')
@@ -463,6 +474,29 @@ def bpy_collections():
 @blender_version_wrapper('>=','2.80')
 def bpy_collections():
     return bpy.data.collections
+
+
+@blender_version_wrapper('<=','2.79')
+def set_active_scene(scene:Scene):
+    bpy.context.screen.scene = scene
+@blender_version_wrapper('>=','2.80')
+def set_active_scene(scene:Scene):
+    bpy.context.window.scene = scene
+
+@blender_version_wrapper('<=','2.79')
+def get_cursor_location():
+    return bpy.context.scene.cursor_location
+@blender_version_wrapper('>=','2.80')
+def get_cursor_location():
+    return bpy.context.scene.cursor.location
+
+
+@blender_version_wrapper('<=','2.79')
+def set_cursor_location(loc:tuple):
+    bpy.context.scene.cursor_location = loc
+@blender_version_wrapper('>=','2.80')
+def set_cursor_location(loc:tuple):
+    bpy.context.scene.cursor.location = loc
 
 
 @blender_version_wrapper('<=','2.79')

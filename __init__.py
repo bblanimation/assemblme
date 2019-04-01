@@ -104,6 +104,7 @@ def register():
 
     # register app handlers
     if b280():
+        bpy.app.handlers.load_post.append(register_assemblme_timers)
         bpy.app.timers.register(handle_selections)
     else:
         bpy.app.handlers.scene_update_pre.append(handle_selections)
@@ -124,6 +125,7 @@ def unregister():
     if b280():
         if bpy.app.timers.is_registered(handle_selections):
             bpy.app.timers.unregister(handle_selections)
+        bpy.app.handlers.load_post.remove(register_assemblme_timers)
     else:
         bpy.app.handlers.scene_update_pre.remove(handle_selections)
 

@@ -61,13 +61,13 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
                 self.objects_to_move = context.selected_objects
 
             # populate self.listZValues
-            self.listZValues,_,_ = getListZValues(self.objects_to_move)
+            self.listZValues,_,_ = getListZValues(ag, self.objects_to_move)
 
             # set props.objMinLoc and props.objMaxLoc
-            setBoundsForVisualizer(self.listZValues)
+            setBoundsForVisualizer(ag, self.listZValues)
 
             # calculate how many frames the animation will last (depletes self.listZValues)
-            ag.animLength = getAnimLength(self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
+            ag.animLength = getAnimLength(ag, self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
 
             if ag.collection:
                 # set current_frame to original current_frame

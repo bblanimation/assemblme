@@ -137,9 +137,10 @@ def setObjOrigin(obj:Object, loc:Vector):
     s_mat_z = Matrix.Scale(s.z, 4, Vector((0, 0, 1)))
     s_mat = mathutils_mult(s_mat_x, s_mat_y, s_mat_z)
     m = obj.data
-    mx = mathutils_mult((obj.location-loc), l_mat, r_mat, s_mat.inverted())
+    mx = mathutils_mult((obj.matrix_world.translation-loc), l_mat, r_mat, s_mat.inverted())
+    mx = mathutils_mult((obj.matrix_world.translation-loc), l_mat, r_mat, s_mat.inverted())
     m.transform(Matrix.Translation(mx))
-    obj.location = loc
+    obj.matrix_world.translation = loc
 
 
 def transformToWorld(vec:Vector, mat:Matrix, junk_bme:bmesh=None):

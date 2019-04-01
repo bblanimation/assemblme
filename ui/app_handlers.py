@@ -36,25 +36,26 @@ from mathutils import Vector, Euler
 #     return False, None
 
 @persistent
+@blender_version_wrapper('<=','2.79')
 def handle_selections(scn):
-    # # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
-    # if scn.assemblMe_last_layers != str(list(scn.layers)):
-    #     scn.assemblMe_last_layers = str(list(scn.layers))
-    #     curGroupVisible = False
-    #     if scn.aglist_index != -1:
-    #         ag0 = scn.aglist[scn.aglist_index]
-    #         curGroupVisible,_ = isGroupVisible(scn, ag0)
-    #     if not curGroupVisible or scn.aglist_index == -1:
-    #         setIndex = False
-    #         for i,ag in enumerate(scn.aglist):
-    #             if i != scn.aglist_index:
-    #                 nextGroupVisible,obj = isGroupVisible(scn, ag)
-    #                 if nextGroupVisible and bpy.context.active_object == obj:
-    #                     scn.aglist_index = i
-    #                     setIndex = True
-    #                     break
-    #         if not setIndex:
-    #             scn.aglist_index = -1
+    # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
+    if scn.assemblMe_last_layers != str(list(scn.layers)):
+        scn.assemblMe_last_layers = str(list(scn.layers))
+        curGroupVisible = False
+        if scn.aglist_index != -1:
+            ag0 = scn.aglist[scn.aglist_index]
+            curGroupVisible,_ = isGroupVisible(scn, ag0)
+        if not curGroupVisible or scn.aglist_index == -1:
+            setIndex = False
+            for i,ag in enumerate(scn.aglist):
+                if i != scn.aglist_index:
+                    nextGroupVisible,obj = isGroupVisible(scn, ag)
+                    if nextGroupVisible and bpy.context.active_object == obj:
+                        scn.aglist_index = i
+                        setIndex = True
+                        break
+            if not setIndex:
+                scn.aglist_index = -1
     # select and make source or LEGO model active if scn.aglist_index changes
     if scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
         scn.assemblMe_last_aglist_index = scn.aglist_index
@@ -76,6 +77,7 @@ def handle_selections(scn):
                 scn.assemblMe_last_aglist_index = scn.aglist_index
                 return
         scn.aglist_index = -1
+
 
 @persistent
 def convert_velocity_value(scn):

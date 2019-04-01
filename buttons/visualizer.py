@@ -134,8 +134,8 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             # set up vars
             self.visualizerObj.location = props.objMinLoc
             curFrame = ag.frameWithOrigLoc
-            idx = -2 if ag.buildType == "Assemble" else -1
-            mult = 1 if ag.buildType == "Assemble" else -1
+            idx = -2 if ag.buildType == "ASSEMBLE" else -1
+            mult = 1 if ag.buildType == "ASSEMBLE" else -1
             # insert keyframe and iterate current frame, and set another
             insertKeyframes(self.visualizerObj, "location", curFrame)
             self.visualizerObj.location = props.objMaxLoc

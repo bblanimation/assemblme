@@ -27,7 +27,6 @@ from ..functions import *
 
 
 def matchProperties(agNew, agOld):
-    agNew.firstFrame = agOld.firstFrame
     agNew.buildSpeed = agOld.buildSpeed
     agNew.velocity = agOld.velocity
     agNew.layerHeight = agOld.layerHeight
@@ -69,12 +68,6 @@ def uniquifyName(self, context):
 
 def collectionUpdate(self, context):
     scn, ag0 = getActiveContextInfo()
-    # verify model doesn't exist with that name
-    if ag0.collection is not None:
-        for i,ag1 in enumerate(scn.aglist):
-            if ag1 != ag0 and ag1.collection is ag0.collection:
-                ag0.collection = None
-                scn.aglist_index = i
     # get rid of unused groups created by AssemblMe
     collections = bpy.data.collections if b280() else bpy.data.groups
     for c in collections:
@@ -104,3 +97,9 @@ def setMeshesOnly(self, context):
         clearAnimation(removedObjs)
         # set current_frame back to to original frame
         scn.frame_set(origFrame)
+
+
+def handleOutdatedPreset(self, context):
+    scn, ag = getActiveContextInfo()
+    if not ag.buildType.isupper():
+        ag.buildType = str(ag.buildType).upper()

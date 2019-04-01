@@ -41,33 +41,21 @@ def getActiveContextInfo(ag_idx=None):
     return scn, ag
 
 
-def saveBackupFile(self):
-    if get_addon_preferences().autoSaveOnStartOver:
-        if bpy.data.filepath == '':
-            self.report({"ERROR"}, "Backup file could not be saved - You haven't saved your project yet!")
-            return{"CANCELLED"}
-        bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath[:-6] + "_backup.blend", copy=True)
-        self.report({"INFO"}, "Backup file saved")
-
-
-def getRandomizedOrient(orient):
+def getRandomizedOrient(orient, random_amount):
     """ returns randomized orientation based on user settings """
-    scn, ag = getActiveContextInfo()
-    return orient + random.uniform(-ag.orientRandom, ag.orientRandom)
+    return orient + random.uniform(-random_amount, random_amount)
 
 
-def getOffsetLocation(loc):
+def getOffsetLocation(ag, loc):
     """ returns randomized location offset """
-    scn, ag = getActiveContextInfo()
     X = loc.x + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.xLocOffset
     Y = loc.y + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.yLocOffset
     Z = loc.z + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.zLocOffset
     return (X, Y, Z)
 
 
-def getOffsetRotation(rot):
+def getOffsetRotation(ag, rot):
     """ returns randomized rotation offset """
-    scn, ag = getActiveContextInfo()
     X = rot.x + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset)
     Y = rot.y + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset)
     Z = rot.z + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset)
@@ -78,28 +66,25 @@ def getOffsetRotation(rot):
 #     return (degreeValue*57.2958)
 
 
-def getBuildSpeed():
+def getBuildSpeed(ag):
     """ calculates and returns build speed """
-    scn, ag = getActiveContextInfo()
     return floor(ag.buildSpeed)
 
 
-def getObjectVelocity():
+def getObjectVelocity(ag):
     """ calculates and returns brick velocity """
-    scn, ag = getActiveContextInfo()
     frameVelocity = round(2**(10-ag.velocity))
     return frameVelocity
 
 
-def getAnimLength(objects_to_move, listZValues, layerHeight, invertBuild, skipEmptySelections):
-    scn = bpy.context.scene
+def getAnimLength(ag, objects_to_move, listZValues, layerHeight, invertBuild, skipEmptySelections):
     tempObjCount = 0
     numLayers = 0
     while len(objects_to_move) > tempObjCount:
         numObjs = len(getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections))
         numLayers += 1 if numObjs > 0 or not skipEmptySelections else 0
         tempObjCount += numObjs
-    return (numLayers - 1) * getBuildSpeed() + getObjectVelocity() + 1
+    return (numLayers - 1) * getBuildSpeed(ag) + getObjectVelocity(ag) + 1
 
 
 def getFileNames(dir):
@@ -149,15 +134,13 @@ def transferDefaultsToPresetsFolder(presetsPath):
 #         bpy.ops.transform.select_orientation(orientation=orientation)
 
 
-def getListZValues(objects, rotXL=False, rotYL=False):
+def getListZValues(ag, objects, rotXL=False, rotYL=False):
     """ returns list of dicts containing objects and ther z locations relative to layer orientation """
-    scn, ag = getActiveContextInfo()
-
     # assemble list of dictionaries into 'listZValues'
     listZValues = []
     if not rotXL:
-        rotXL = [getRandomizedOrient(ag.xOrient) for i in range(len(objects))]
-        rotYL = [getRandomizedOrient(ag.yOrient) for i in range(len(objects))]
+        rotXL = [getRandomizedOrient(ag.xOrient, ag.orientRandom) for i in range(len(objects))]
+        rotYL = [getRandomizedOrient(ag.yOrient, ag.orientRandom) for i in range(len(objects))]
     for i,obj in enumerate(objects):
         l = obj.matrix_world.to_translation() if ag.useGlobal else obj.location
         rotX = rotXL[i]
@@ -193,7 +176,6 @@ def getObjectsInBound(listZValues, z_lower_bound, invertBuild):
 
 def getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections):
     """ selects next layer of objects """
-    scn = bpy.context.scene
     # get new upper and lower bounds
     props.z_upper_bound = listZValues[0]["loc"] if skipEmptySelections or props.z_upper_bound is None else props.z_lower_bound
     props.z_lower_bound = props.z_upper_bound + layerHeight * (1 if invertBuild else -1)
@@ -202,8 +184,7 @@ def getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections):
     return objsInBound
 
 
-def setBoundsForVisualizer(listZValues):
-    scn, ag = getActiveContextInfo()
+def setBoundsForVisualizer(ag, listZValues):
     for i in range(len(listZValues)):
         obj = listZValues[i]["obj"]
         if not ag.meshOnly or obj.type == "MESH":
@@ -243,7 +224,6 @@ def updateAnimPreset(self, context):
             spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
-            foo.execute()
         else:
             badPreset = str(scn.animPreset)
             if badPreset in scn.assemblme_default_presets:
@@ -293,15 +273,15 @@ def setInterpolation(objs, data_path, mode, idx):
             fcurve.keyframe_points[idx].interpolation = mode
 
 
-def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
+def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
     """ animates objects """
 
     # initialize variables for use in while loop
-    scn, ag = getActiveContextInfo()
     objects_moved = []
     last_len_objects_moved = 0
-    mult = 1 if ag.buildType == "Assemble" else -1
-    inc  = 1 if ag.buildType == "Assemble" else 0
+    mult = 1 if ag.buildType == "ASSEMBLE" else -1
+    inc  = 1 if ag.buildType == "ASSEMBLE" else 0
+    velocity = getObjectVelocity(ag)
     insertLoc = ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0
     insertRot = ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0
     layerHeight = ag.layerHeight
@@ -309,6 +289,14 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
     skipEmptySelections = ag.skipEmptySelections
     kfIdxLoc = -1
     kfIdxRot = -1
+
+    # insert first location keyframes
+    if insertLoc:
+        insertKeyframes(objects_to_move, "location", curFrame)
+    # insert first rotation keyframes
+    if insertRot:
+        insertKeyframes(objects_to_move, "rotation_euler", curFrame)
+
 
     while len(objects_to_move) > len(objects_moved):
         # print status to terminal
@@ -333,15 +321,15 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
                 kfIdxRot -= inc
 
             # step curFrame backwards
-            curFrame -= getObjectVelocity() * mult
+            curFrame -= velocity * mult
 
             # move object and insert location keyframes
             if insertLoc:
                 for obj in newSelection:
                     if ag.useGlobal:
-                        obj.matrix_world.translation = getOffsetLocation(obj.matrix_world.translation)
+                        obj.matrix_world.translation = getOffsetLocation(ag, obj.matrix_world.translation)
                     else:
-                        obj.location = getOffsetLocation(obj.location)
+                        obj.location = getOffsetLocation(ag, obj.location)
                 insertKeyframes(newSelection, "location", curFrame, if_needed=True)
             # rotate object and insert rotation keyframes
             if insertRot:
@@ -349,7 +337,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
                     # if ag.useGlobal:
                     #     # TODO: Fix global rotation functionality
                     #     # NOTE: Solution 1 - currently limited to at most 360 degrees
-                    #     xr, yr, zr = getOffsetRotation(Vector((0,0,0)))
+                    #     xr, yr, zr = getOffsetRotation(ag, Vector((0,0,0)))
                     #     inv_mat = obj.matrix_world.inverted()
                     #     xAxis = mathutils_mult(inv_mat, Vector((1, 0, 0)))
                     #     yAxis = mathutils_mult(inv_mat, Vector((0, 1, 0)))
@@ -359,19 +347,27 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
                     #     zMat = Matrix.Rotation(zr, 4, zAxis)
                     #     obj.matrix_local = mathutils_mult(zMat, yMat, xMat, obj.matrix_local)
                     # else:
-                    obj.rotation_euler = getOffsetRotation(obj.rotation_euler)
+                    obj.rotation_euler = getOffsetRotation(ag, obj.rotation_euler)
                 insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
 
             # step curFrame forwards
-            curFrame += (getObjectVelocity() - getBuildSpeed()) * mult
+            curFrame += (velocity - getBuildSpeed(ag)) * mult
 
         # handle case where 'ag.skipEmptySelections' == False and empty selection is grabbed
         elif not ag.skipEmptySelections:
             # skip frame if nothing selected
-            curFrame -= getBuildSpeed() * mult
+            curFrame -= getBuildSpeed(ag) * mult
         # handle case where 'ag.skipEmptySelections' == True and empty selection is grabbed
         else:
             os.stderr.write("Grabbed empty selection. This shouldn't happen!")
+
+    curFrame -= (velocity - getBuildSpeed(ag)) * mult
+    # insert final location keyframes
+    if insertLoc:
+        insertKeyframes(objects_to_move, "location", curFrame)
+    # insert final rotation keyframes
+    if insertRot:
+        insertKeyframes(objects_to_move, "rotation_euler", curFrame)
 
     # set interpolation modes for moved objects
     setInterpolation(objects_moved, 'loc', locInterpolationMode, kfIdxLoc)
@@ -379,7 +375,7 @@ def animateObjects(objects_to_move, listZValues, curFrame, locInterpolationMode=
 
     updateProgressBars(True, True, 1, 0, "Animating Layers", end=True)
 
-    return {"errorMsg":None, "moved":objects_moved, "lastFrame":curFrame}
+    return objects_moved, curFrame
 
 def assemblme_handle_exception():
     handle_exception(log_name="AssemblMe_log", report_button_loc="AssemblMe > Animations > Report Error")

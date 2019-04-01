@@ -24,6 +24,7 @@ from bpy.props import *
 from bpy.types import Panel, UIList
 
 # Addon imports
+from .aglist_utils import *
 from ..functions import *
 from ..buttons.visualizer import *
 
@@ -61,6 +62,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             pass
 
         if self.action == 'REMOVE':
+            bpy.ops.ed.undo_push(message="AssemblMe: Remove Item")
             ag = scn.aglist[scn.aglist_index]
             if not ag.animated:
                 if ASSEMBLME_OT_visualizer.enabled():
@@ -78,6 +80,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
                 self.report({"WARNING"}, "Please press 'Start Over' to clear the animation before removing this item.")
 
         if self.action == 'ADD':
+            bpy.ops.ed.undo_push(message="AssemblMe: Add Item")
             if ASSEMBLME_OT_visualizer.enabled():
                 ASSEMBLME_OT_visualizer.disable()
             item = scn.aglist.add()
@@ -115,6 +118,7 @@ class AGLIST_OT_copy_settings_to_others(bpy.types.Operator):
     bl_idname = "aglist.copy_settings_to_others"
     bl_label = "Copy Settings to Other Animations"
     bl_description = "Copies the settings from the current animation to all other animations"
+    bl_options = {"UNDO"}
 
     @classmethod
     def poll(cls, context):
@@ -160,6 +164,7 @@ class AGLIST_OT_paste_settings(bpy.types.Operator):
     bl_idname = "aglist.paste_settings"
     bl_label = "Paste Settings to Current animation"
     bl_description = "Pastes the settings from stored animation ID to the current index"
+    bl_options = {"UNDO"}
 
     @classmethod
     def poll(cls, context):

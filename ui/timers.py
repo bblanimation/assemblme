@@ -22,8 +22,10 @@ Created by Christopher Gearhart
 # system imports
 import bpy
 from ..functions import *
+from bpy.app.handlers import persistent
 
 
+@blender_version_wrapper('>=','2.80')
 def handle_selections():
     scn = bpy.context.scene
     obj = bpy.context.view_layer.objects.active
@@ -51,16 +53,30 @@ def handle_selections():
         ag = scn.aglist[scn.aglist_index]
         coll = ag.collection
         if coll is not None and len(coll.objects) > 0:
-            select(list(coll.objects), active=coll.objects[0])
+            select(list(coll.objects), active=coll.objects[0], only=True)
             scn.assemblMe_last_active_object_name = obj.name
     # open LEGO model settings for active object if active object changes
     elif obj and scn.assemblMe_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and obj.type == "MESH":
         scn.assemblMe_last_active_object_name = obj.name
+        # do nothing, because the active aglist index refers to this collection
+        if scn.aglist_index != -1 and scn.aglist[scn.aglist_index].collection in obj.users_collection:
+            return 0.2
+        # attempt to switch aglist index if one of them refers to this collection
         for i in range(len(scn.aglist)):
             ag = scn.aglist[i]
             if ag.collection in obj.users_collection:
                 scn.aglist_index = i
                 scn.assemblMe_last_aglist_index = scn.aglist_index
+                tag_redraw_areas("VIEW_3D")
                 return 0.2
         scn.aglist_index = -1
     return 0.2
+
+
+@persistent
+@blender_version_wrapper('>=','2.80')
+def register_assemblme_timers(scn):
+    timer_fns = (handle_selections,)
+    for timer_fn in timer_fns:
+        if not bpy.app.timers.is_registered(timer_fn):
+            bpy.app.timers.register(timer_fn)

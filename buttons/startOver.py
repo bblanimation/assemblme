@@ -60,9 +60,6 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
         # initialize vars
         scn, ag = getActiveContextInfo()
 
-        # save backup of blender file if enabled in user prefs
-        saveBackupFile(self)
-
         # set current_frame to animation start frame
         self.origFrame = scn.frame_current
         bpy.context.scene.frame_set(ag.frameWithOrigLoc)

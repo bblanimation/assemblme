@@ -40,16 +40,6 @@ class ASSEMBLME_PT_preferences(AddonPreferences):
             subtype='FILE_PATH',
             default=defaultPresetsFP)
 
-    # auto save preferences
-    autoSaveOnCreateAnim = BoolProperty(
-            name="Before 'Create Build Animation'",
-            description="Save backup .blend file to project directory before executing 'Create Build Animation' actions",
-            default=False)
-    autoSaveOnStartOver = BoolProperty(
-            name="Before 'Start Over'",
-            description="Save backup .blend file to project directory before executing 'Start Over' actions",
-            default=False)
-
 	# addon updater preferences
     auto_check_update = BoolProperty(
         name = "Auto-check for Update",
@@ -78,12 +68,6 @@ class ASSEMBLME_PT_preferences(AddonPreferences):
     def draw(self, context):
         layout = self.layout
         col = layout.column(align=True)
-        row = col.row(align=True)
-        row.label(text="Auto-Save:")
-        row = col.row(align=True)
-        row.prop(self, "autoSaveOnCreateAnim")
-        row = col.row(align=True)
-        row.prop(self, "autoSaveOnStartOver")
 
         # updater draw function
         addon_updater_ops.update_settings_ui(self,context)
