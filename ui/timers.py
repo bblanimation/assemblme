@@ -25,10 +25,10 @@ from ..functions import *
 from bpy.app.handlers import persistent
 
 
-@blender_version_wrapper('>=','2.80')
-def handle_selections():
+@persistent
+def handle_selections(junk=None):
     scn = bpy.context.scene
-    obj = bpy.context.view_layer.objects.active
+    obj = bpy.context.view_layer.objects.active if b280() else scn.objects.active
     # # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
     # if scn.assemblMe_last_layers != str(list(scn.layers)):
     #     scn.assemblMe_last_layers = str(list(scn.layers))
@@ -59,12 +59,12 @@ def handle_selections():
     elif obj and scn.assemblMe_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and obj.type == "MESH":
         scn.assemblMe_last_active_object_name = obj.name
         # do nothing, because the active aglist index refers to this collection
-        if scn.aglist_index != -1 and scn.aglist[scn.aglist_index].collection in obj.users_collection:
+        if scn.aglist_index != -1 and scn.aglist[scn.aglist_index].collection in (obj.users_collection if b280() else obj.users_group):
             return 0.2
         # attempt to switch aglist index if one of them refers to this collection
         for i in range(len(scn.aglist)):
             ag = scn.aglist[i]
-            if ag.collection in obj.users_collection:
+            if ag.collection in (obj.users_collection if b280() else obj.users_group):
                 scn.aglist_index = i
                 scn.assemblMe_last_aglist_index = scn.aglist_index
                 tag_redraw_areas("VIEW_3D")
