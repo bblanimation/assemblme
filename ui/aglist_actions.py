@@ -62,14 +62,17 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             pass
 
         if self.action == 'REMOVE':
+            if scn.aglist_index == -1:
+                return {"FINISHED"}
             bpy.ops.ed.undo_push(message="AssemblMe: Remove Item")
             ag = scn.aglist[scn.aglist_index]
             if not ag.animated:
                 if ASSEMBLME_OT_visualizer.enabled():
                     ASSEMBLME_OT_visualizer.disable()
                 if ag.collection is not None:
-                    collections = bpy.data.collections if b280() else bpy.data.groups
-                    collections.remove(ag.collection, do_unlink=True)
+                    if ag.collection.name == "AssemblMe_{}_collection".format(ag.name):
+                        collections = bpy_collections()
+                        collections.remove(ag.collection, do_unlink=True)
                     bpy.context.area.tag_redraw()
                 if len(scn.aglist) - 1 == scn.aglist_index:
                     scn.aglist_index -= 1
@@ -79,7 +82,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             else:
                 self.report({"WARNING"}, "Please press 'Start Over' to clear the animation before removing this item.")
 
-        if self.action == 'ADD':
+        elif self.action == 'ADD':
             bpy.ops.ed.undo_push(message="AssemblMe: Add Item")
             if ASSEMBLME_OT_visualizer.enabled():
                 ASSEMBLME_OT_visualizer.disable()

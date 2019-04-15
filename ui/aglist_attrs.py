@@ -205,7 +205,7 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         name="Mesh Objects Only",
         description="Non-mesh objects will be excluded from the animation",
         update=setMeshesOnly,
-        default=False)
+        default=True)
     skipEmptySelections = BoolProperty(
         name="Skip Empty Selections",
         description="Skip frames where nothing is selected if checked (Recommended)",
@@ -214,6 +214,7 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     animated = BoolProperty(default=False)
     animBoundsStart = IntProperty(default=-1)
     animBoundsEnd = IntProperty(default=-1)
+    time_created = FloatProperty(default=float('inf'))
 
     ## DO THESE BELONG HERE??? ##
     frameWithOrigLoc = IntProperty(

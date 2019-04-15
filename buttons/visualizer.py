@@ -55,7 +55,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 # if new build animation created, update visualizer animation
                 if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
                     self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                    self.createAnim()
+                    self.createVisAnim()
                 # set visualizer object rotation
                 if v_obj.rotation_euler.x != ag.xOrient:
                     v_obj.rotation_euler.x = ag.xOrient
@@ -87,7 +87,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 # create animation for visualizer if build animation exists
                 self.minAndMax = [props.objMinLoc, props.objMaxLoc]
                 if ag.collection is not None:
-                    self.createAnim()
+                    self.createVisAnim()
                 # enable visualizer
                 self.enable(context)
                 # initialize self.zOrient for modal
@@ -118,7 +118,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     #############################################
     # class methods
 
-    def createAnim(self):
+    def createVisAnim(self):
         scn, ag = getActiveContextInfo()
         # if first and last location are the same, keep visualizer stationary
         if props.objMinLoc == props.objMaxLoc or ag.orientRandom > 0.0025:

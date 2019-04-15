@@ -224,6 +224,7 @@ def updateAnimPreset(self, context):
             spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
+            foo.execute()
         else:
             badPreset = str(scn.animPreset)
             if badPreset in scn.assemblme_default_presets:

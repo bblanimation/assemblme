@@ -45,16 +45,20 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     def execute(self, context):
         try:
             scn, ag = getActiveContextInfo()
+            all_ags_for_collection = [ag0 for ag0 in scn.aglist if ag0 == ag or (ag0.collection == ag.collection and ag0.animated)]
+            all_ags_for_collection.sort(key=lambda x: x.time_created)
             # ensure operation can run
             if not self.isValid(scn, ag):
                 return {"CANCELLED"}
+            # set frame to frameWithOrigLoc that was created first (all_ags_for_collection are sorted by time created)
+            scn.frame_set(all_ags_for_collection[0].frameWithOrigLoc)
             # clear animation data from all objects in ag.collection
             clearAnimation(ag.collection.objects)
             # create current animation (and recreate any others for this collection that were cleared)
-            all_ags_for_collection = [ag0 for ag0 in scn.aglist if ag0 == ag or (ag0.collection == ag.collection and ag0.animated)]
             for ag0 in all_ags_for_collection:
-                if ag0.collection == ag.collection and (ag0.animated or ag0 == ag):
-                    self.createAnim(scn, ag0)
+                self.createAnim(scn, ag0)
+            # set current_frame to original current_frame
+            scn.frame_set(self.origFrame)
         except:
             assemblme_handle_exception()
             return{"CANCELLED"}
@@ -66,6 +70,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     def __init__(self):
         scn, ag = getActiveContextInfo()
         self.objects_to_move = [obj for obj in ag.collection.objects if not ag.meshOnly or obj.type == "MESH"]
+        self.origFrame = scn.frame_current
 
     ###################################################
     # class variables
@@ -79,13 +84,14 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     def createAnim(self, scn, ag):
         print("\ncreating build animation...")
 
-        # set up other variables
+        # initialize vars
         action = "UPDATE" if ag.animated else "CREATE"
         ag.lastLayerVelocity = getObjectVelocity(ag)
-        self.origFrame = scn.frame_current
-        if action == "UPDATE":
-            # set current_frame to animation start frame
-            scn.frame_set(ag.frameWithOrigLoc)
+        if action == "CREATE":
+            ag.time_created = time.time()
+
+        # set current_frame to a frame where the animation is in it's initial state (if creating, this was done in 'execute')
+        scn.frame_set(ag.frameWithOrigLoc if action == "UPDATE" else ag.firstFrame)
 
         ### BEGIN ANIMATION GENERATION ###
         # populate self.listZValues
@@ -122,10 +128,11 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         props.z_upper_bound = None
         props.z_lower_bound = None
 
-        # set current_frame to original current_frame
+        # define animation start and end frames
         ag.animBoundsStart = ag.firstFrame if ag.buildType == "ASSEMBLE" else ag.firstFrame
         ag.animBoundsEnd   = ag.frameWithOrigLoc if ag.buildType == "ASSEMBLE" else lastFrame
-        bpy.context.scene.frame_set(self.origFrame)
+
+        # disable relationship lines and mark as animated
         if action == "CREATE":
             disableRelationshipLines()
             ag.animated = True
@@ -140,7 +147,6 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         # check if this would overlap with other animations
         other_anim_ags = [ag0 for ag0 in scn.aglist if ag0 != ag and ag0.collection == ag.collection and ag0.animated]
         for ag1 in other_anim_ags:
-            print(ag1.animBoundsStart, ag.firstFrame, ag1.animBoundsEnd)
             if ag1.animBoundsStart <= ag.firstFrame and ag.firstFrame <= ag1.animBoundsEnd:
                 self.report({"WARNING"}, "Animation overlaps with another AssemblMe aninmation for this collection")
                 return False
