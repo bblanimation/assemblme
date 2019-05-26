@@ -82,6 +82,7 @@ def register():
     Scene.visualizerScale = FloatProperty(
         name="Scale",
         description="Scale of layer orientation visualizer",
+        subtype="DISTANCE",
         precision=1,
         min=0.1, max=16,
         default=10)

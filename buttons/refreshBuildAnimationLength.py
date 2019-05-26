@@ -52,7 +52,7 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
 
             if ag.collection:
                 # if objects in ag.collection, populate objects_to_move with them
-                self.objects_to_move = ag.collection.objects
+                self.objects_to_move = get_anim_objects(ag)
                 # set current_frame to animation start frame
                 self.origFrame = scn.frame_current
                 bpy.context.scene.frame_set(ag.frameWithOrigLoc)

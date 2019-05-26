@@ -53,7 +53,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
             # set frame to frameWithOrigLoc that was created first (all_ags_for_collection are sorted by time created)
             scn.frame_set(all_ags_for_collection[0].frameWithOrigLoc)
             # clear animation data from all objects in ag.collection
-            clearAnimation(ag.collection.objects)
+            clearAnimation(get_anim_objects(ag))
             # create current animation (and recreate any others for this collection that were cleared)
             for ag0 in all_ags_for_collection:
                 self.createAnim(scn, ag0)
@@ -69,7 +69,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
     def __init__(self):
         scn, ag = getActiveContextInfo()
-        self.objects_to_move = [obj for obj in ag.collection.objects if not ag.meshOnly or obj.type == "MESH"]
+        self.objects_to_move = [obj for obj in get_anim_objects(ag) if not ag.meshOnly or obj.type == "MESH"]
         self.origFrame = scn.frame_current
 
     ###################################################
@@ -141,7 +141,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         if ag.collection is None:
             self.report({"WARNING"}, "No collection name specified" if b280() else "No group name specified")
             return False
-        if len(ag.collection.objects) == 0:
+        if len(get_anim_objects(ag)) == 0:
             self.report({"WARNING"}, "Collection contains no objects!" if b280() else "Group contains no objects!")
             return False
         # check if this would overlap with other animations

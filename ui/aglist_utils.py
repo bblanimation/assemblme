@@ -83,18 +83,15 @@ def collectionUpdate(self, context):
 
 def setMeshesOnly(self, context):
     scn, ag = getActiveContextInfo()
-    removedObjs = []
+    objsToClear = []
     if ag.collection is not None and ag.meshOnly:
-        for obj in ag.collection.objects:
-            if obj.type != "MESH":
-                ag.collection.objects.unlink(obj)
-                removedObjs.append(obj)
-    if ag.animated:
+        objsToClear = [obj for obj in get_anim_objects(ag, meshOnly=False) if obj.type != "MESH"]
+    if ag.animated and len(objsToClear) > 0:
         # set current_frame to animation start frame
         origFrame = scn.frame_current
         scn.frame_set(ag.frameWithOrigLoc)
         # clear animation
-        clearAnimation(removedObjs)
+        clearAnimation(objsToClear)
         # set current_frame back to to original frame
         scn.frame_set(origFrame)
 

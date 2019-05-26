@@ -77,8 +77,8 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
 
         # clear animation data from all objects in 'AssemblMe_all_objects_moved' group/collection
         if ag.collection is not None:
-            print("\nClearing animation data from " + str(len(ag.collection.objects)) + " objects.")
-            clearAnimation(ag.collection.objects)
+            print("\nClearing animation data from " + str(len(get_anim_objects(ag))) + " objects.")
+            clearAnimation(get_anim_objects(ag))
 
         # set current_frame to original current_frame
         scn.frame_set(self.origFrame)

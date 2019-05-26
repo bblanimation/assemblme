@@ -67,7 +67,6 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 if scn.visualizerScale != self.visualizerScale or scn.visualizerRes != self.visualizerRes:
                     self.loadLatticeMesh(context)
                     v_obj.data.update()
-                    scn.update()
             except:
                 assemblme_handle_exception()
 

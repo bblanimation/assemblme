@@ -256,7 +256,7 @@ def clearAnimation(objs):
     objs = confirmIter(objs)
     for obj in objs:
         obj.animation_data_clear()
-    bpy.context.scene.update()
+    update_depsgraph()
 
 
 def createdWithUnsupportedVersion(ag):
@@ -380,3 +380,8 @@ def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationM
 
 def assemblme_handle_exception():
     handle_exception(log_name="AssemblMe_log", report_button_loc="AssemblMe > Animations > Report Error")
+
+
+def get_anim_objects(ag, meshOnly:bool=None):
+    if meshOnly is None: meshOnly = ag.meshOnly
+    return [obj for obj in ag.collection.all_objects if obj.type == "MESH" or not meshOnly]

@@ -33,6 +33,7 @@ except ImportError:
 # Module imports
 from .python_utils import confirmIter, confirmList
 from .wrappers import blender_version_wrapper
+from .reporting import b280
 
 
 #################### PREFERENCES ####################
@@ -96,16 +97,10 @@ def duplicate(obj:Object, linked:bool=False, link_to_scene:bool=False):
 
 @blender_version_wrapper('<=','2.79')
 def setActiveObj(obj:Object, scene:Scene=None):
-    if obj is None:
-        return
-    assert type(obj) == Object
     scene = scene or bpy.context.scene
     scene.objects.active = obj
 @blender_version_wrapper('>=','2.80')
 def setActiveObj(obj:Object, view_layer:ViewLayer=None):
-    if obj is None:
-        return
-    assert type(obj) == Object
     view_layer = view_layer or bpy.context.view_layer
     view_layer.objects.active = obj
 
@@ -143,14 +138,14 @@ def selectAll():
     select(bpy.context.scene.objects)
 
 
-def selectVerts(vertList, only:bool=False):
-    """ selects verts in list and deselects the rest """
+def selectGeom(geom, only:bool=False):
+    """ selects verts/edges/faces in list and deselects the rest """
     # confirm vertList is a list of vertices
-    vertList = confirmList(vertList)
+    geom = confirmList(geom)
     # deselect all if selection is exclusive
     if only: deselectAll()
     # select vertices in list
-    for v in vertList:
+    for v in geom:
         if v is not None and not v.select:
             v.select = True
 
@@ -313,11 +308,30 @@ def insertKeyframes(objs, keyframeType:str, frame:int, if_needed:bool=False):
         inserted = obj.keyframe_insert(data_path=keyframeType, frame=frame, options=options)
 
 
-def apply_modifiers(obj:Object, settings:str="PREVIEW"):
+@blender_version_wrapper("<=", "2.79")
+def new_mesh_from_object(obj:Object):
+    return bpy.data.meshes.new_from_object(bpy.context.scene, obj, apply_modifiers=True, settings="PREVIEW")
+@blender_version_wrapper(">=", "2.80")
+def new_mesh_from_object(obj:Object):
+    depsgraph = bpy.context.view_layer.depsgraph
+    obj_eval = depsgraph.objects.get(obj.name, None)
+    return bpy.data.meshes.new_from_object(obj_eval)
+
+
+def apply_modifiers(obj:Object):
     """ apply modifiers to object """
-    m = obj.to_mesh(bpy.context.scene, True, "PREVIEW")
+    m = new_mesh_from_object(obj)
     obj.modifiers.clear()
     obj.data = m
+
+
+@blender_version_wrapper('<=','2.79')
+def light_add(type:str='POINT', radius:float=1.0, align:str='WORLD', location:tuple=(0.0, 0.0, 0.0), rotation:tuple=(0.0, 0.0, 0.0)):
+    view_align = align != 'WORLD'
+    bpy.ops.object.lamp_add(type=type, radius=radius, view_align=view_align, location=location, rotation=rotation)
+@blender_version_wrapper('>=','2.80')
+def light_add(type:str='POINT', radius:float=1.0, align:str='WORLD', location:tuple=(0.0, 0.0, 0.0), rotation:tuple=(0.0, 0.0, 0.0)):
+    bpy.ops.object.light_add(type=type, radius=radius, align=align, location=location, rotation=rotation)
 
 
 def is_smoke(ob:Object):
@@ -448,6 +462,14 @@ def smoothMeshFaces(faces:iter):
 
 
 #################### OTHER ####################
+
+
+@blender_version_wrapper('<=','2.79')
+def update_depsgraph():
+    bpy.context.scene.update()
+@blender_version_wrapper('>=','2.80')
+def update_depsgraph():
+    bpy.context.view_layer.depsgraph.update()
 
 
 def getItemByID(collection:bpy.types.CollectionProperty, id:int):
