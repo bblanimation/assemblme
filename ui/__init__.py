@@ -253,7 +253,7 @@ class ASSEMBLME_PT_settings(Panel):
         row = col.row(align=True)
         row.label(text="Build Type:")
         row = col.row(align=True)
-        row.prop(ag, "buildType", text="")
+        row.prop(ag, "buildType", expand=True)
         row = col.row(align=True)
         row.prop(ag, "invertBuild")
 

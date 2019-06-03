@@ -166,13 +166,13 @@ def makeCylinder(r:float, h:float, N:int, co:Vector=Vector((0,0,0)), botFace:boo
     topVerts = []
     botVerts = []
     sideFaces = []
+    z = h / 2
 
     # create upper and lower circles
     for i in range(N):
         circ_val = ((2 * math.pi) / N) * i
         x = r * math.cos(circ_val)
         y = r * math.sin(circ_val)
-        z = h / 2
         coordT = co + Vector((x, y, z))
         coordB = co + Vector((x, y, -z))
         topVerts.append(bme.verts.new(coordT))

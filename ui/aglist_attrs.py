@@ -186,10 +186,7 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         name="Build Type",
         description="Choose whether to assemble or disassemble the objects",
         items=[("ASSEMBLE", "Assemble", "Assemble the objects to current location"),
-               ("DISASSEMBLE", "Disassemble", "Disassemble objects from current location"),
-               # the following is for backwards compatibility with old assemblme presets
-               ("Assemble", "", ""),
-               ("Disassemble", "", "")],
+               ("DISASSEMBLE", "Disassemble", "Disassemble objects from current location")],
         update=handleOutdatedPreset,
         default="ASSEMBLE")
     invertBuild = BoolProperty(
