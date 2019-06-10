@@ -215,6 +215,11 @@ def layers(l):
     return all
 
 
+def get_default_preset_names():
+    default_preset_path = os.path.join(get_addon_directory(), "lib", "default_presets")
+    return [os.path.splitext(fn)[0] for fn in os.listdir(default_preset_path) if fn.endswith(".py")]
+
+
 def updateAnimPreset(self, context):
     scn = bpy.context.scene
     if scn.animPreset != "None":
@@ -227,7 +232,7 @@ def updateAnimPreset(self, context):
             foo.execute()
         else:
             badPreset = str(scn.animPreset)
-            if badPreset in scn.assemblme_default_presets:
+            if badPreset in get_default_preset_names():
                 errorString = "Preset '%(badPreset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
             else:
                 errorString = "Preset '%(badPreset)s' could not be found." % locals()
@@ -248,6 +253,8 @@ def updateAnimPreset(self, context):
                 items=presetNames,
                 default="None")
             scn.animPreset = "None"
+    scn, ag = getActiveContextInfo()
+    ag.cur_preset = scn.animPreset
 
     return None
 
@@ -385,3 +392,15 @@ def assemblme_handle_exception():
 def get_anim_objects(ag, meshOnly:bool=None):
     if meshOnly is None: meshOnly = ag.meshOnly
     return [obj for obj in ag.collection.all_objects if obj.type == "MESH" or not meshOnly]
+
+def ag_update(self, context):
+    """ select and make source or LEGO model active if scn.aglist_index changes """
+    scn = bpy.context.scene
+    obj = bpy.context.active_object
+    if scn.aglist_index != -1:
+        ag = scn.aglist[scn.aglist_index]
+        scn.animPreset = ag.cur_preset
+        coll = ag.collection
+        if coll is not None and len(coll.objects) > 0:
+            select(list(coll.objects), active=coll.objects[0], only=True)
+            scn.assemblMe_last_active_object_name = obj.name

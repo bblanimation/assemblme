@@ -212,6 +212,7 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     animBoundsStart = IntProperty(default=-1)
     animBoundsEnd = IntProperty(default=-1)
     time_created = FloatProperty(default=float('inf'))
+    cur_preset = StringProperty(default="None")
 
     ## DO THESE BELONG HERE??? ##
     frameWithOrigLoc = IntProperty(

@@ -47,16 +47,8 @@ def handle_selections(junk=None):
     #                     break
     #         if not setIndex:
     #             scn.aglist_index = -1
-    # select and make source or LEGO model active if scn.aglist_index changes
-    if scn.assemblMe_last_aglist_index != scn.aglist_index and scn.aglist_index != -1:
-        scn.assemblMe_last_aglist_index = scn.aglist_index
-        ag = scn.aglist[scn.aglist_index]
-        coll = ag.collection
-        if coll is not None and len(coll.objects) > 0:
-            select(list(coll.objects), active=coll.objects[0], only=True)
-            scn.assemblMe_last_active_object_name = obj.name
     # open LEGO model settings for active object if active object changes
-    elif obj and scn.assemblMe_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and obj.type == "MESH":
+    if obj and scn.assemblMe_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and obj.type == "MESH":
         scn.assemblMe_last_active_object_name = obj.name
         # do nothing, because the active aglist index refers to this collection
         if scn.aglist_index != -1 and scn.aglist[scn.aglist_index].collection in (obj.users_collection if b280() else obj.users_group):
@@ -66,7 +58,6 @@ def handle_selections(junk=None):
             ag = scn.aglist[i]
             if ag.collection in (obj.users_collection if b280() else obj.users_group):
                 scn.aglist_index = i
-                scn.assemblMe_last_aglist_index = scn.aglist_index
                 tag_redraw_areas("VIEW_3D")
                 return 0.2
         scn.aglist_index = -1

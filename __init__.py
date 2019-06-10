@@ -38,6 +38,7 @@ from bpy.utils import register_class, unregister_class
 # Addon import
 from .ui import *
 from .functions import getPresetTuples
+from .functions.general import *
 from .functions.common import *
 from .buttons.presets import *
 from .lib.classesToRegister import classes
@@ -57,7 +58,6 @@ def register():
     # items used by selection app handler
     Scene.assemblMe_runningOperation = BoolProperty(default=False)
     Scene.assemblMe_last_layers = StringProperty(default="")
-    Scene.assemblMe_last_aglist_index = IntProperty(default=-2)
     Scene.assemblMe_active_object_name = StringProperty(default="")
     Scene.assemblMe_last_active_object_name = StringProperty(default="")
 
@@ -65,7 +65,6 @@ def register():
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
-    Scene.assemblme_default_presets = ["Explode", "Rain", "Standard Build", "Step-by-Step"]
     presetNames = getPresetTuples(transferDefaults=not bpy.app.background)
     Scene.animPreset = EnumProperty(
         name="Presets",
@@ -95,7 +94,7 @@ def register():
 
     # list properties
     Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_collections)
-    Scene.aglist_index = IntProperty(default=-1)
+    Scene.aglist_index = IntProperty(default=-1, update=ag_update)
 
     # Session properties
     bpy.props.z_upper_bound = None
@@ -147,7 +146,6 @@ def unregister():
 
     del Scene.assemblMe_last_active_object_name
     del Scene.assemblMe_active_object_name
-    del Scene.assemblMe_last_aglist_index
     del Scene.assemblMe_last_layers
     del Scene.assemblMe_runningOperation
 
