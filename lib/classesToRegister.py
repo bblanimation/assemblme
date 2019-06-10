@@ -39,7 +39,7 @@ classes = [
     ASSEMBLME_PT_animations,
     ASSEMBLME_PT_actions,
     ASSEMBLME_PT_settings,
-    ASSEMBLME_PT_interface,
+    ASSEMBLME_PT_visualizer_settings,
     ASSEMBLME_PT_preset_manager,
     # assemblme/lib
     ASSEMBLME_PT_preferences,

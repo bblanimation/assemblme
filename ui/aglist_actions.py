@@ -79,6 +79,9 @@ class AGLIST_OT_list_action(bpy.types.Operator):
                 scn.aglist.remove(idx)
                 if scn.aglist_index == -1 and len(scn.aglist) > 0:
                     scn.aglist_index = 0
+                else:
+                    # run update function of the property
+                    scn.aglist_index = scn.aglist_index
             else:
                 self.report({"WARNING"}, "Please press 'Start Over' to clear the animation before removing this item.")
 

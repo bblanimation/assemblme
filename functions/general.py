@@ -396,7 +396,7 @@ def get_anim_objects(ag, meshOnly:bool=None):
 def ag_update(self, context):
     """ select and make source or LEGO model active if scn.aglist_index changes """
     scn = bpy.context.scene
-    obj = bpy.context.active_object
+    obj = bpy.context.view_layer.objects.active if b280() else scn.objects.active
     if scn.aglist_index != -1:
         ag = scn.aglist[scn.aglist_index]
         scn.animPreset = ag.cur_preset

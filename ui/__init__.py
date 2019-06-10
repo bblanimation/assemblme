@@ -179,8 +179,6 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.label(text="Animation:")
-        row = col.row(align=True)
         if ag.orientRandom > 0.005:
             approx = "~"
         else:
@@ -268,11 +266,11 @@ class ASSEMBLME_PT_settings(Panel):
         row.prop(ag, "meshOnly")
 
 
-class ASSEMBLME_PT_interface(Panel):
+class ASSEMBLME_PT_visualizer_settings(Panel):
     bl_space_type  = "VIEW_3D"
     bl_region_type = "UI" if b280() else "TOOLS"
-    bl_label       = "Interface"
-    bl_idname      = "ASSEMBLME_PT_interface"
+    bl_label       = "Visualizer Settings"
+    bl_idname      = "ASSEMBLME_PT_visualizer_settings"
     bl_context     = "objectmode"
     bl_category    = "AssemblMe"
     bl_options     = {"DEFAULT_CLOSED"}
@@ -293,9 +291,8 @@ class ASSEMBLME_PT_interface(Panel):
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label(text="Visualizer:")
-        row = col.row(align=True)
         row.prop(scn, "visualizerScale")
+        row = col.row(align=True)
         row.prop(scn, "visualizerRes")
 
 class ASSEMBLME_PT_preset_manager(Panel):
@@ -339,6 +336,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
         col = split.column(align=True)
         col.active = scn.animPresetToDelete != "None"
         col.operator("assemblme.anim_presets", text="Remove", icon="X").action = "REMOVE"
+        layout.separator()
         col = layout.column(align=True)
         row = col.row(align=True)
         col.operator("assemblme.info_restore_preset", text="Restore Presets", icon="INFO")
