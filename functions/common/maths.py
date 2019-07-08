@@ -25,14 +25,14 @@ from mathutils import Matrix, Vector
 from .wrappers import blender_version_wrapper
 
 
-@blender_version_wrapper('<=','2.79')
+@blender_version_wrapper("<=","2.79")
 def mathutils_mult(*argv):
     """ elementwise multiplication for vectors, matrices, etc. """
     result = argv[0]
     for arg in argv[1:]:
         result = result * arg
     return result
-@blender_version_wrapper('>=','2.80')
+@blender_version_wrapper(">=","2.80")
 def mathutils_mult(*argv):
     """ elementwise multiplication for vectors, matrices, etc. """
     result = argv[0]

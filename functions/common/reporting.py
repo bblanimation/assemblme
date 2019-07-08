@@ -27,10 +27,11 @@ import time
 import bpy
 
 
-def stopwatch(text:str, startTime:float, endTime:float=None, precision:int=5):
+def stopwatch(text:str, startTime:float, endTime:float=None, precision:int=5, multiplier:float=1):
     """From seconds to Days;Hours:Minutes;Seconds"""
     endTime = endTime or time.time()
     value = endTime - startTime
+    value = value * multiplier
 
     valueD = (((value/365)/24)/60)
     Days = int(valueD)
@@ -85,7 +86,7 @@ def showErrorMessage(message:str, wrap:int=80):
     for line in lines:
         spc = len(line) - len(line.lstrip())
         while len(line) > wrap:
-            i = line.rfind(' ', 0, wrap)
+            i = line.rfind(" ", 0, wrap)
             if i == -1:
                 nlines += [line[:wrap]]
                 line = line[wrap:]
@@ -93,7 +94,7 @@ def showErrorMessage(message:str, wrap:int=80):
                 nlines += [line[:i]]
                 line = line[i+1:]
             if line:
-                line = ' '*spc + line
+                line = " "*spc + line
         nlines += [line]
     lines = nlines
 
@@ -109,26 +110,26 @@ def handle_exception(log_name:str, report_button_loc:str):
     errormsg = print_exception(log_name)
     # if max number of exceptions occur within threshold of time, abort!
     errorStr = "Something went wrong. Please start an error report with us so we can fix it! ('%(report_button_loc)s')" % locals()
-    print('\n'*5)
-    print('-'*100)
+    print("\n"*5)
+    print("-"*100)
     print(errorStr)
-    print('-'*100)
-    print('\n'*5)
+    print("-"*100)
+    print("\n"*5)
     showErrorMessage(errorStr, wrap=240)
 
 
 def getExceptionMessage():
     exc_type, exc_obj, tb = sys.exc_info()
 
-    errormsg = 'EXCEPTION (%s): %s\n' % (exc_type, exc_obj)
+    errormsg = "EXCEPTION (%s): %s\n" % (exc_type, exc_obj)
     etb = traceback.extract_tb(tb)
     pfilename = None
     for i, entry in enumerate(reversed(etb)):
         filename, lineno, funcname, line = entry
         if filename != pfilename:
             pfilename = filename
-            errormsg += '         %s\n' % (filename)
-        errormsg += '%03d %04d:%s() %s\n' % (i, lineno, funcname, line.strip())
+            errormsg += "         %s\n" % (filename)
+        errormsg += "%03d %04d:%s() %s\n" % (i, lineno, funcname, line.strip())
 
     return errormsg
 
@@ -147,7 +148,7 @@ def print_exception(txtName:str, showError:bool=False, errormsg:str=""):
         txt.clear()
 
     # write error to log text object
-    txt.write(errormsg + '\n')
+    txt.write(errormsg + "\n")
 
     if showError:
         showErrorMessage(errormsg, wrap=240)
@@ -159,8 +160,8 @@ def print_exception(txtName:str, showError:bool=False, errormsg:str=""):
 def bversion(short:bool=True):
     """ return Blender version string """
     major,minor,rev = bpy.app.version
-    bver_long = '%03d.%03d.%03d' % (major,minor,rev)
-    bver_short = '%d.%02d' % (major, minor)
+    bver_long = "%03d.%03d.%03d" % (major,minor,rev)
+    bver_short = "%d.%02d" % (major, minor)
     return bver_short if short else bver_long
 
 

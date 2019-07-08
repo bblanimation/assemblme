@@ -38,18 +38,24 @@ def apply_transform(obj:Object, location:bool=True, rotation:bool=True, scale:bo
     s_mat_x = Matrix.Scale(scale.x, 4, Vector((1, 0, 0)))
     s_mat_y = Matrix.Scale(scale.y, 4, Vector((0, 1, 0)))
     s_mat_z = Matrix.Scale(scale.z, 4, Vector((0, 0, 1)))
-    if scale:    m.transform(mathutils_mult(s_mat_x, s_mat_y, s_mat_z))
-    else:        obj.scale = scale
-    if rotation: m.transform(rot.to_matrix().to_4x4())
-    else:        obj.rotation_euler = rot.to_euler()
-    if location: m.transform(Matrix.Translation(loc))
-    else:        obj.location = loc
+    if scale:
+        m.transform(mathutils_mult(s_mat_x, s_mat_y, s_mat_z))
+    else:
+        obj.scale = scale
+    if rotation:
+        m.transform(rot.to_matrix().to_4x4())
+    else:
+        obj.rotation_euler = rot.to_euler()
+    if location:
+        m.transform(Matrix.Translation(loc))
+    else:
+        obj.location = loc
 
 
 def parent_clear(objs, apply_transform:bool=True):
     """ efficiently clear parent """
     # select(objs, active=True, only=True)
-    # bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+    # bpy.ops.object.parent_clear(type="CLEAR_KEEP_TRANSFORM")
     objs = confirmIter(objs)
     if apply_transform:
         for obj in objs:
@@ -149,9 +155,9 @@ def transformToWorld(vec:Vector, mat:Matrix, junk_bme:bmesh=None):
     if rot != Euler((0, 0, 0), "XYZ"):
         junk_bme = bmesh.new() if junk_bme is None else junk_bme
         v1 = junk_bme.verts.new(vec)
-        bmesh.ops.rotate(junk_bme, verts=[v1], cent=-loc, matrix=Matrix.Rotation(rot.x, 3, 'X'))
-        bmesh.ops.rotate(junk_bme, verts=[v1], cent=-loc, matrix=Matrix.Rotation(rot.y, 3, 'Y'))
-        bmesh.ops.rotate(junk_bme, verts=[v1], cent=-loc, matrix=Matrix.Rotation(rot.z, 3, 'Z'))
+        bmesh.ops.rotate(junk_bme, verts=[v1], cent=-loc, matrix=Matrix.Rotation(rot.x, 3, "X"))
+        bmesh.ops.rotate(junk_bme, verts=[v1], cent=-loc, matrix=Matrix.Rotation(rot.y, 3, "Y"))
+        bmesh.ops.rotate(junk_bme, verts=[v1], cent=-loc, matrix=Matrix.Rotation(rot.z, 3, "Z"))
         vec = v1.co
     # apply scale
     vec = vec * scale
@@ -172,8 +178,8 @@ def transformToLocal(vec:Vector, mat:Matrix, junk_bme:bmesh=None):
     if rot != Euler((0, 0, 0), "XYZ"):
         junk_bme = bmesh.new() if junk_bme is None else junk_bme
         v1 = junk_bme.verts.new(vec)
-        bmesh.ops.rotate(junk_bme, verts=[v1], cent=loc, matrix=Matrix.Rotation(-rot.z, 3, 'Z'))
-        bmesh.ops.rotate(junk_bme, verts=[v1], cent=loc, matrix=Matrix.Rotation(-rot.y, 3, 'Y'))
-        bmesh.ops.rotate(junk_bme, verts=[v1], cent=loc, matrix=Matrix.Rotation(-rot.x, 3, 'X'))
+        bmesh.ops.rotate(junk_bme, verts=[v1], cent=loc, matrix=Matrix.Rotation(-rot.z, 3, "Z"))
+        bmesh.ops.rotate(junk_bme, verts=[v1], cent=loc, matrix=Matrix.Rotation(-rot.y, 3, "Y"))
+        bmesh.ops.rotate(junk_bme, verts=[v1], cent=loc, matrix=Matrix.Rotation(-rot.x, 3, "X"))
         vec = v1.co
     return vec
