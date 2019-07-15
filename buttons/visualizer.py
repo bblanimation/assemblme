@@ -136,10 +136,10 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             idx = -2 if ag.buildType == "ASSEMBLE" else -1
             mult = 1 if ag.buildType == "ASSEMBLE" else -1
             # insert keyframe and iterate current frame, and set another
-            insertKeyframes(self.visualizerObj, "location", curFrame)
+            insert_keyframes(self.visualizerObj, "location", curFrame)
             self.visualizerObj.location = props.objMaxLoc
             curFrame -= (ag.animLength - ag.lastLayerVelocity) * mult
-            insertKeyframes(self.visualizerObj, "location", curFrame, if_needed=True)
+            insert_keyframes(self.visualizerObj, "location", curFrame, if_needed=True)
             ag.visualizerAnimated = True
             setInterpolation(self.visualizerObj, 'loc', 'LINEAR', idx)
 
@@ -160,7 +160,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         # add proper mesh data to visualizer object
         self.loadLatticeMesh(context)
         # link visualizer object to scene
-        safeLink(self.visualizerObj)
+        safe_link(self.visualizerObj)
         unhide(self.visualizerObj)
         ag.visualizerActive = True
 
@@ -169,7 +169,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
         # unlink visualizer object
-        safeUnlink(self.visualizerObj)
+        safe_unlink(self.visualizerObj)
         # disable visualizer icon
         for ag in bpy.context.scene.aglist:
             ag.visualizerActive = False

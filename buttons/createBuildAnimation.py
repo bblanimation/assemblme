@@ -134,7 +134,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
         # disable relationship lines and mark as animated
         if action == "CREATE":
-            disableRelationshipLines()
+            disable_relationship_lines()
             ag.animated = True
 
     def isValid(self, scn, ag):

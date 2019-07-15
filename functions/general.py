@@ -233,11 +233,11 @@ def updateAnimPreset(self, context):
         else:
             badPreset = str(scn.animPreset)
             if badPreset in get_default_preset_names():
-                errorString = "Preset '%(badPreset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
+                error_string = "Preset '%(badPreset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
             else:
-                errorString = "Preset '%(badPreset)s' could not be found." % locals()
-            sys.stderr.write(errorString)
-            print(errorString)
+                error_string = "Preset '%(badPreset)s' could not be found." % locals()
+            sys.stderr.write(error_string)
+            print(error_string)
             presetNames = getPresetTuples()
 
             bpy.types.Scene.animPreset = EnumProperty(
@@ -260,7 +260,7 @@ def updateAnimPreset(self, context):
 
 
 def clearAnimation(objs):
-    objs = confirmIter(objs)
+    objs = confirm_iter(objs)
     for obj in objs:
         obj.animation_data_clear()
     update_depsgraph()
@@ -271,7 +271,7 @@ def createdWithUnsupportedVersion(ag):
 
 
 def setInterpolation(objs, data_path, mode, idx):
-    objs = confirmIter(objs)
+    objs = confirm_iter(objs)
     for obj in objs:
         if obj.animation_data is None:
             continue
@@ -300,15 +300,15 @@ def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationM
 
     # insert first location keyframes
     if insertLoc:
-        insertKeyframes(objects_to_move, "location", curFrame)
+        insert_keyframes(objects_to_move, "location", curFrame)
     # insert first rotation keyframes
     if insertRot:
-        insertKeyframes(objects_to_move, "rotation_euler", curFrame)
+        insert_keyframes(objects_to_move, "rotation_euler", curFrame)
 
 
     while len(objects_to_move) > len(objects_moved):
         # print status to terminal
-        updateProgressBars(True, True, len(objects_moved) / len(objects_to_move), last_len_objects_moved / len(objects_to_move), "Animating Layers")
+        update_progress_bars(True, True, len(objects_moved) / len(objects_to_move), last_len_objects_moved / len(objects_to_move), "Animating Layers")
         last_len_objects_moved = len(objects_moved)
 
         # get next objects to animate
@@ -321,11 +321,11 @@ def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationM
         if len(newSelection) != 0:
             # insert location keyframes
             if insertLoc:
-                insertKeyframes(newSelection, "location", curFrame)
+                insert_keyframes(newSelection, "location", curFrame)
                 kfIdxLoc -= inc
             # insert rotation keyframes
             if insertRot:
-                insertKeyframes(newSelection, "rotation_euler", curFrame)
+                insert_keyframes(newSelection, "rotation_euler", curFrame)
                 kfIdxRot -= inc
 
             # step curFrame backwards
@@ -338,7 +338,7 @@ def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationM
                         obj.matrix_world.translation = getOffsetLocation(ag, obj.matrix_world.translation)
                     else:
                         obj.location = getOffsetLocation(ag, obj.location)
-                insertKeyframes(newSelection, "location", curFrame, if_needed=True)
+                insert_keyframes(newSelection, "location", curFrame, if_needed=True)
             # rotate object and insert rotation keyframes
             if insertRot:
                 for obj in newSelection:
@@ -356,7 +356,7 @@ def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationM
                     #     obj.matrix_local = mathutils_mult(zMat, yMat, xMat, obj.matrix_local)
                     # else:
                     obj.rotation_euler = getOffsetRotation(ag, obj.rotation_euler)
-                insertKeyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
+                insert_keyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
 
             # step curFrame forwards
             curFrame += (velocity - getBuildSpeed(ag)) * mult
@@ -372,16 +372,16 @@ def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationM
     curFrame -= (velocity - getBuildSpeed(ag)) * mult
     # insert final location keyframes
     if insertLoc:
-        insertKeyframes(objects_to_move, "location", curFrame)
+        insert_keyframes(objects_to_move, "location", curFrame)
     # insert final rotation keyframes
     if insertRot:
-        insertKeyframes(objects_to_move, "rotation_euler", curFrame)
+        insert_keyframes(objects_to_move, "rotation_euler", curFrame)
 
     # set interpolation modes for moved objects
     setInterpolation(objects_moved, 'loc', locInterpolationMode, kfIdxLoc)
     setInterpolation(objects_moved, 'rot', rotInterpolationMode, kfIdxRot)
 
-    updateProgressBars(True, True, 1, 0, "Animating Layers", end=True)
+    update_progress_bars(True, True, 1, 0, "Animating Layers", end=True)
 
     return objects_moved, curFrame
 

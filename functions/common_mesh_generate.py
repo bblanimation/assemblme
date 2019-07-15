@@ -180,7 +180,7 @@ def makeCylinder(r:float, h:float, N:int, co:Vector=Vector((0,0,0)), botFace:boo
 
     # create faces on the sides
     _, sideFaces = connectCircles(topVerts if flipNormals else botVerts, botVerts if flipNormals else topVerts, bme)
-    smoothBMFaces(sideFaces)
+    smooth_bm_faces(sideFaces)
 
     # create top and bottom faces
     if topFace:
@@ -404,7 +404,7 @@ def makeIco():
 
 
 def makeTruncIco(layer):
-    newObjFromBmesh(layer, makeIco(), "truncated icosahedron")
+    new_objFromBmesh(layer, makeIco(), "truncated icosahedron")
     bpy.ops.object.editmode_toggle()
     bpy.ops.mesh.select_all(action='TOGGLE')
     bpy.ops.mesh.bevel(offset=0.35, vertex_only=True)
@@ -467,6 +467,6 @@ def makeLattice(vertDist:Vector, scale:Vector, offset:Vector=Vector((0, 0, 0))):
                 if y != 0: bme.edges.new((vertMatrix[x][y][z], vertMatrix[x][y-1][z]))
                 if z != 0: bme.edges.new((vertMatrix[x][y][z], vertMatrix[x][y][z-1]))
     # draw bmesh verts in 3D space
-    # drawBMesh(bme)
+    # draw_bmesh(bme)
 
     return bme

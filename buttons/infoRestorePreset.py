@@ -52,7 +52,7 @@ class ASSEMBLME_OT_info_restore_preset(bpy.types.Operator):
             txt.write("\n\nThat should do it! If this doesn't work for you, be sure to open up an")
             txt.write("\nissue at 'https://github.com/bblanimation/assemblme/issues' to let us know")
             txt.write("\nwhat steps you took and what problem you've run into so we can fix it ASAP!")
-            changeContext(context, 'TEXT_EDITOR')
+            change_context(context, 'TEXT_EDITOR')
             for area in bpy.context.window.screen.areas:
                 if area.type == 'TEXT_EDITOR':
                     area.spaces.active.text = txt
