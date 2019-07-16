@@ -94,14 +94,14 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             scn.aglist_index = len(scn.aglist)-1
             item.name = "<New Animation>"
             # get all existing IDs
-            existingIDs = []
+            existing_ids = []
             for ag in scn.aglist:
-                existingIDs.append(ag.id)
-            i = max(existingIDs) + 1
+                existing_ids.append(ag.id)
+            i = max(existing_ids) + 1
             # protect against massive item IDs
             if i > 9999:
                 i = 1
-                while i in existingIDs:
+                while i in existing_ids:
                     i += 1
             # set item ID to unique number
             item.id = i
@@ -141,7 +141,7 @@ class AGLIST_OT_copy_settings_to_others(bpy.types.Operator):
         ag0 = scn.aglist[scn.aglist_index]
         for ag1 in scn.aglist:
             if ag0 != ag1:
-                matchProperties(ag1, ag0)
+                match_properties(ag1, ag0)
         return{'FINISHED'}
 
 
@@ -160,7 +160,7 @@ class AGLIST_OT_copy_settings(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        scn, ag = getActiveContextInfo()
+        scn, ag = get_active_context_info()
         scn.assemblme_copy_from_id = ag.id
         return{'FINISHED'}
 
@@ -185,7 +185,7 @@ class AGLIST_OT_paste_settings(bpy.types.Operator):
         ag0 = scn.aglist[scn.aglist_index]
         for ag1 in scn.aglist:
             if ag0 != ag1 and ag1.id == scn.assemblme_copy_from_id:
-                matchProperties(ag0, ag1)
+                match_properties(ag0, ag1)
                 break
         return{'FINISHED'}
 
@@ -207,18 +207,18 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        scn, ag = getActiveContextInfo()
+        scn, ag = get_active_context_info()
         active_object = bpy.context.active_object
         obj_users = active_object.users_collection if b280() else active_object.users_group
         if len(obj_users) == 0:
             self.report({"INFO"}, "Active object has no parent collections" if b280() else "Active object has no linked groups.")
             return {"CANCELLED"}
-        if ag.lastActiveObjectName == active_object.name:
-            ag.activeUserIndex = (ag.activeUserIndex + 1) % len(obj_users)
+        if ag.last_active_object_name == active_object.name:
+            ag.active_user_index = (ag.active_user_index + 1) % len(obj_users)
         else:
-            ag.lastActiveObjectName = active_object.name
-            ag.activeUserIndex = 0
-        ag.collection = obj_users[ag.activeUserIndex]
+            ag.last_active_object_name = active_object.name
+            ag.active_user_index = 0
+        ag.collection = obj_users[ag.active_user_index]
 
         return{'FINISHED'}
 

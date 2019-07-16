@@ -26,32 +26,27 @@ from ..functions import *
 
 
 
-def matchProperties(agNew, agOld):
-    agNew.buildSpeed = agOld.buildSpeed
-    agNew.velocity = agOld.velocity
-    agNew.layerHeight = agOld.layerHeight
-    agNew.pathObject = agOld.pathObject
-    agNew.xLocOffset = agOld.xLocOffset
-    agNew.yLocOffset = agOld.yLocOffset
-    agNew.zLocOffset = agOld.zLocOffset
-    agNew.locationRandom = agOld.locationRandom
-    agNew.xRotOffset = agOld.xRotOffset
-    agNew.yRotOffset = agOld.yRotOffset
-    agNew.zRotOffset = agOld.zRotOffset
-    agNew.rotationRandom = agOld.rotationRandom
-    agNew.locInterpolationMode = agOld.locInterpolationMode
-    agNew.rotInterpolationMode = agOld.rotInterpolationMode
-    agNew.xOrient = agOld.xOrient
-    agNew.yOrient = agOld.yOrient
-    agNew.orientRandom = agOld.orientRandom
-    agNew.buildType = agOld.buildType
-    agNew.invertBuild = agOld.invertBuild
-    agNew.useGlobal = agOld.useGlobal
+def match_properties(ag_new, ag_old):
+    ag_new.build_speed = ag_old.build_speed
+    ag_new.velocity = ag_old.velocity
+    ag_new.layer_height = ag_old.layer_height
+    ag_new.path_object = ag_old.path_object
+    ag_new.loc_offset = ag_old.loc_offset
+    ag_new.loc_random = ag_old.loc_random
+    ag_new.rot_offset = ag_old.rot_offset
+    ag_new.rot_random = ag_old.rot_random
+    ag_new.loc_interpolation_mode = ag_old.loc_interpolation_mode
+    ag_new.rot_interpolation_mode = ag_old.rot_interpolation_mode
+    ag_new.orient = ag_old.orient
+    ag_new.orient_random = ag_old.orient_random
+    ag_new.build_type = ag_old.build_type
+    ag_new.inverted_build = ag_old.inverted_build
+    ag_new.use_global = ag_old.use_global
 
 
-def uniquifyName(self, context):
+def uniquify_name(self, context):
     """ if LEGO model exists with name, add '.###' to the end """
-    scn, ag = getActiveContextInfo()
+    scn, ag = get_active_context_info()
     name = ag.name
     while scn.aglist.keys().count(name) > 1:
         if name[-4] == ".":
@@ -66,8 +61,8 @@ def uniquifyName(self, context):
         ag.name = name
 
 
-def collectionUpdate(self, context):
-    scn, ag0 = getActiveContextInfo()
+def collection_update(self, context):
+    scn, ag0 = get_active_context_info()
     # get rid of unused groups created by AssemblMe
     collections = bpy.data.collections if b280() else bpy.data.groups
     for c in collections:
@@ -81,22 +76,22 @@ def collectionUpdate(self, context):
                 collections.remove(c, do_unlink=True)
 
 
-def setMeshesOnly(self, context):
-    scn, ag = getActiveContextInfo()
-    objsToClear = []
-    if ag.collection is not None and ag.meshOnly:
-        objsToClear = [obj for obj in get_anim_objects(ag, meshOnly=False) if obj.type != "MESH"]
-    if ag.animated and len(objsToClear) > 0:
+def set_meshes_only(self, context):
+    scn, ag = get_active_context_info()
+    objs_to_clear = []
+    if ag.collection is not None and ag.mesh_only:
+        objs_to_clear = [obj for obj in get_anim_objects(ag, mesh_only=False) if obj.type != "MESH"]
+    if ag.animated and len(objs_to_clear) > 0:
         # set current_frame to animation start frame
-        origFrame = scn.frame_current
-        scn.frame_set(ag.frameWithOrigLoc)
+        orig_frame = scn.frame_current
+        scn.frame_set(ag.frame_with_orig_loc)
         # clear animation
-        clearAnimation(objsToClear)
+        clear_animation(objs_to_clear)
         # set current_frame back to to original frame
-        scn.frame_set(origFrame)
+        scn.frame_set(orig_frame)
 
 
-def handleOutdatedPreset(self, context):
-    scn, ag = getActiveContextInfo()
-    if not ag.buildType.isupper():
-        ag.buildType = str(ag.buildType).upper()
+def handle_outdated_preset(self, context):
+    scn, ag = get_active_context_info()
+    if not ag.build_type.isupper():
+        ag.build_type = str(ag.build_type).upper()

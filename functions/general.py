@@ -34,166 +34,154 @@ props = bpy.props
 from .common import *
 
 
-def getActiveContextInfo(ag_idx=None):
+def get_active_context_info(ag_idx=None):
     scn = bpy.context.scene
     ag_idx = ag_idx or scn.aglist_index
     ag = scn.aglist[ag_idx]
     return scn, ag
 
 
-def getRandomizedOrient(orient, random_amount):
+def get_randomized_orient(orient, random_amount):
     """ returns randomized orientation based on user settings """
     return orient + random.uniform(-random_amount, random_amount)
 
 
-def getOffsetLocation(ag, loc):
+def get_offset_location(ag, loc):
     """ returns randomized location offset """
-    X = loc.x + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.xLocOffset
-    Y = loc.y + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.yLocOffset
-    Z = loc.z + random.uniform(-ag.locationRandom, ag.locationRandom) + ag.zLocOffset
+    X = loc.x + random.uniform(-ag.loc_random, ag.loc_random) + ag.loc_offset.x
+    Y = loc.y + random.uniform(-ag.loc_random, ag.loc_random) + ag.loc_offset.y
+    Z = loc.z + random.uniform(-ag.loc_random, ag.loc_random) + ag.loc_offset.z
     return (X, Y, Z)
 
 
-def getOffsetRotation(ag, rot):
+def get_offset_rotation(ag, rot):
     """ returns randomized rotation offset """
-    X = rot.x + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.xRotOffset)
-    Y = rot.y + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.yRotOffset)
-    Z = rot.z + (random.uniform(-ag.rotationRandom, ag.rotationRandom) + ag.zRotOffset)
-    return (X, Y, Z)
-
-# def toDegrees(degreeValue):
-#     """ converts radians to degrees """
-#     return (degreeValue*57.2958)
+    x = rot.x + (random.uniform(-ag.rot_random, ag.rot_random) + ag.rot_offset.x)
+    y = rot.y + (random.uniform(-ag.rot_random, ag.rot_random) + ag.rot_offset.y)
+    z = rot.z + (random.uniform(-ag.rot_random, ag.rot_random) + ag.rot_offset.z)
+    return (x, y, z)
 
 
-def getBuildSpeed(ag):
+def get_build_speed(ag):
     """ calculates and returns build speed """
-    return floor(ag.buildSpeed)
+    return floor(ag.build_speed)
 
 
-def getObjectVelocity(ag):
+def get_object_velocity(ag):
     """ calculates and returns brick velocity """
-    frameVelocity = round(2**(10-ag.velocity))
+    frameVelocity = round(2 ** (10 - ag.velocity))
     return frameVelocity
 
 
-def getAnimLength(ag, objects_to_move, listZValues, layerHeight, invertBuild, skipEmptySelections):
-    tempObjCount = 0
-    numLayers = 0
-    while len(objects_to_move) > tempObjCount:
-        numObjs = len(getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections))
-        numLayers += 1 if numObjs > 0 or not skipEmptySelections else 0
-        tempObjCount += numObjs
-    return (numLayers - 1) * getBuildSpeed(ag) + getObjectVelocity(ag) + 1
+def get_anim_length(ag, objects_to_move, list_z_values, layer_height, inverted_build, skip_empty_selections):
+    temp_obj_count = 0
+    num_layers = 0
+    while len(objects_to_move) > temp_obj_count:
+        num_objs = len(get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections))
+        num_layers += 1 if num_objs > 0 or not skip_empty_selections else 0
+        temp_obj_count += num_objs
+    return (num_layers - 1) * get_build_speed(ag) + get_object_velocity(ag) + 1
 
 
-def getFileNames(dir):
+def get_filenames(dir):
     """ list files in the given directory """
     return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and not f.startswith(".")]
 
 
-def getPresetTuples(fileNames=None, transferDefaults=False):
-    if not fileNames:
+def get_preset_tuples(filenames=None, transferDefaults=False):
+    if not filenames:
         # initialize presets path
-        path = get_addon_preferences().presetsFilepath
+        path = get_addon_preferences().presets_filepath
         # set up presets folder and transfer default presets
         if not os.path.exists(path):
             os.makedirs(path)
         if transferDefaults:
-            transferDefaultsToPresetsFolder(path)
+            transfer_defaults_to_preset_folder(path)
         # get list of filenames in presets directory
-        fileNames = getFileNames(path)
+        filenames = get_filenames(path)
     # refresh preset names
-    fileNames.sort()
-    presetNames = [(fileNames[i][:-3], fileNames[i][:-3], "Select this preset!") for i in range(len(fileNames))]
-    presetNames.append(("None", "None", "Don't use a preset"))
-    return presetNames
+    filenames.sort()
+    preset_names = [(filenames[i][:-3], filenames[i][:-3], "Select this preset!") for i in range(len(filenames))]
+    preset_names.append(("None", "None", "Don't use a preset"))
+    return preset_names
 
 
-def transferDefaultsToPresetsFolder(presetsPath):
-    defaultPresetsPath = join(dirname(dirname(abspath(__file__))), "lib", "default_presets")
-    fileNames = getFileNames(defaultPresetsPath)
+def transfer_defaults_to_preset_folder(presetsPath):
+    default_presets_path = join(dirname(dirname(abspath(__file__))), "lib", "default_presets")
+    filenames = get_filenames(default_presets_path)
     if not os.path.exists(presetsPath):
         os.mkdir(presetsPath)
-    for fn in fileNames:
+    for fn in filenames:
         dst = os.path.join(presetsPath, fn)
         backup_dst = os.path.join(presetsPath, "backups", fn)
         if os.path.isfile(dst):
             os.remove(dst)
         elif os.path.isfile(backup_dst):
             continue
-        src = os.path.join(defaultPresetsPath, fn)
+        src = os.path.join(default_presets_path, fn)
         copyfile(src, dst)
 
 
-# def setOrientation(orientation):
-#     """ sets transform orientation """
-#     if orientation == "custom":
-#         bpy.ops.transform.create_orientation(name="LEGO Build Custom Orientation", use_view=False, use=True, overwrite=True)
-#     else:
-#         bpy.ops.transform.select_orientation(orientation=orientation)
-
-
-def getListZValues(ag, objects, rotXL=False, rotYL=False):
+def get_list_z_values(ag, objects, rot_x_l=False, rot_y_l=False):
     """ returns list of dicts containing objects and ther z locations relative to layer orientation """
-    # assemble list of dictionaries into 'listZValues'
-    listZValues = []
-    if not rotXL:
-        rotXL = [getRandomizedOrient(ag.xOrient, ag.orientRandom) for i in range(len(objects))]
-        rotYL = [getRandomizedOrient(ag.yOrient, ag.orientRandom) for i in range(len(objects))]
+    # assemble list of dictionaries into 'list_z_values'
+    list_z_values = []
+    if not rot_x_l:
+        rot_x_l = [get_randomized_orient(ag.orient[0], ag.orient_random) for i in range(len(objects))]
+        rot_y_l = [get_randomized_orient(ag.orient[1], ag.orient_random) for i in range(len(objects))]
     for i,obj in enumerate(objects):
-        l = obj.matrix_world.to_translation() if ag.useGlobal else obj.location
-        rotX = rotXL[i]
-        rotY = rotYL[i]
+        l = obj.matrix_world.to_translation() if ag.use_global else obj.location
+        rotX = rot_x_l[i]
+        rotY = rot_y_l[i]
         zLoc = (l.z * cos(rotX) * cos(rotY)) + (l.x * sin(rotY)) + (l.y * -sin(rotX))
-        listZValues.append({"loc":zLoc, "obj":obj})
+        list_z_values.append({"loc":zLoc, "obj":obj})
 
     # sort list by "loc" key (relative z values)
-    listZValues.sort(key=lambda x: x["loc"], reverse=not ag.invertBuild)
+    list_z_values.sort(key=lambda x: x["loc"], reverse=not ag.inverted_build)
 
     # return list of dictionaries
-    return listZValues, rotXL, rotYL
+    return list_z_values, rot_x_l, rot_y_l
 
 
-def getObjectsInBound(listZValues, z_lower_bound, invertBuild):
-    """ select objects in bounds from listZValues """
-    objsInBound = []
-    # iterate through objects in listZValues (breaks when outside range)
-    for i,lst in enumerate(listZValues):
+def get_objs_in_bound(list_z_values, z_lower_bound, inverted_build):
+    """ select objects in bounds from list_z_values """
+    objs_in_bound = []
+    # iterate through objects in list_z_values (breaks when outside range)
+    for i,lst in enumerate(list_z_values):
         # set obj and z_loc
         obj = lst["obj"]
         z_loc = lst["loc"]
         # check if object is in bounding z value
-        if z_loc >= z_lower_bound and not invertBuild or z_loc <= z_lower_bound and invertBuild:
-            objsInBound.append(obj)
-        # if not, break for loop and pop previous objects from listZValues
+        if z_loc >= z_lower_bound and not inverted_build or z_loc <= z_lower_bound and inverted_build:
+            objs_in_bound.append(obj)
+        # if not, break for loop and pop previous objects from list_z_values
         else:
             for j in range(i):
-                listZValues.pop(0)
+                list_z_values.pop(0)
             break
-    return objsInBound
+    return objs_in_bound
 
 
-def getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections):
+def get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections):
     """ selects next layer of objects """
     # get new upper and lower bounds
-    props.z_upper_bound = listZValues[0]["loc"] if skipEmptySelections or props.z_upper_bound is None else props.z_lower_bound
-    props.z_lower_bound = props.z_upper_bound + layerHeight * (1 if invertBuild else -1)
+    props.z_upper_bound = list_z_values[0]["loc"] if skip_empty_selections or props.z_upper_bound is None else props.z_lower_bound
+    props.z_lower_bound = props.z_upper_bound + layer_height * (1 if inverted_build else -1)
     # select objects in bounds
-    objsInBound = getObjectsInBound(listZValues, props.z_lower_bound, invertBuild)
-    return objsInBound
+    objs_in_bound = get_objs_in_bound(list_z_values, props.z_lower_bound, inverted_build)
+    return objs_in_bound
 
 
-def setBoundsForVisualizer(ag, listZValues):
-    for i in range(len(listZValues)):
-        obj = listZValues[i]["obj"]
-        if not ag.meshOnly or obj.type == "MESH":
-            props.objMinLoc = obj.location.copy()
+def set_bounds_for_visualizer(ag, list_z_values):
+    for i in range(len(list_z_values)):
+        obj = list_z_values[i]["obj"]
+        if not ag.mesh_only or obj.type == "MESH":
+            props.obj_min_loc = obj.location.copy()
             break
-    for i in range(len(listZValues)-1,-1,-1):
-        obj = listZValues[i]["obj"]
-        if not ag.meshOnly or obj.type == "MESH":
-            props.objMaxLoc = obj.location.copy()
+    for i in range(len(list_z_values)-1,-1,-1):
+        obj = list_z_values[i]["obj"]
+        if not ag.mesh_only or obj.type == "MESH":
+            props.obj_max_loc = obj.location.copy()
             break
 
 
@@ -220,57 +208,57 @@ def get_default_preset_names():
     return [os.path.splitext(fn)[0] for fn in os.listdir(default_preset_path) if fn.endswith(".py")]
 
 
-def updateAnimPreset(self, context):
+def update_anim_preset(self, context):
     scn = bpy.context.scene
-    if scn.animPreset != "None":
+    if scn.anim_preset != "None":
         import importlib.util
-        pathToFile = os.path.join(get_addon_preferences().presetsFilepath, scn.animPreset + ".py")
-        if os.path.isfile(pathToFile):
-            spec = importlib.util.spec_from_file_location(scn.animPreset + ".py", pathToFile)
+        path_to_file = os.path.join(get_addon_preferences().presets_filepath, scn.anim_preset + ".py")
+        if os.path.isfile(path_to_file):
+            spec = importlib.util.spec_from_file_location(scn.anim_preset + ".py", path_to_file)
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
             foo.execute()
         else:
-            badPreset = str(scn.animPreset)
-            if badPreset in get_default_preset_names():
-                error_string = "Preset '%(badPreset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
+            bad_preset = str(scn.anim_preset)
+            if bad_preset in get_default_preset_names():
+                error_string = "Preset '%(bad_preset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
             else:
-                error_string = "Preset '%(badPreset)s' could not be found." % locals()
+                error_string = "Preset '%(bad_preset)s' could not be found." % locals()
             sys.stderr.write(error_string)
             print(error_string)
-            presetNames = getPresetTuples()
+            preset_names = get_preset_tuples()
 
-            bpy.types.Scene.animPreset = EnumProperty(
+            bpy.types.Scene.anim_preset = EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
-                items=presetNames,
-                update=updateAnimPreset,
+                items=preset_names,
+                update=update_anim_preset,
                 default="None")
 
-            bpy.types.Scene.animPresetToDelete = EnumProperty(
+            bpy.types.Scene.anim_preset_to_delete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
-                items=presetNames,
+                items=preset_names,
                 default="None")
-            scn.animPreset = "None"
-    scn, ag = getActiveContextInfo()
-    ag.cur_preset = scn.animPreset
+            scn.anim_preset = "None"
+    scn, ag = get_active_context_info()
+    ag.cur_preset = scn.anim_preset
 
     return None
 
 
-def clearAnimation(objs):
+def clear_animation(objs):
     objs = confirm_iter(objs)
     for obj in objs:
         obj.animation_data_clear()
     update_depsgraph()
 
 
-def createdWithUnsupportedVersion(ag):
+def created_with_unsupported_version(ag):
     return ag.version[:3] != bpy.props.assemblme_version[:3]
 
 
-def setInterpolation(objs, data_path, mode, idx):
+def set_interpolation(objs, data_path, mode, idx):
     objs = confirm_iter(objs)
     for obj in objs:
         if obj.animation_data is None:
@@ -281,29 +269,29 @@ def setInterpolation(objs, data_path, mode, idx):
             fcurve.keyframe_points[idx].interpolation = mode
 
 
-def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationMode='LINEAR', rotInterpolationMode='LINEAR'):
+def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpolation_mode='LINEAR', rot_interpolation_mode='LINEAR'):
     """ animates objects """
 
     # initialize variables for use in while loop
     objects_moved = []
     last_len_objects_moved = 0
-    mult = 1 if ag.buildType == "ASSEMBLE" else -1
-    inc  = 1 if ag.buildType == "ASSEMBLE" else 0
-    velocity = getObjectVelocity(ag)
-    insertLoc = ag.xLocOffset != 0 or ag.yLocOffset != 0 or ag.zLocOffset != 0 or ag.locationRandom != 0
-    insertRot = ag.xRotOffset != 0 or ag.yRotOffset != 0 or ag.zRotOffset != 0 or ag.rotationRandom != 0
-    layerHeight = ag.layerHeight
-    invertBuild = ag.invertBuild
-    skipEmptySelections = ag.skipEmptySelections
-    kfIdxLoc = -1
-    kfIdxRot = -1
+    mult = 1 if ag.build_type == "ASSEMBLE" else -1
+    inc  = 1 if ag.build_type == "ASSEMBLE" else 0
+    velocity = get_object_velocity(ag)
+    insert_loc = any(ag.loc_offset) or ag.loc_random != 0
+    insert_rot = any(ag.rot_offset) or ag.rot_random != 0
+    layer_height = ag.layer_height
+    inverted_build = ag.inverted_build
+    skip_empty_selections = ag.skip_empty_selections
+    kf_idx_loc = -1
+    kf_idx_rot = -1
 
     # insert first location keyframes
-    if insertLoc:
-        insert_keyframes(objects_to_move, "location", curFrame)
+    if insert_loc:
+        insert_keyframes(objects_to_move, "location", cur_frame)
     # insert first rotation keyframes
-    if insertRot:
-        insert_keyframes(objects_to_move, "rotation_euler", curFrame)
+    if insert_rot:
+        insert_keyframes(objects_to_move, "rotation_euler", cur_frame)
 
 
     while len(objects_to_move) > len(objects_moved):
@@ -312,86 +300,86 @@ def animateObjects(ag, objects_to_move, listZValues, curFrame, locInterpolationM
         last_len_objects_moved = len(objects_moved)
 
         # get next objects to animate
-        newSelection = getNewSelection(listZValues, layerHeight, invertBuild, skipEmptySelections)
-        objects_moved += newSelection
+        new_selection = get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections)
+        objects_moved += new_selection
 
         # move selected objects and add keyframes
-        kfIdxLoc = -1
-        kfIdxRot = -1
-        if len(newSelection) != 0:
+        kf_idx_loc = -1
+        kf_idx_rot = -1
+        if len(new_selection) != 0:
             # insert location keyframes
-            if insertLoc:
-                insert_keyframes(newSelection, "location", curFrame)
-                kfIdxLoc -= inc
+            if insert_loc:
+                insert_keyframes(new_selection, "location", cur_frame)
+                kf_idx_loc -= inc
             # insert rotation keyframes
-            if insertRot:
-                insert_keyframes(newSelection, "rotation_euler", curFrame)
-                kfIdxRot -= inc
+            if insert_rot:
+                insert_keyframes(new_selection, "rotation_euler", cur_frame)
+                kf_idx_rot -= inc
 
-            # step curFrame backwards
-            curFrame -= velocity * mult
+            # step cur_frame backwards
+            cur_frame -= velocity * mult
 
             # move object and insert location keyframes
-            if insertLoc:
-                for obj in newSelection:
-                    if ag.useGlobal:
-                        obj.matrix_world.translation = getOffsetLocation(ag, obj.matrix_world.translation)
+            if insert_loc:
+                for obj in new_selection:
+                    if ag.use_global:
+                        obj.matrix_world.translation = get_offset_location(ag, obj.matrix_world.translation)
                     else:
-                        obj.location = getOffsetLocation(ag, obj.location)
-                insert_keyframes(newSelection, "location", curFrame, if_needed=True)
+                        obj.location = get_offset_location(ag, obj.location)
+                insert_keyframes(new_selection, "location", cur_frame, if_needed=True)
             # rotate object and insert rotation keyframes
-            if insertRot:
-                for obj in newSelection:
-                    # if ag.useGlobal:
+            if insert_rot:
+                for obj in new_selection:
+                    # if ag.use_global:
                     #     # TODO: Fix global rotation functionality
                     #     # NOTE: Solution 1 - currently limited to at most 360 degrees
-                    #     xr, yr, zr = getOffsetRotation(ag, Vector((0,0,0)))
+                    #     xr, yr, zr = get_offset_rotation(ag, Vector((0,0,0)))
                     #     inv_mat = obj.matrix_world.inverted()
-                    #     xAxis = mathutils_mult(inv_mat, Vector((1, 0, 0)))
-                    #     yAxis = mathutils_mult(inv_mat, Vector((0, 1, 0)))
-                    #     zAxis = mathutils_mult(inv_mat, Vector((0, 0, 1)))
-                    #     xMat = Matrix.Rotation(xr, 4, xAxis)
-                    #     yMat = Matrix.Rotation(yr, 4, yAxis)
-                    #     zMat = Matrix.Rotation(zr, 4, zAxis)
-                    #     obj.matrix_local = mathutils_mult(zMat, yMat, xMat, obj.matrix_local)
+                    #     x_axis = mathutils_mult(inv_mat, Vector((1, 0, 0)))
+                    #     y_axis = mathutils_mult(inv_mat, Vector((0, 1, 0)))
+                    #     z_axis = mathutils_mult(inv_mat, Vector((0, 0, 1)))
+                    #     x_mat = Matrix.Rotation(xr, 4, x_axis)
+                    #     y_mat = Matrix.Rotation(yr, 4, y_axis)
+                    #     z_mat = Matrix.Rotation(zr, 4, z_axis)
+                    #     obj.matrix_local = mathutils_mult(z_mat, y_mat, x_mat, obj.matrix_local)
                     # else:
-                    obj.rotation_euler = getOffsetRotation(ag, obj.rotation_euler)
-                insert_keyframes(newSelection, "rotation_euler", curFrame, if_needed=True)
+                    obj.rotation_euler = get_offset_rotation(ag, obj.rotation_euler)
+                insert_keyframes(new_selection, "rotation_euler", cur_frame, if_needed=True)
 
-            # step curFrame forwards
-            curFrame += (velocity - getBuildSpeed(ag)) * mult
+            # step cur_frame forwards
+            cur_frame += (velocity - get_build_speed(ag)) * mult
 
-        # handle case where 'ag.skipEmptySelections' == False and empty selection is grabbed
-        elif not ag.skipEmptySelections:
+        # handle case where 'ag.skip_empty_selections' == False and empty selection is grabbed
+        elif not ag.skip_empty_selections:
             # skip frame if nothing selected
-            curFrame -= getBuildSpeed(ag) * mult
-        # handle case where 'ag.skipEmptySelections' == True and empty selection is grabbed
+            cur_frame -= get_build_speed(ag) * mult
+        # handle case where 'ag.skip_empty_selections' == True and empty selection is grabbed
         else:
             os.stderr.write("Grabbed empty selection. This shouldn't happen!")
 
-    curFrame -= (velocity - getBuildSpeed(ag)) * mult
+    cur_frame -= (velocity - get_build_speed(ag)) * mult
     # insert final location keyframes
-    if insertLoc:
-        insert_keyframes(objects_to_move, "location", curFrame)
+    if insert_loc:
+        insert_keyframes(objects_to_move, "location", cur_frame)
     # insert final rotation keyframes
-    if insertRot:
-        insert_keyframes(objects_to_move, "rotation_euler", curFrame)
+    if insert_rot:
+        insert_keyframes(objects_to_move, "rotation_euler", cur_frame)
 
     # set interpolation modes for moved objects
-    setInterpolation(objects_moved, 'loc', locInterpolationMode, kfIdxLoc)
-    setInterpolation(objects_moved, 'rot', rotInterpolationMode, kfIdxRot)
+    set_interpolation(objects_moved, 'loc', loc_interpolation_mode, kf_idx_loc)
+    set_interpolation(objects_moved, 'rot', rot_interpolation_mode, kf_idx_rot)
 
     update_progress_bars(True, True, 1, 0, "Animating Layers", end=True)
 
-    return objects_moved, curFrame
+    return objects_moved, cur_frame
 
 def assemblme_handle_exception():
-    handle_exception(log_name="AssemblMe_log", report_button_loc="AssemblMe > Animations > Report Error")
+    handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")
 
 
-def get_anim_objects(ag, meshOnly:bool=None):
-    if meshOnly is None: meshOnly = ag.meshOnly
-    return [obj for obj in ag.collection.all_objects if obj.type == "MESH" or not meshOnly]
+def get_anim_objects(ag, mesh_only:bool=None):
+    if mesh_only is None: mesh_only = ag.mesh_only
+    return [obj for obj in ag.collection.all_objects if obj.type == "MESH" or not mesh_only]
 
 def ag_update(self, context):
     """ select and make source or LEGO model active if scn.aglist_index changes """
@@ -399,8 +387,8 @@ def ag_update(self, context):
     obj = bpy.context.view_layer.objects.active if b280() else scn.objects.active
     if scn.aglist_index != -1:
         ag = scn.aglist[scn.aglist_index]
-        scn.animPreset = ag.cur_preset
+        scn.anim_preset = ag.cur_preset
         coll = ag.collection
         if coll is not None and len(coll.objects) > 0:
             select(list(coll.objects), active=coll.objects[0], only=True)
-            scn.assemblMe_last_active_object_name = obj.name
+            scn.assemblme_last_active_object_name = obj.name

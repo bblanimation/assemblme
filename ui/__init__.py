@@ -131,7 +131,7 @@ class ASSEMBLME_PT_actions(Panel):
 
     def draw(self, context):
         layout = self.layout
-        scn, ag = getActiveContextInfo()
+        scn, ag = get_active_context_info()
 
         col = layout.column(align=True)
         row = col.row(align=True)
@@ -140,7 +140,7 @@ class ASSEMBLME_PT_actions(Panel):
         row.operator("assemblme.create_build_animation", text="Create Build Animation" if not ag.animated else "Update Build Animation", icon="MOD_BUILD")
         row = col.row(align=True)
         row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
-        if bpy.data.texts.find('AssemblMe_log') >= 0:
+        if bpy.data.texts.find('AssemblMe log') >= 0:
             split = layout_split(layout, factor=0.9)
             col = split.column(align=True)
             row = col.row(align=True)
@@ -169,65 +169,51 @@ class ASSEMBLME_PT_settings(Panel):
 
     def draw(self, context):
         layout = self.layout
-        scn, ag = getActiveContextInfo()
+        scn, ag = get_active_context_info()
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.prop(scn, "animPreset", text="Preset")
+        row.prop(scn, "anim_preset", text="Preset")
 
         box = layout.box()
 
         col = box.column(align=True)
         row = col.row(align=True)
-        if ag.orientRandom > 0.005:
+        if ag.orient_random > 0.005:
             approx = "~"
         else:
             approx = ""
-        row.operator("assemblme.refresh_anim_length", text="Duration: " + approx + str(ag.animLength) + " frames", icon="FILE_REFRESH")
+        row.operator("assemblme.refresh_anim_length", text="Duration: " + approx + str(ag.anim_length) + " frames", icon="FILE_REFRESH")
         row = col.row(align=True)
-        row.prop(ag, "firstFrame")
+        row.prop(ag, "first_frame")
         row = col.row(align=True)
-        row.prop(ag, "buildSpeed")
+        row.prop(ag, "build_speed")
         row = col.row(align=True)
         row.prop(ag, "velocity")
         row = col.row(align=True)
 
         col = box.column(align=True)
-        if scn.animPreset == "Follow Curve":
+        if scn.anim_preset == "Follow Curve":
             row = col.row(align=True)
             row.label(text="Path Object:")
             row = col.row(align=True)
-            row.prop(ag, "pathObject")
+            row.prop(ag, "path_object")
         else:
             split = layout_split(col, align=False, factor=0.5)
             col1 = split.column(align=True)
+            col1.prop(ag, "loc_offset", text="Location Offset")
             row = col1.row(align=True)
-            row.label(text="Location Offset:")
+            row.prop(ag, "loc_interpolation_mode", text="")
             row = col1.row(align=True)
-            row.prop(ag, "xLocOffset")
-            row = col1.row(align=True)
-            row.prop(ag, "yLocOffset")
-            row = col1.row(align=True)
-            row.prop(ag, "zLocOffset")
-            row = col1.row(align=True)
-            row.prop(ag, "locInterpolationMode", text="")
-            row = col1.row(align=True)
-            row.prop(ag, "locationRandom")
+            row.prop(ag, "loc_random")
             row = col1.row(align=True)
 
             col1 = split.column(align=True)
+            col1.prop(ag, "rot_offset", text="Rotation Offset")
             row = col1.row(align=True)
-            row.label(text="Rotation Offset:")
+            row.prop(ag, "rot_interpolation_mode", text="")
             row = col1.row(align=True)
-            row.prop(ag, "xRotOffset")
-            row = col1.row(align=True)
-            row.prop(ag, "yRotOffset")
-            row = col1.row(align=True)
-            row.prop(ag, "zRotOffset")
-            row = col1.row(align=True)
-            row.prop(ag, "rotInterpolationMode", text="")
-            row = col1.row(align=True)
-            row.prop(ag, "rotationRandom")
+            row.prop(ag, "rot_random")
 
         col1 = box.column(align=True)
         row = col1.row(align=True)
@@ -235,35 +221,32 @@ class ASSEMBLME_PT_settings(Panel):
         row = col1.row(align=True)
         split = layout_split(row, factor=0.9)
         row = split.row(align=True)
-        col = row.column(align=True)
-        col.prop(ag, "xOrient")
-        col = row.column(align=True)
-        col.prop(ag, "yOrient")
+        row.prop(ag, "orient", text="")
         col = split.column(align=True)
-        col.operator("assemblme.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF" if ag.visualizerActive else "RESTRICT_VIEW_ON")
+        col.operator("assemblme.visualize_layer_orientation", text="", icon="RESTRICT_VIEW_OFF" if ag.visualizer_active else "RESTRICT_VIEW_ON")
         row = col1.row(align=True)
-        row.prop(ag, "orientRandom")
+        row.prop(ag, "orient_random")
         col1 = box.column(align=True)
         row = col1.row(align=True)
-        row.prop(ag, "layerHeight")
+        row.prop(ag, "layer_height")
 
         col = box.column(align=True)
         row = col.row(align=True)
         row.label(text="Build Type:")
         row = col.row(align=True)
-        row.prop(ag, "buildType", expand=True)
+        row.prop(ag, "build_type", expand=True)
         row = col.row(align=True)
-        row.prop(ag, "invertBuild")
+        row.prop(ag, "inverted_build")
 
         col = box.column(align=True)
         row = col.row(align=True)
         row.label(text="Advanced:")
         row = col.row(align=True)
-        row.prop(ag, "skipEmptySelections")
+        row.prop(ag, "skip_empty_selections")
         row = col.row(align=True)
-        row.prop(ag, "useGlobal")
+        row.prop(ag, "use_global")
         row = col.row(align=True)
-        row.prop(ag, "meshOnly")
+        row.prop(ag, "mesh_only")
 
 
 class ASSEMBLME_PT_visualizer_settings(Panel):
@@ -287,13 +270,13 @@ class ASSEMBLME_PT_visualizer_settings(Panel):
 
     def draw(self, context):
         layout = self.layout
-        scn, ag = getActiveContextInfo()
+        scn, ag = get_active_context_info()
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.prop(scn, "visualizerScale")
+        row.prop(scn, "visualizer_scale")
         row = col.row(align=True)
-        row.prop(scn, "visualizerRes")
+        row.prop(scn, "visualizer_res")
 
 class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
@@ -322,9 +305,9 @@ class ASSEMBLME_PT_preset_manager(Panel):
             row = col.row(align=True)
             split = layout_split(row, factor=0.7)
             col = split.column(align=True)
-            col.prop(scn, "newPresetName", text="")
+            col.prop(scn, "new_preset_name", text="")
             col = split.column(align=True)
-            col.active = scn.newPresetName != ""
+            col.active = scn.new_preset_name != ""
             col.operator("assemblme.anim_presets", text="Create", icon="ADD" if b280() else "ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         row = col.row(align=True)
@@ -332,9 +315,9 @@ class ASSEMBLME_PT_preset_manager(Panel):
         row = col.row(align=True)
         split = layout_split(row, factor=0.7)
         col = split.column(align=True)
-        col.prop(scn, "animPresetToDelete", text="")
+        col.prop(scn, "anim_preset_to_delete", text="")
         col = split.column(align=True)
-        col.active = scn.animPresetToDelete != "None"
+        col.active = scn.anim_preset_to_delete != "None"
         col.operator("assemblme.anim_presets", text="Remove", icon="X").action = "REMOVE"
         layout.separator()
         col = layout.column(align=True)

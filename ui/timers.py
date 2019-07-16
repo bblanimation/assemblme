@@ -30,26 +30,26 @@ def handle_selections(junk=None):
     scn = bpy.context.scene
     obj = bpy.context.view_layer.objects.active if b280() else scn.objects.active
     # # if scn.layers changes and active object is no longer visible, set scn.aglist_index to -1
-    # if scn.assemblMe_last_layers != str(list(scn.layers)):
-    #     scn.assemblMe_last_layers = str(list(scn.layers))
-    #     curCollVisible = False
+    # if scn.assemblme_last_layers != str(list(scn.layers)):
+    #     scn.assemblme_last_layers = str(list(scn.layers))
+    #     cur_coll_visible = False
     #     if scn.aglist_index != -1:
     #         ag0 = scn.aglist[scn.aglist_index]
-    #         curCollVisible,_ = isCollectionVisible(scn, ag0)
-    #     if not curCollVisible or scn.aglist_index == -1:
-    #         setIndex = False
+    #         cur_coll_visible,_ = is_collection_visible(scn, ag0)
+    #     if not cur_coll_visible or scn.aglist_index == -1:
+    #         set_index = False
     #         for i,ag in enumerate(scn.aglist):
     #             if i != scn.aglist_index:
-    #                 nextCollVisible,obj = isCollectionVisible(scn, ag)
-    #                 if nextCollVisible and obj == obj:
+    #                 next_coll_visible,obj = is_collection_visible(scn, ag)
+    #                 if next_coll_visible and obj == obj:
     #                     scn.aglist_index = i
-    #                     setIndex = True
+    #                     set_index = True
     #                     break
-    #         if not setIndex:
+    #         if not set_index:
     #             scn.aglist_index = -1
     # open LEGO model settings for active object if active object changes
-    if obj and scn.assemblMe_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and obj.type == "MESH":
-        scn.assemblMe_last_active_object_name = obj.name
+    if obj and scn.assemblme_last_active_object_name != obj.name and (scn.aglist_index == -1 or scn.aglist[scn.aglist_index].collection is not None):# and obj.type == "MESH":
+        scn.assemblme_last_active_object_name = obj.name
         # do nothing, because the active aglist index refers to this collection
         if scn.aglist_index != -1 and scn.aglist[scn.aglist_index].collection in (obj.users_collection if b280() else obj.users_group):
             return 0.2

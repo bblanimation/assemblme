@@ -310,7 +310,7 @@ def copy_animation_data(source:Object, target:Object):
         setattr(ad2, prop, getattr(ad, prop))
 
 
-def insert_keyframes(objs, keyframeType:str, frame:int, if_needed:bool=False):
+def insert_keyframes(objs, keyframe_type:str, frame:int, if_needed:bool=False):
     """ insert key frames for given objects to given frames """
     objs = confirm_iter(objs)
     options = set(["INSERTKEY_NEEDED"] if if_needed else [])

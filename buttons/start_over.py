@@ -47,7 +47,7 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            self.startOver()
+            self.start_over()
         except:
             assemblme_handle_exception()
         return{"FINISHED"}
@@ -56,32 +56,32 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
     # initialization method
 
     def __init__(self):
-        self.origFrame = bpy.context.scene.frame_current
+        self.orig_frame = bpy.context.scene.frame_current
 
     ###################################################
     # class methods
 
     @timed_call("Time Elapsed")
-    def startOver(self):
+    def start_over(self):
         # initialize vars
-        scn, ag = getActiveContextInfo()
+        scn, ag = get_active_context_info()
 
         # set current_frame to animation start frame
         all_ags_for_collection = [ag0 for ag0 in scn.aglist if ag0 == ag or (ag0.collection == ag.collection and ag0.animated)]
         all_ags_for_collection.sort(key=lambda x: x.time_created)
-        # set frame to frameWithOrigLoc that was created first (all_ags_for_collection are sorted by time created)
-        scn.frame_set(all_ags_for_collection[0].frameWithOrigLoc)
+        # set frame to frame_with_orig_loc that was created first (all_ags_for_collection are sorted by time created)
+        scn.frame_set(all_ags_for_collection[0].frame_with_orig_loc)
 
-        # clear objMinLoc and objMaxLoc
-        props.objMinLoc, props.objMaxLoc = 0, 0
+        # clear obj_min_loc and obj_max_loc
+        props.obj_min_loc, props.obj_max_loc = 0, 0
 
         # clear animation data from all objects in 'AssemblMe_all_objects_moved' group/collection
         if ag.collection is not None:
             print("\nClearing animation data from " + str(len(get_anim_objects(ag))) + " objects.")
-            clearAnimation(get_anim_objects(ag))
+            clear_animation(get_anim_objects(ag))
 
         # set current_frame to original current_frame
-        scn.frame_set(self.origFrame)
+        scn.frame_set(self.orig_frame)
 
         # set all animated groups as not animated
         for ag0 in all_ags_for_collection:

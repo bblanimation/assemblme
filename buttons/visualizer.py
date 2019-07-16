@@ -45,27 +45,27 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             if context.scene.aglist_index == -1:
                 self.full_disable(context)
                 return{"CANCELLED"}
-            scn, ag = getActiveContextInfo()
+            scn, ag = get_active_context_info()
             try:
-                v_obj = self.visualizerObj
+                v_obj = self.visualizer_obj
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
                     self.full_disable(context)
                     return{"CANCELLED"}
                 # if new build animation created, update visualizer animation
-                if self.minAndMax != [props.objMinLoc, props.objMaxLoc]:
-                    self.minAndMax = [props.objMinLoc, props.objMaxLoc]
-                    self.createVisAnim()
+                if self.min_and_max != [props.obj_min_loc, props.obj_max_loc]:
+                    self.min_and_max = [props.obj_min_loc, props.obj_max_loc]
+                    self.create_vis_anim()
                 # set visualizer object rotation
-                if v_obj.rotation_euler.x != ag.xOrient:
-                    v_obj.rotation_euler.x = ag.xOrient
-                if v_obj.rotation_euler.y != ag.yOrient:
-                    v_obj.rotation_euler.y = ag.yOrient
-                if v_obj.rotation_euler.z != self.zOrient:
-                    v_obj.rotation_euler.z = ag.xOrient * (cos(ag.yOrient) * sin(ag.yOrient))
-                    self.zOrient = v_obj.rotation_euler.z
-                if scn.visualizerScale != self.visualizerScale or scn.visualizerRes != self.visualizerRes:
-                    self.loadLatticeMesh(context)
+                if v_obj.rotation_euler.x != ag.orient[0]:
+                    v_obj.rotation_euler.x = ag.orient[0]
+                if v_obj.rotation_euler.y != ag.orient[1]:
+                    v_obj.rotation_euler.y = ag.orient[1]
+                if v_obj.rotation_euler.z != self.z_orient:
+                    v_obj.rotation_euler.z = ag.orient[0] * (cos(ag.orient[1]) * sin(ag.orient[1]))
+                    self.z_orient = v_obj.rotation_euler.z
+                if scn.visualizer_scale != self.visualizer_scale or scn.visualizer_res != self.visualizer_res:
+                    self.load_lattice_mesh(context)
                     v_obj.data.update()
             except:
                 assemblme_handle_exception()
@@ -74,23 +74,23 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            scn, ag = getActiveContextInfo()
+            scn, ag = get_active_context_info()
             # if enabled, all we do is disable it
             if self.enabled():
                 self.full_disable(context)
                 return{"FINISHED"}
             else:
                 # ensure visualizer is hidden from render and selection
-                self.visualizerObj.hide_select = True
-                self.visualizerObj.hide_render = True
+                self.visualizer_obj.hide_select = True
+                self.visualizer_obj.hide_render = True
                 # create animation for visualizer if build animation exists
-                self.minAndMax = [props.objMinLoc, props.objMaxLoc]
+                self.min_and_max = [props.obj_min_loc, props.obj_max_loc]
                 if ag.collection is not None:
-                    self.createVisAnim()
+                    self.create_vis_anim()
                 # enable visualizer
                 self.enable(context)
-                # initialize self.zOrient for modal
-                self.zOrient = None
+                # initialize self.z_orient for modal
+                self.z_orient = None
                 # create timer for modal
                 wm = context.window_manager
                 self._timer = wm.event_timer_add(.02, window=context.window)
@@ -108,84 +108,84 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     # initialization method
 
     def __init__(self):
-        self.visualizerObj = bpy.data.objects.get("AssemblMe_visualizer")
-        if self.visualizerObj is None:
+        self.visualizer_obj = bpy.data.objects.get("AssemblMe_visualizer")
+        if self.visualizer_obj is None:
             # create visualizer object
             m = bpy.data.meshes.new("AssemblMe_visualizer_m")
-            self.visualizerObj = bpy.data.objects.new("AssemblMe_visualizer", m)
+            self.visualizer_obj = bpy.data.objects.new("AssemblMe_visualizer", m)
 
     #############################################
     # class methods
 
-    def createVisAnim(self):
-        scn, ag = getActiveContextInfo()
+    def create_vis_anim(self):
+        scn, ag = get_active_context_info()
         # if first and last location are the same, keep visualizer stationary
-        if props.objMinLoc == props.objMaxLoc or ag.orientRandom > 0.0025:
-            clearAnimation(self.visualizerObj)
-            self.visualizerObj.location = props.objMinLoc if type(props.objMinLoc) == type(self.visualizerObj.location) else (0, 0, 0)
-            ag.visualizerAnimated = False
+        if props.obj_min_loc == props.obj_max_loc or ag.orient_random > 0.0025:
+            clear_animation(self.visualizer_obj)
+            self.visualizer_obj.location = props.obj_min_loc if type(props.obj_min_loc) == type(self.visualizer_obj.location) else (0, 0, 0)
+            ag.visualizer_animated = False
             return "static"
         # else, create animation
         else:
             # if animation already created, clear it
-            if ag.visualizerAnimated:
-                clearAnimation(self.visualizerObj)
+            if ag.visualizer_animated:
+                clear_animation(self.visualizer_obj)
             # set up vars
-            self.visualizerObj.location = props.objMinLoc
-            curFrame = ag.frameWithOrigLoc
-            idx = -2 if ag.buildType == "ASSEMBLE" else -1
-            mult = 1 if ag.buildType == "ASSEMBLE" else -1
+            self.visualizer_obj.location = props.obj_min_loc
+            cur_frame = ag.frame_with_orig_loc
+            idx = -2 if ag.build_type == "ASSEMBLE" else -1
+            mult = 1 if ag.build_type == "ASSEMBLE" else -1
             # insert keyframe and iterate current frame, and set another
-            insert_keyframes(self.visualizerObj, "location", curFrame)
-            self.visualizerObj.location = props.objMaxLoc
-            curFrame -= (ag.animLength - ag.lastLayerVelocity) * mult
-            insert_keyframes(self.visualizerObj, "location", curFrame, if_needed=True)
-            ag.visualizerAnimated = True
-            setInterpolation(self.visualizerObj, 'loc', 'LINEAR', idx)
+            insert_keyframes(self.visualizer_obj, "location", cur_frame)
+            self.visualizer_obj.location = props.obj_max_loc
+            cur_frame -= (ag.anim_length - ag.last_layer_velocity) * mult
+            insert_keyframes(self.visualizer_obj, "location", cur_frame, if_needed=True)
+            ag.visualizer_animated = True
+            set_interpolation(self.visualizer_obj, 'loc', 'LINEAR', idx)
 
             return "animated"
 
-    def loadLatticeMesh(self, context):
+    def load_lattice_mesh(self, context):
         scn = bpy.context.scene
-        visualizerBM = makeLattice(Vector((scn.visualizerRes, scn.visualizerRes, 1)), Vector([scn.visualizerScale]*2 + [1]))
-        self.visualizerRes = scn.visualizerRes
-        self.visualizerScale = scn.visualizerScale
-        visualizerBM.to_mesh(self.visualizerObj.data)
+        visualizer_bm = make_lattice(Vector((scn.visualizer_res, scn.visualizer_res, 1)), Vector([scn.visualizer_scale]*2 + [1]))
+        self.visualizer_res = scn.visualizer_res
+        self.visualizer_scale = scn.visualizer_scale
+        visualizer_bm.to_mesh(self.visualizer_obj.data)
 
     def enable(self, context):
         """ enables visualizer """
-        scn, ag = getActiveContextInfo()
+        scn, ag = get_active_context_info()
         # alert user that visualizer is enabled
         self.report({"INFO"}, "Visualizer enabled... ('ESC' to disable)")
         # add proper mesh data to visualizer object
-        self.loadLatticeMesh(context)
+        self.load_lattice_mesh(context)
         # link visualizer object to scene
-        safe_link(self.visualizerObj)
-        unhide(self.visualizerObj)
-        ag.visualizerActive = True
+        safe_link(self.visualizer_obj)
+        unhide(self.visualizer_obj)
+        ag.visualizer_active = True
 
     def full_disable(self, context):
         """ disables visualizer """
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")
         # unlink visualizer object
-        safe_unlink(self.visualizerObj)
+        safe_unlink(self.visualizer_obj)
         # disable visualizer icon
         for ag in bpy.context.scene.aglist:
-            ag.visualizerActive = False
+            ag.visualizer_active = False
 
     @staticmethod
     def disable():
         """ static method for disabling visualizer """
-        ag = getActiveContextInfo()[1]
-        ag.visualizerActive = False
+        ag = get_active_context_info()[1]
+        ag.visualizer_active = False
 
     @staticmethod
     def enabled():
         """ returns boolean for visualizer linked to scene """
         if bpy.context.scene.aglist_index == -1:
             return False
-        ag = getActiveContextInfo()[1]
-        return ag.visualizerActive
+        ag = get_active_context_info()[1]
+        return ag.visualizer_active
 
     #############################################

@@ -35,7 +35,7 @@ class ASSEMBLME_PT_preferences(AddonPreferences):
     # file path to assemblMe presets (non-user-editable)
     addonLibPath = os.path.dirname(os.path.abspath(__file__))
     defaultPresetsFP = os.path.abspath(os.path.join(addonLibPath, '..', '..', '..', 'presets', 'assemblme'))
-    presetsFilepath = StringProperty(
+    presets_filepath = StringProperty(
             name="Path to assemblMe presets",
             subtype='FILE_PATH',
             default=defaultPresetsFP)

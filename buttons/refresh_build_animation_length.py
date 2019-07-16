@@ -48,30 +48,30 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
     def execute(self, context):
         try:
             # set up variables
-            scn, ag = getActiveContextInfo()
+            scn, ag = get_active_context_info()
 
             if ag.collection:
                 # if objects in ag.collection, populate objects_to_move with them
                 self.objects_to_move = get_anim_objects(ag)
                 # set current_frame to animation start frame
-                self.origFrame = scn.frame_current
-                bpy.context.scene.frame_set(ag.frameWithOrigLoc)
+                self.orig_frame = scn.frame_current
+                bpy.context.scene.frame_set(ag.frame_with_orig_loc)
             else:
                 # else, populate objects_to_move with selected_objects
                 self.objects_to_move = context.selected_objects
 
-            # populate self.listZValues
-            self.listZValues,_,_ = getListZValues(ag, self.objects_to_move)
+            # populate self.list_z_values
+            self.list_z_values,_,_ = get_list_z_values(ag, self.objects_to_move)
 
-            # set props.objMinLoc and props.objMaxLoc
-            setBoundsForVisualizer(ag, self.listZValues)
+            # set props.obj_min_loc and props.obj_max_loc
+            set_bounds_for_visualizer(ag, self.list_z_values)
 
-            # calculate how many frames the animation will last (depletes self.listZValues)
-            ag.animLength = getAnimLength(ag, self.objects_to_move, self.listZValues, ag.layerHeight, ag.invertBuild, ag.skipEmptySelections)
+            # calculate how many frames the animation will last (depletes self.list_z_values)
+            ag.anim_length = get_anim_length(ag, self.objects_to_move, self.list_z_values, ag.layer_height, ag.inverted_build, ag.skip_empty_selections)
 
             if ag.collection:
                 # set current_frame to original current_frame
-                bpy.context.scene.frame_set(self.origFrame)
+                bpy.context.scene.frame_set(self.orig_frame)
 
             # reset upper and lower bound values
             props.z_upper_bound = None

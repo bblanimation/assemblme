@@ -8,7 +8,7 @@ Created by Christopher Gearhart
 
 # Addon imports
 from .preferences import *
-from .reportError import *
+from .report_error import *
 from ..ui import *
 from ..buttons import *
 from .. import addon_updater_ops
@@ -16,12 +16,12 @@ from .. import addon_updater_ops
 
 classes = [
     # assemblme/buttons
-    createBuildAnimation.ASSEMBLME_OT_create_build_animation,
-    infoRestorePreset.ASSEMBLME_OT_info_restore_preset,
-    newGroupFromSelection.ASSEMBLME_OT_new_group_from_selection,
+    create_build_animation.ASSEMBLME_OT_create_build_animation,
+    info_restore_preset.ASSEMBLME_OT_info_restore_preset,
+    new_group_from_selection.ASSEMBLME_OT_new_group_from_selection,
     presets.ASSEMBLME_OT_anim_presets,
-    refreshBuildAnimationLength.ASSEMBLME_OT_refresh_anim_length,
-    startOver.ASSEMBLME_OT_start_over,
+    refresh_build_animation_length.ASSEMBLME_OT_refresh_anim_length,
+    start_over.ASSEMBLME_OT_start_over,
     visualizer.ASSEMBLME_OT_visualizer,
     # assemblme/ui/aglist_attrs
     ASSEMBLME_UL_animated_collections,

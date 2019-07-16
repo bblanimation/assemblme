@@ -42,17 +42,17 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        if not self.canRun():
+        if not self.can_run():
             return{"CANCELLED"}
         try:
-            scn, ag = getActiveContextInfo()
+            scn, ag = get_active_context_info()
             collections = bpy.data.collections if b280() else bpy.data.groups
             # create new animated collection
-            newCollName = "AssemblMe_{}_collection".format(ag.name)
-            overwriteColl = collections.get(newCollName)
-            if overwriteColl is not None:
-                collections.remove(overwriteColl)
-            ag.collection = collections.new(newCollName)
+            new_coll_name = "AssemblMe_{}_collection".format(ag.name)
+            overwrite_coll = collections.get(new_coll_name)
+            if overwrite_coll is not None:
+                collections.remove(overwrite_coll)
+            ag.collection = collections.new(new_coll_name)
             # add selected objects to new group
             for obj in self.objs_to_move:
                 ag.collection.objects.link(obj)
@@ -65,13 +65,13 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
     # initialization method
 
     def __init__(self):
-        scn, ag = getActiveContextInfo()
-        self.objs_to_move = [obj for obj in bpy.context.selected_objects if not ag.meshOnly or obj.type == "MESH"]
+        scn, ag = get_active_context_info()
+        self.objs_to_move = [obj for obj in bpy.context.selected_objects if not ag.mesh_only or obj.type == "MESH"]
 
     ################################################
     # class method
 
-    def canRun(self):
+    def can_run(self):
         if len(self.objs_to_move) == 0:
             self.report({"WARNING"}, "No objects selected")
             return False

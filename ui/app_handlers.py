@@ -22,30 +22,17 @@ from bpy.app.handlers import persistent
 from ..functions import *
 from mathutils import Vector, Euler
 
-# def isGroupVisible(scn, ag):
-#     scn = bpy.context.scene
-#     objectsOnActiveLayers = []
-#     objects = scn.objects
-#     for i in range(20):
-#         # get objects on current layer if layer is active for object and scene
-#         objectsOnActiveLayers += [ob for ob in objects if ob.layers[i] and scn.layers[i]]
-#     for obj in objectsOnActiveLayers:
-#         users_collection = obj.users_collection if b280() else obj.users_group
-#         if ag.collection in users_collection:
-#             return True, obj
-#     return False, None
-
 
 @persistent
 def convert_velocity_value(scn):
     if scn is None:
         return
     for ag in scn.aglist:
-        if ag.objectVelocity != -1:
-            oldV = ag.objectVelocity
-            targetNumFrames = 51 - oldV
-            ag.velocity = 10 - (math.log(targetNumFrames, 2))
-            ag.objectVelocity = -1
+        if ag.object_velocity != -1:
+            old_v = ag.object_velocity
+            target_num_frames = 51 - old_v
+            ag.velocity = 10 - (math.log(target_num_frames, 2))
+            ag.object_velocity = -1
 
 
 @persistent
@@ -54,7 +41,7 @@ def handle_upconversion(scn):
         return
     # update storage scene name
     for ag in scn.aglist:
-        if createdWithUnsupportedVersion(ag):
+        if created_with_unsupported_version(ag):
             # convert from v1_1 to v1_2
             if int(ag.version[2]) < 2:
                 if ag.collection and ag.collection.name.startswith("AssemblMe_animated_group"):

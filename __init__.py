@@ -37,11 +37,11 @@ from bpy.utils import register_class, unregister_class
 
 # Addon import
 from .ui import *
-from .functions import getPresetTuples
+from .functions import get_preset_tuples
 from .functions.general import *
 from .functions.common import *
 from .buttons.presets import *
-from .lib.classesToRegister import classes
+from .lib.classes_to_register import classes
 from . import addon_updater_ops
 
 
@@ -57,35 +57,35 @@ def register():
 
     # items used by selection app handler
     Scene.assemblMe_runningOperation = BoolProperty(default=False)
-    Scene.assemblMe_last_layers = StringProperty(default="")
+    Scene.assemblme_last_layers = StringProperty(default="")
     Scene.assemblMe_active_object_name = StringProperty(default="")
-    Scene.assemblMe_last_active_object_name = StringProperty(default="")
+    Scene.assemblme_last_active_object_name = StringProperty(default="")
 
-    Scene.newPresetName = StringProperty(
+    Scene.new_preset_name = StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
-    presetNames = getPresetTuples(transferDefaults=not bpy.app.background)
-    Scene.animPreset = EnumProperty(
+    preset_names = get_preset_tuples(transferDefaults=not bpy.app.background)
+    Scene.anim_preset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
-        items=presetNames,
-        update=updateAnimPreset,
+        items=preset_names,
+        update=update_anim_preset,
         default="None")
-    Scene.animPresetToDelete = EnumProperty(
+    Scene.anim_preset_to_delete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
-        items=Scene.animPreset[1]['items'],
+        items=Scene.anim_preset[1]['items'],
         default="None")
 
-    Scene.visualizerScale = FloatProperty(
+    Scene.visualizer_scale = FloatProperty(
         name="Scale",
         description="Scale of layer orientation visualizer",
         subtype="DISTANCE",
         precision=1,
         min=0.1, max=16,
         default=10)
-    Scene.visualizerRes = FloatProperty(
+    Scene.visualizer_res = FloatProperty(
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
@@ -99,8 +99,8 @@ def register():
     # Session properties
     bpy.props.z_upper_bound = None
     bpy.props.z_lower_bound = None
-    bpy.props.objMinLoc = 0
-    bpy.props.objMaxLoc = 0
+    bpy.props.obj_min_loc = 0
+    bpy.props.obj_max_loc = 0
 
     # register app handlers
     if b280():
@@ -131,22 +131,22 @@ def unregister():
 
     del bpy.props.z_upper_bound
     del bpy.props.z_lower_bound
-    del bpy.props.objMinLoc
-    del bpy.props.objMaxLoc
+    del bpy.props.obj_min_loc
+    del bpy.props.obj_max_loc
 
     del Scene.aglist_index
     del Scene.aglist
 
-    del Scene.visualizerRes
-    del Scene.visualizerScale
+    del Scene.visualizer_res
+    del Scene.visualizer_scale
 
-    del Scene.animPresetToDelete
-    del Scene.animPreset
-    del Scene.newPresetName
+    del Scene.anim_preset_to_delete
+    del Scene.anim_preset
+    del Scene.new_preset_name
 
-    del Scene.assemblMe_last_active_object_name
+    del Scene.assemblme_last_active_object_name
     del Scene.assemblMe_active_object_name
-    del Scene.assemblMe_last_layers
+    del Scene.assemblme_last_layers
     del Scene.assemblMe_runningOperation
 
     del Scene.assemblme_copy_from_id

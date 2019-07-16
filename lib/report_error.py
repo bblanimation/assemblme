@@ -27,12 +27,12 @@ from bpy.props import StringProperty
 # Addon imports
 from ..functions import *
 
-# define addon name (must match name in bl_info, replace spaces with underscores)
+# define addon name (must match name in bl_info)
 addon_name = "AssemblMe"
 
 class SCENE_OT_report_error(bpy.types.Operator):
     """Report a bug via an automatically generated issue ticket"""              # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "{}.report_error".format(addon_name.lower().replace(" ", "_"))  # unique identifier for buttons and menu items to reference.
+    bl_idname = "{}.report_error".format(make_bash_safe(addon_name.lower(), replace_with="_"))  # unique identifier for buttons and menu items to reference.
     bl_label = "Report Error"                                                   # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
@@ -41,18 +41,18 @@ class SCENE_OT_report_error(bpy.types.Operator):
 
     def execute(self, context):
         # set up file paths
-        libraryServersPath = os.path.join(get_addon_directory(), "error_log", self.txt_name)
+        library_servers_path = os.path.join(get_addon_directory(), "error_log", self.txt_name)
         # write necessary debugging information to text file
-        write_error_to_file(libraryServersPath, bpy.data.texts[addon_name + " log"].as_string(), str(self.version)[1:-1], self.github_path)
+        write_error_to_file(library_servers_path, bpy.data.texts[addon_name + " log"].as_string(), str(self.version)[1:-1], self.github_path)
         # open error report in UI with text editor
-        lastType = change_context(context, "TEXT_EDITOR")
+        last_type = change_context(context, "TEXT_EDITOR")
         try:
-            bpy.ops.text.open(filepath=libraryServersPath)
+            bpy.ops.text.open(filepath=library_servers_path)
             bpy.context.space_data.show_word_wrap = True
             self.report({"INFO"}, "Opened '{txt_name}'".format(txt_name=self.txt_name))
             bpy.props.needsUpdating = True
         except:
-            change_context(context, lastType)
+            change_context(context, last_type)
             self.report({"ERROR"}, "ERROR: Could not open '{txt_name}'. If the problem persists, try reinstalling the add-on.".format(txt_name=self.txt_name))
         return{"FINISHED"}
 
@@ -72,7 +72,7 @@ class SCENE_OT_report_error(bpy.types.Operator):
 
 class SCENE_OT_close_report_error(bpy.types.Operator):
     """Deletes error report from blender's memory (still exists in file system)""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "{}.close_report_error".format(addon_name.lower().replace(" ", "_")) # unique identifier for buttons and menu items to reference.
+    bl_idname = "{}.close_report_error".format(make_bash_safe(addon_name.lower(), replace_with="_")) # unique identifier for buttons and menu items to reference.
     bl_label = "Close Report Error"                                             # display name in the interface.
     bl_options = {"REGISTER", "UNDO"}
 
