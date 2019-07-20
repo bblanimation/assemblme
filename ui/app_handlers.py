@@ -50,3 +50,10 @@ def handle_upconversion(scn):
             if int(ag.version[2]) < 2:
                 collections = bpy.data.collections if b280() else bpy.data.groups
                 ag.collection = collections.get(ag.group_name)
+                # transfer props from 1_2 (camel to snake case)
+                for prop in get_annotations(ag):
+                    if prop.islower():
+                        continue
+                    snake_prop = camel_to_snake_case(prop)
+                    if hasattr(ag, snake_prop):
+                        setattr(ag, snake_prop, getattr(ag, prop))

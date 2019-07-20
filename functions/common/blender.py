@@ -310,7 +310,7 @@ def copy_animation_data(source:Object, target:Object):
         setattr(ad2, prop, getattr(ad, prop))
 
 
-def insert_keyframes(objs, keyframe_type:str, frame:int, if_needed:bool=False):
+def insert_keyframes(objs, keyframeType:str, frame:int, if_needed:bool=False):
     """ insert key frames for given objects to given frames """
     objs = confirm_iter(objs)
     options = set(["INSERTKEY_NEEDED"] if if_needed else [])
@@ -565,3 +565,48 @@ def make_annotations(cls):
             annotations[k] = v
             delattr(cls, k)
     return cls
+
+
+@blender_version_wrapper("<=","2.79")
+def get_annotations(cls):
+    return list(dict(cm).keys())
+@blender_version_wrapper(">=","2.80")
+def get_annotations(cls):
+    return cls.__annotations__
+
+
+def append_from(blendfile_path, attr, filename):
+    directory = os.path.join(blendfile_path, attr)
+    filepath = os.path.join(directory, filename)
+    bpy.ops.wm.append(
+        filepath=filepath,
+        filename=filename,
+        directory=directory)
+
+
+def append_all_from(blendfile_path, attr, overwrite_data=False):
+    data_block_infos = list()
+    orig_data_names = lambda: None
+    with bpy.data.libraries.load(blendfile_path) as (data_from, data_to):
+        setattr(data_to, attr, getattr(data_from, attr))
+        # store copies of loaded attributes to 'orig_data_names' object
+        if overwrite_data:
+            attrib = getattr(data_from, attr)
+            if len(attrib) > 0:
+                setattr(orig_data_names, attr, attrib.copy())
+    # overwrite existing data with loaded data of the same name
+    if overwrite_data:
+        # get attributes to remap
+        source_attr = getattr(orig_data_names, attr)
+        target_attr = getattr(data_to, attr)
+        for i, data_name in enumerate(source_attr):
+            # check that the data doesn't match
+            if not hasattr(target_attr[i], "name") or target_attr[i].name == data_name or not hasattr(bpy.data, attr): continue
+            # remap existing data to loaded data
+            data_attr = getattr(bpy.data, attr)
+            data_attr.get(data_name).user_remap(target_attr[i])
+            # remove remapped existing data
+            data_attr.remove(data_attr.get(data_name))
+            # rename loaded data to original name
+            target_attr[i].name = data_name
+    return data_to

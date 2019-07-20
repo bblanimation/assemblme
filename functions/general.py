@@ -377,6 +377,11 @@ def assemblme_handle_exception():
     handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")
 
 
+@blender_version_wrapper("<=", "2.79")
+def get_anim_objects(ag, mesh_only:bool=None):
+    if mesh_only is None: mesh_only = ag.mesh_only
+    return [obj for obj in ag.collection.objects if obj.type == "MESH" or not mesh_only]
+@blender_version_wrapper(">=", "2.80")
 def get_anim_objects(ag, mesh_only:bool=None):
     if mesh_only is None: mesh_only = ag.mesh_only
     return [obj for obj in ag.collection.all_objects if obj.type == "MESH" or not mesh_only]
