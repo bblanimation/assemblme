@@ -4,7 +4,7 @@ def execute():
     ag = scn.aglist[scn.aglist_index]
     ag.build_speed = 1.0
     ag.velocity = 5.5
-    ag.loc_offset = (5, 0, 0)
+    ag.loc_offset = (0, 0, 5)
     ag.loc_interpolation_mode = "CUBIC"
     ag.loc_random = 0.0
     ag.rot_offset = (0, 0, 0)

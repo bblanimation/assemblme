@@ -168,7 +168,7 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         update=handle_outdated_preset,
         default="ASSEMBLE")
     inverted_build = BoolProperty(
-        name="Assemble from other direction",
+        name="From other direction",
         description="Invert the animation so that the objects start (dis)assembling from the other side",
         default=False)
 
