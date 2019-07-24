@@ -88,14 +88,14 @@ def get_filenames(dir):
     return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and not f.startswith(".")]
 
 
-def get_preset_tuples(filenames=None, transferDefaults=False):
+def get_preset_tuples(filenames=None, transfer_defaults=False):
     if not filenames:
         # initialize presets path
         path = get_addon_preferences().presets_filepath
         # set up presets folder and transfer default presets
         if not os.path.exists(path):
             os.makedirs(path)
-        if transferDefaults:
+        if transfer_defaults:
             transfer_defaults_to_preset_folder(path)
         # get list of filenames in presets directory
         filenames = get_filenames(path)
@@ -106,14 +106,14 @@ def get_preset_tuples(filenames=None, transferDefaults=False):
     return preset_names
 
 
-def transfer_defaults_to_preset_folder(presetsPath):
+def transfer_defaults_to_preset_folder(presets_path):
     default_presets_path = join(dirname(dirname(abspath(__file__))), "lib", "default_presets")
     filenames = get_filenames(default_presets_path)
-    if not os.path.exists(presetsPath):
-        os.mkdir(presetsPath)
+    if not os.path.exists(presets_path):
+        os.mkdir(presets_path)
     for fn in filenames:
-        dst = os.path.join(presetsPath, fn)
-        backup_dst = os.path.join(presetsPath, "backups", fn)
+        dst = os.path.join(presets_path, fn)
+        backup_dst = os.path.join(presets_path, "backups", fn)
         if os.path.isfile(dst):
             os.remove(dst)
         elif os.path.isfile(backup_dst):
@@ -131,10 +131,10 @@ def get_list_z_values(ag, objects, rot_x_l=False, rot_y_l=False):
         rot_y_l = [get_randomized_orient(ag.orient[1], ag.orient_random) for i in range(len(objects))]
     for i,obj in enumerate(objects):
         l = obj.matrix_world.to_translation() if ag.use_global else obj.location
-        rotX = rot_x_l[i]
-        rotY = rot_y_l[i]
-        zLoc = (l.z * cos(rotX) * cos(rotY)) + (l.x * sin(rotY)) + (l.y * -sin(rotX))
-        list_z_values.append({"loc":zLoc, "obj":obj})
+        rot_x = rot_x_l[i]
+        rot_y = rot_y_l[i]
+        z_loc = (l.z * cos(rot_x) * cos(rot_y)) + (l.x * sin(rot_y)) + (l.y * -sin(rot_x))
+        list_z_values.append({"loc":z_loc, "obj":obj})
 
     # sort list by "loc" key (relative z values)
     list_z_values.sort(key=lambda x: x["loc"], reverse=not ag.inverted_build)
@@ -258,7 +258,7 @@ def created_with_unsupported_version(ag):
     return ag.version[:3] != bpy.props.assemblme_version[:3]
 
 
-def set_interpolation(objs, data_path, mode, idx):
+def set_interpolation(objs, data_path, mode, start_frame=0, end_frame=1048574):
     objs = confirm_iter(objs)
     for obj in objs:
         if obj.animation_data is None:
@@ -266,7 +266,9 @@ def set_interpolation(objs, data_path, mode, idx):
         for fcurve in obj.animation_data.action.fcurves:
             if fcurve is None or not fcurve.data_path.startswith(data_path):
                 continue
-            fcurve.keyframe_points[idx].interpolation = mode
+            for kf in fcurve.keyframe_points:
+                if start_frame <= kf.co[0] <= end_frame:
+                    kf.interpolation = mode
 
 
 def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpolation_mode='LINEAR', rot_interpolation_mode='LINEAR'):
@@ -278,6 +280,7 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
     mult = 1 if ag.build_type == "ASSEMBLE" else -1
     inc  = 1 if ag.build_type == "ASSEMBLE" else 0
     velocity = get_object_velocity(ag)
+    orig_frame = cur_frame
     insert_loc = any(ag.loc_offset) or ag.loc_random != 0
     insert_rot = any(ag.rot_offset) or ag.rot_random != 0
     layer_height = ag.layer_height
@@ -288,10 +291,10 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
 
     # insert first location keyframes
     if insert_loc:
-        insert_keyframes(objects_to_move, "location", cur_frame)
+        insert_keyframes(objects_to_move, "location", cur_frame + mult)
     # insert first rotation keyframes
     if insert_rot:
-        insert_keyframes(objects_to_move, "rotation_euler", cur_frame)
+        insert_keyframes(objects_to_move, "rotation_euler", cur_frame + mult)
 
 
     while len(objects_to_move) > len(objects_moved):
@@ -366,8 +369,10 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
         insert_keyframes(objects_to_move, "rotation_euler", cur_frame)
 
     # set interpolation modes for moved objects
-    set_interpolation(objects_moved, 'loc', loc_interpolation_mode, kf_idx_loc)
-    set_interpolation(objects_moved, 'rot', rot_interpolation_mode, kf_idx_rot)
+    start_frame = cur_frame if ag.build_type == "ASSEMBLE" else orig_frame
+    end_frame = orig_frame if ag.build_type == "ASSEMBLE" else cur_frame
+    set_interpolation(objects_moved, "loc", loc_interpolation_mode, start_frame, end_frame)
+    set_interpolation(objects_moved, "rot", rot_interpolation_mode, start_frame, end_frame)
 
     update_progress_bars(True, True, 1, 0, "Animating Layers", end=True)
 

@@ -35,10 +35,10 @@ class AGLIST_OT_list_action(bpy.types.Operator):
 
     action = EnumProperty(
         items=(
-            ('UP', "Up", ""),
-            ('DOWN', "Down", ""),
-            ('REMOVE', "Remove", ""),
-            ('ADD', "Add", ""),
+            ("UP", "Up", ""),
+            ("DOWN", "Down", ""),
+            ("REMOVE", "Remove", ""),
+            ("ADD", "Add", ""),
         )
     )
 
@@ -61,7 +61,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
         except IndexError:
             pass
 
-        if self.action == 'REMOVE':
+        if self.action == "REMOVE":
             if scn.aglist_index == -1:
                 return {"FINISHED"}
             bpy.ops.ed.undo_push(message="AssemblMe: Remove Item")
@@ -85,7 +85,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             else:
                 self.report({"WARNING"}, "Please press 'Start Over' to clear the animation before removing this item.")
 
-        elif self.action == 'ADD':
+        elif self.action == "ADD":
             bpy.ops.ed.undo_push(message="AssemblMe: Add Item")
             if ASSEMBLME_OT_visualizer.enabled():
                 ASSEMBLME_OT_visualizer.disable()
@@ -107,12 +107,12 @@ class AGLIST_OT_list_action(bpy.types.Operator):
             item.id = i
             item.idx = len(scn.aglist)-1
 
-        elif self.action == 'DOWN' and idx < len(scn.aglist) - 1:
+        elif self.action == "DOWN" and idx < len(scn.aglist) - 1:
             scn.aglist.move(scn.aglist_index, scn.aglist_index+1)
             scn.aglist_index += 1
             item.idx = scn.aglist_index
 
-        elif self.action == 'UP' and idx >= 1:
+        elif self.action == "UP" and idx >= 1:
             scn.aglist.move(scn.aglist_index, scn.aglist_index-1)
             scn.aglist_index -= 1
             item.idx = scn.aglist_index
@@ -142,7 +142,7 @@ class AGLIST_OT_copy_settings_to_others(bpy.types.Operator):
         for ag1 in scn.aglist:
             if ag0 != ag1:
                 match_properties(ag1, ag0)
-        return{'FINISHED'}
+        return{"FINISHED"}
 
 
 # copy settings from current index to memory
@@ -162,7 +162,7 @@ class AGLIST_OT_copy_settings(bpy.types.Operator):
     def execute(self, context):
         scn, ag = get_active_context_info()
         scn.assemblme_copy_from_id = ag.id
-        return{'FINISHED'}
+        return{"FINISHED"}
 
 
 # paste settings from index in memory to current index
@@ -187,7 +187,7 @@ class AGLIST_OT_paste_settings(bpy.types.Operator):
             if ag0 != ag1 and ag1.id == scn.assemblme_copy_from_id:
                 match_properties(ag0, ag1)
                 break
-        return{'FINISHED'}
+        return{"FINISHED"}
 
 
 # set source to active button
@@ -220,7 +220,7 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
             ag.active_user_index = 0
         ag.collection = obj_users[ag.active_user_index]
 
-        return{'FINISHED'}
+        return{"FINISHED"}
 
 
 # print button
@@ -233,7 +233,7 @@ class AGLIST_OT_print_all_items(bpy.types.Operator):
         scn = context.scene
         for i in scn.aglist:
             print (i.source_name, i.id)
-        return{'FINISHED'}
+        return{"FINISHED"}
 
 
 # clear button
@@ -251,12 +251,12 @@ class AGLIST_OT_clear_all_items(bpy.types.Operator):
              # reverse range to remove last item first
             for i in range(len(ag)-1,-1,-1):
                 scn.aglist.remove(i)
-            self.report({'INFO'}, "All items removed")
+            self.report({"INFO"}, "All items removed")
 
         else:
-            self.report({'INFO'}, "Nothing to remove")
+            self.report({"INFO"}, "Nothing to remove")
 
-        return{'FINISHED'}
+        return{"FINISHED"}
 
 
 # -------------------------------------------------------------------
@@ -267,10 +267,10 @@ class ASSEMBLME_UL_items(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types
-        if self.layout_type in {'GRID'}:
-            layout.alignment = 'CENTER'
+        if self.layout_type in {"GRID"}:
+            layout.alignment = "CENTER"
         split = layout_split(layout, align=False, factor=0.9)
-        split.prop(item, "name", text="", emboss=False, translate=False, icon='MOD_BUILD')
+        split.prop(item, "name", text="", emboss=False, translate=False, icon="MOD_BUILD")
 
     def invoke(self, context, event):
         pass

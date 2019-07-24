@@ -60,7 +60,7 @@ class ASSEMBLME_PT_animations(Panel):
         layout = self.layout
         scn = bpy.context.scene
 
-        if bversion() < '002.079.00':
+        if bversion() < "002.079.00":
             col = layout.column(align=True)
             col.label(text="ERROR: upgrade needed", icon="ERROR")
             col.label(text="AssemblMe requires Blender 2.79+")
@@ -82,18 +82,18 @@ class ASSEMBLME_PT_animations(Panel):
         row.template_list("ASSEMBLME_UL_items", "", scn, "aglist", scn, "aglist_index", rows=rows)
 
         col = row.column(align=True)
-        col.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="").action = 'ADD'
-        col.operator("aglist.list_action", icon='REMOVE' if b280() else 'ZOOMOUT', text="").action = 'REMOVE'
-        col.menu("ASSEMBLME_MT_copy_paste_menu", icon='DOWNARROW_HLT', text="")
+        col.operator("aglist.list_action", icon="ADD" if b280() else "ZOOMIN", text="").action = "ADD"
+        col.operator("aglist.list_action", icon="REMOVE" if b280() else "ZOOMOUT", text="").action = "REMOVE"
+        col.menu("ASSEMBLME_MT_copy_paste_menu", icon="DOWNARROW_HLT", text="")
         if len(scn.aglist) > 1:
             col.separator()
-            col.operator("aglist.list_action", icon='TRIA_UP', text="").action = 'UP'
-            col.operator("aglist.list_action", icon='TRIA_DOWN', text="").action = 'DOWN'
+            col.operator("aglist.list_action", icon="TRIA_UP", text="").action = "UP"
+            col.operator("aglist.list_action", icon="TRIA_DOWN", text="").action = "DOWN"
 
         col1 = layout.column(align=True)
         if scn.aglist_index == -1:
             row = col1.row(align=True)
-            row.operator("aglist.list_action", icon='ADD' if b280() else 'ZOOMIN', text="Create New Animation").action = 'ADD'
+            row.operator("aglist.list_action", icon="ADD" if b280() else "ZOOMIN", text="Create New Animation").action = "ADD"
         else:
             ag = scn.aglist[scn.aglist_index]
             col1.label(text="Collection Name:" if b280() else "Group Name:")
@@ -109,7 +109,7 @@ class ASSEMBLME_PT_animations(Panel):
                 if ag.collection is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
-                    row.operator("assemblme.new_group_from_selection", icon='ADD' if b280() else 'ZOOMIN', text="From Selection")
+                    row.operator("assemblme.new_group_from_selection", icon="ADD" if b280() else "ZOOMIN", text="From Selection")
 
 class ASSEMBLME_PT_actions(Panel):
     bl_space_type  = "VIEW_3D"
@@ -122,7 +122,7 @@ class ASSEMBLME_PT_actions(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.079.00':
+        if bversion() < "002.079.00":
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -140,7 +140,7 @@ class ASSEMBLME_PT_actions(Panel):
         row.operator("assemblme.create_build_animation", text="Create Build Animation" if not ag.animated else "Update Build Animation", icon="MOD_BUILD")
         row = col.row(align=True)
         row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
-        if bpy.data.texts.find('AssemblMe log') >= 0:
+        if bpy.data.texts.find("AssemblMe log") >= 0:
             split = layout_split(layout, factor=0.9)
             col = split.column(align=True)
             row = col.row(align=True)
@@ -160,7 +160,7 @@ class ASSEMBLME_PT_settings(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.079.00':
+        if bversion() < "002.079.00":
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -261,7 +261,7 @@ class ASSEMBLME_PT_visualizer_settings(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.079.00':
+        if bversion() < "002.079.00":
             return False
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -290,7 +290,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
     @classmethod
     def poll(cls, context):
         """ ensures operator can execute (if not, returns false) """
-        if bversion() < '002.079.00':
+        if bversion() < "002.079.00":
             return False
         return True
 

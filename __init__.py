@@ -65,7 +65,7 @@ def register():
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="")
-    preset_names = get_preset_tuples(transferDefaults=not bpy.app.background)
+    preset_names = get_preset_tuples(transfer_defaults=not bpy.app.background)
     Scene.anim_preset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
@@ -75,7 +75,7 @@ def register():
     Scene.anim_preset_to_delete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
-        items=Scene.anim_preset[1]['items'],
+        items=Scene.anim_preset[1]["items"],
         default="None")
 
     Scene.visualizer_scale = FloatProperty(

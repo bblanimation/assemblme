@@ -141,7 +141,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             cur_frame -= (ag.anim_length - ag.last_layer_velocity) * mult
             insert_keyframes(self.visualizer_obj, "location", cur_frame, if_needed=True)
             ag.visualizer_animated = True
-            set_interpolation(self.visualizer_obj, 'loc', 'LINEAR', idx)
+            set_interpolation(self.visualizer_obj, "loc", "LINEAR")
 
             return "animated"
 

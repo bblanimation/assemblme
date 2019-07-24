@@ -45,19 +45,19 @@ class ASSEMBLME_OT_info_restore_preset(bpy.types.Operator):
             txt = bpy.data.texts.new("INFO: Restoring Removed Presets")
             txt.write("\nFollow these steps to restore a removed preset:")
             txt.write("\n\n- Navigate to the AssemblMe presets folder in your Blender scripts directory")
-            txt.write("\n      (e.g. ~/Library/Application Support/Blender/2.79/scripts/presets/assemblme)")
+            txt.write("\n      (e.g. ~/Library/Application Support/Blender/2.80/scripts/presets/assemblme)")
             txt.write("\n- From this directory, navigate to the 'backups' folder")
             txt.write("\n- Select and copy the preset files you would like to restore")
             txt.write("\n- Paste the copied preset files into the parent directory '...scripts/presets/assemblme'")
             txt.write("\n\nThat should do it! If this doesn't work for you, be sure to open up an")
             txt.write("\nissue at 'https://github.com/bblanimation/assemblme/issues' to let us know")
             txt.write("\nwhat steps you took and what problem you've run into so we can fix it ASAP!")
-            change_context(context, 'TEXT_EDITOR')
+            change_context(context, "TEXT_EDITOR")
             for area in bpy.context.window.screen.areas:
-                if area.type == 'TEXT_EDITOR':
+                if area.type == "TEXT_EDITOR":
                     area.spaces.active.text = txt
             bpy.ops.text.jump(line=1)
-            bpy.ops.text.move(type='LINE_BEGIN')
+            bpy.ops.text.move(type="LINE_BEGIN")
 
         except:
             assemblme_handle_exception()

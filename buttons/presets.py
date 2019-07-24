@@ -102,8 +102,8 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
 
     action = EnumProperty(
         items=(
-            ('CREATE', "Create", ""),
-            ('REMOVE', "Remove", ""),
+            ("CREATE", "Create", ""),
+            ("REMOVE", "Remove", ""),
         )
     )
 

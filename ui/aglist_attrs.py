@@ -189,7 +189,7 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
     animated = BoolProperty(default=False)
     anim_bounds_start = IntProperty(default=-1)
     anim_bounds_end = IntProperty(default=-1)
-    time_created = FloatProperty(default=float('inf'))
+    time_created = FloatProperty(default=float("inf"))
     cur_preset = StringProperty(default="None")
 
     frame_with_orig_loc = IntProperty(default=-1)
