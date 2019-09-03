@@ -15,4 +15,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = [ "create_build_animation", "start_over", "refresh_build_animation_length", "visualizer", "presets", "new_group_from_selection", "info_restore_preset"]
+
+from .animated_collection_properties import *

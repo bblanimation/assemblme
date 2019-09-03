@@ -15,9 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .common import *
-from .app_handlers import *
-from .common_mesh_generate import *
-from .general import *
-from .property_callbacks import *
-from .timers import *
+# System imports
+# NONE!
+
+# Blender imports
+import bpy
+from bpy.props import *
+from bpy.types import Panel, UIList
+
+# Module imports
+from ..functions.common import *
+
+class ASSEMBLME_UL_items(UIList):
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        # Make sure your code supports all 3 layout types
+        if self.layout_type in {"GRID"}:
+            layout.alignment = "CENTER"
+        split = layout_split(layout, align=False, factor=0.9)
+        split.prop(item, "name", text="", emboss=False, translate=False, icon="MOD_BUILD")
+
+    def invoke(self, context, event):
+        pass

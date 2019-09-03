@@ -6,16 +6,17 @@ chris@bblanimation.com
 Created by Christopher Gearhart
 """
 
-# Addon imports
+# Module imports
 from .preferences import *
 from .report_error import *
+from .property_groups import *
 from ..ui import *
-from ..buttons import *
+from ..operators import *
 from .. import addon_updater_ops
 
 
 classes = [
-    # assemblme/buttons
+    # assemblme/operators
     create_build_animation.ASSEMBLME_OT_create_build_animation,
     info_restore_preset.ASSEMBLME_OT_info_restore_preset,
     new_group_from_selection.ASSEMBLME_OT_new_group_from_selection,
@@ -23,17 +24,13 @@ classes = [
     refresh_build_animation_length.ASSEMBLME_OT_refresh_anim_length,
     start_over.ASSEMBLME_OT_start_over,
     visualizer.ASSEMBLME_OT_visualizer,
-    # assemblme/ui/aglist_attrs
-    ASSEMBLME_UL_animated_collections,
-    # assemblme/ui/aglist_actions
-    AGLIST_OT_list_action,
-    AGLIST_OT_copy_settings_to_others,
-    AGLIST_OT_copy_settings,
-    AGLIST_OT_paste_settings,
-    AGLIST_OT_set_to_active,
-    AGLIST_OT_print_all_items,
-    AGLIST_OT_clear_all_items,
-    ASSEMBLME_UL_items,
+    aglist_actions.AGLIST_OT_list_action,
+    aglist_actions.AGLIST_OT_copy_settings_to_others,
+    aglist_actions.AGLIST_OT_copy_settings,
+    aglist_actions.AGLIST_OT_paste_settings,
+    aglist_actions.AGLIST_OT_set_to_active,
+    aglist_actions.AGLIST_OT_print_all_items,
+    aglist_actions.AGLIST_OT_clear_all_items,
     # assemblme/ui
     ASSEMBLME_MT_copy_paste_menu,
     ASSEMBLME_PT_animations,
@@ -41,7 +38,9 @@ classes = [
     ASSEMBLME_PT_settings,
     ASSEMBLME_PT_visualizer_settings,
     ASSEMBLME_PT_preset_manager,
+    ASSEMBLME_UL_items,
     # assemblme/lib
+    AnimatedCollectionProperties,
     ASSEMBLME_PT_preferences,
     SCENE_OT_report_error,
     SCENE_OT_close_report_error,

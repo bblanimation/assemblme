@@ -20,7 +20,6 @@ import marshal
 import itertools
 import operator
 import hashlib
-import numpy as np
 import re
 import sys
 import zlib
@@ -28,6 +27,9 @@ import binascii
 from io import StringIO
 
 # Blender imports
+# NONE!
+
+# Module imports
 # NONE!
 
 
@@ -107,7 +109,12 @@ def check_equal(lst:list):
 
 def is_unique(lst:list):
     """ verifies that all items in list are unique """
-    return np.unique(lst).size == len(lst)
+    try:
+        import numpy as np
+        return np.unique(lst).size == len(lst)
+    # in case the user is running Ubuntu without numpy installed
+    except ImportError:
+        return len(lst) == len(set(lst))
 
 
 #################### STRINGS ####################

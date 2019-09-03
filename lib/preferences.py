@@ -23,9 +23,9 @@ import bpy
 from bpy.props import *
 from bpy.types import AddonPreferences
 
-# Addon imports
+# Module imports
 from ..ui import *
-from ..buttons import *
+from ..operators import *
 from .. import addon_updater_ops
 
 class ASSEMBLME_PT_preferences(AddonPreferences):

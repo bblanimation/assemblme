@@ -51,6 +51,11 @@ def vec_div(v1:Vector, v2:Vector):
     return Vector(e1 / e2 for e1, e2 in zip(v1, v2))
 
 
+def vec_mod(v1:Vector, v2:Vector):
+    """ componentwise modulo for vectors """
+    return Vector(e1 % e2 for e1, e2 in zip(v1, v2))
+
+
 def vec_remainder(v1:Vector, v2:Vector):
     """ componentwise remainder for vectors """
     return Vector(e1 % e2 for e1, e2 in zip(v1, v2))

@@ -17,7 +17,6 @@
 
 # System imports
 import os
-import numpy as np
 from math import *
 
 # Blender imports
@@ -147,16 +146,24 @@ def select_all():
     select(bpy.context.scene.objects)
 
 
-def select_geom(geom, only:bool=False):
+def select_geom(geom):
     """ selects verts/edges/faces in list and deselects the rest """
     # confirm vertList is a list of vertices
     geom = confirm_list(geom)
-    # deselect all if selection is exclusive
-    if only: deselect_all()
     # select vertices in list
     for v in geom:
         if v is not None and not v.select:
             v.select = True
+
+
+def deselect_geom(geom):
+    """ deselects verts/edges/faces in list """
+    # confirm vertList is a list of vertices
+    geom = confirm_list(geom)
+    # select vertices in list
+    for v in geom:
+        if v is not None and v.select:
+            v.select = False
 
 
 @blender_version_wrapper("<=","2.79")
@@ -193,6 +200,14 @@ def deselect_all():
 
 
 @blender_version_wrapper("<=","2.79")
+def is_selected(obj):
+    return obj.select
+@blender_version_wrapper(">=","2.80")
+def is_selected(obj):
+    return obj.select_get()
+
+
+@blender_version_wrapper("<=","2.79")
 def hide(obj:Object, viewport:bool=True, render:bool=True):
     if not obj.hide and viewport:
         obj.hide = True
@@ -220,6 +235,10 @@ def unhide(obj:Object, viewport:bool=True, render:bool=True):
         obj.hide_render = False
 
 
+@blender_version_wrapper("<=","2.79")
+def is_obj_visible_in_viewport(obj:Object):
+    scn = bpy.context.scene
+    return any([obj.layers[i] and scn.layers[i] for i in range(20)])
 @blender_version_wrapper(">=","2.80")
 def is_obj_visible_in_viewport(obj:Object):
     if obj is None:
@@ -310,7 +329,7 @@ def copy_animation_data(source:Object, target:Object):
         setattr(ad2, prop, getattr(ad, prop))
 
 
-def insert_keyframes(objs, keyframe_type:str, frame:int, if_needed:bool=False):
+def insert_keyframes(objs, keyframeType:str, frame:int, if_needed:bool=False):
     """ insert key frames for given objects to given frames """
     objs = confirm_iter(objs)
     options = set(["INSERTKEY_NEEDED"] if if_needed else [])
@@ -405,14 +424,14 @@ def change_context(context, areaType:str):
     return last_area_type
 
 
-def assemble_override_context_for_view_3d_ops():
+def assemble_override_context(area_type="VIEW_3D"):
     """
     Iterates through the blender GUI's areas & regions to find the View3D space
     NOTE: context override can only be used with bpy.ops that were called from a window/screen with a view3d space
     """
     win      = bpy.context.window
     scr      = win.screen
-    areas3d  = [area for area in scr.areas if area.type == "VIEW_3D"]
+    areas3d  = [area for area in scr.areas if area.type == area_type]
     region   = [region for region in areas3d[0].regions if region.type == "WINDOW"]
     override = {"window": win,
                 "screen": scr,
@@ -457,13 +476,6 @@ def draw_bmesh(bm:bmesh, name:str="drawn_bmesh"):
     return obj
 
 
-def smooth_bm_faces(faces:iter):
-    """ set given bmesh faces to smooth """
-    faces = confirm_iter(faces)
-    for f in faces:
-        f.smooth = True
-
-
 def smooth_mesh_faces(faces:iter):
     """ set given Mesh faces to smooth """
     faces = confirm_iter(faces)
@@ -472,6 +484,14 @@ def smooth_mesh_faces(faces:iter):
 
 
 #################### OTHER ####################
+
+
+@blender_version_wrapper("<=","2.79")
+def active_render_engine():
+    return bpy.context.scene.render.engine
+@blender_version_wrapper(">=","2.80")
+def active_render_engine():
+    return bpy.context.engine
 
 
 @blender_version_wrapper("<=","2.79")
@@ -569,44 +589,50 @@ def make_annotations(cls):
 
 @blender_version_wrapper("<=","2.79")
 def get_annotations(cls):
-    return list(dict(cm).keys())
+    return list(dict(cls).keys())
 @blender_version_wrapper(">=","2.80")
 def get_annotations(cls):
     return cls.__annotations__
 
 
-def append_from(blendfile_path, attr, filename):
-    directory = os.path.join(blendfile_path, attr)
-    filepath = os.path.join(directory, filename)
-    bpy.ops.wm.append(
-        filepath=filepath,
-        filename=filename,
-        directory=directory)
+@blender_version_wrapper(">=","2.80")
+def get_tool_list(space_type, context_mode):
+    from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
+    cls = ToolSelectPanelHelper._tool_class_from_space_type(space_type)
+    return cls._tools[context_mode]
 
 
-def append_all_from(blendfile_path, attr, overwrite_data=False):
+def append_from(blendfile_path, data_attr, filenames=None, overwrite_data=False):
     data_block_infos = list()
     orig_data_names = lambda: None
     with bpy.data.libraries.load(blendfile_path) as (data_from, data_to):
-        setattr(data_to, attr, getattr(data_from, attr))
+        # if only appending some of the filenames
+        if filenames is not None:
+            # rebuild 'data_attr' of data_from based on filenames in 'filenames' list
+            filenames = confirm_list(filenames)
+            data_group = getattr(data_from, data_attr)
+            new_data_group = [data_name for data_name in data_group if data_name in filenames]
+            setattr(data_from, data_attr, new_data_group)
+        # append data from library ('data_from') to 'data_to'
+        setattr(data_to, data_attr, getattr(data_from, data_attr))
         # store copies of loaded attributes to 'orig_data_names' object
         if overwrite_data:
-            attrib = getattr(data_from, attr)
+            attrib = getattr(data_from, data_attr)
             if len(attrib) > 0:
-                setattr(orig_data_names, attr, attrib.copy())
+                setattr(orig_data_names, data_attr, attrib.copy())
     # overwrite existing data with loaded data of the same name
     if overwrite_data:
         # get attributes to remap
-        source_attr = getattr(orig_data_names, attr)
-        target_attr = getattr(data_to, attr)
+        source_attr = getattr(orig_data_names, data_attr)
+        target_attr = getattr(data_to, data_attr)
         for i, data_name in enumerate(source_attr):
             # check that the data doesn't match
-            if not hasattr(target_attr[i], "name") or target_attr[i].name == data_name or not hasattr(bpy.data, attr): continue
+            if not hasattr(target_attr[i], "name") or target_attr[i].name == data_name or not hasattr(bpy.data, data_attr): continue
             # remap existing data to loaded data
-            data_attr = getattr(bpy.data, attr)
-            data_attr.get(data_name).user_remap(target_attr[i])
+            data_group = getattr(bpy.data, data_attr)
+            data_group.get(data_name).user_remap(target_attr[i])
             # remove remapped existing data
-            data_attr.remove(data_attr.get(data_name))
+            data_group.remove(data_group.get(data_name))
             # rename loaded data to original name
             target_attr[i].name = data_name
-    return data_to
+    return getattr(data_to, data_attr)

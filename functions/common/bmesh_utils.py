@@ -15,9 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .common import *
-from .app_handlers import *
-from .common_mesh_generate import *
-from .general import *
-from .property_callbacks import *
-from .timers import *
+# System imports
+import math
+
+# Blender imports
+import bpy
+import bmesh
+from mathutils import Vector
+
+# Module imports
+from .python_utils import *
+
+
+def smooth_bm_faces(faces:iter):
+    """ set given bmesh faces to smooth """
+    faces = confirm_iter(faces)
+    for f in faces:
+        f.smooth = True

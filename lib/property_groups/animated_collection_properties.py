@@ -23,12 +23,11 @@ import bpy
 from bpy.props import *
 props = bpy.props
 
-# Addon imports
-from ..functions import *
-from .aglist_utils import *
+# Module imports
+from ...functions import *
 
 # Create custom property group
-class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
+class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     name = StringProperty(update=uniquify_name)
     id = IntProperty()
     idx = IntProperty()
@@ -45,13 +44,11 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         min=0,
         max=500000,
         default=1)
-    build_speed = FloatProperty(
+    build_speed = IntProperty(
         name="Step",
         description="Number of frames to skip forward between each object selection",
-        unit="TIME",
         min=1,
         soft_max=1000,
-        precision=0,
         default=1)
     velocity = FloatProperty(
         name="Velocity",
@@ -59,7 +56,6 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         unit="VELOCITY",
         min=0.001,
         soft_max=100,
-        precision=1,
         step=1,
         default=6)
     object_velocity = FloatProperty(default=-1)
@@ -84,7 +80,6 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         description="Move objects by this value",
         unit="LENGTH",
         subtype="XYZ",
-        precision=0,
         size=3,
         default=(0, 0, 10))
     loc_random = FloatProperty(
@@ -102,7 +97,6 @@ class ASSEMBLME_UL_animated_collections(bpy.types.PropertyGroup):
         subtype="EULER",
         soft_min=-10000,
         soft_max=10000,
-        precision=1,
         step=20,
         size=3,
         default=(0, 0, 0))

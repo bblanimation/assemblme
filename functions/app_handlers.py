@@ -15,12 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# system imports
-import bpy
+# System imports
 import math
+
+# Blender imports
+import bpy
 from bpy.app.handlers import persistent
-from ..functions import *
 from mathutils import Vector, Euler
+
+# Module imports
+from ..functions import *
 
 
 @persistent

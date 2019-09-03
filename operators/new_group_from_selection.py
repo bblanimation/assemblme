@@ -21,14 +21,14 @@ import bpy
 # Blender imports
 import time
 
-# Addon imports
+# Module imports
 from ..functions import *
 
 class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
-    """Create new group/collection for animation containing selected objects""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "assemblme.new_group_from_selection"                            # unique identifier for buttons and menu items to reference.
-    bl_label = "New Collection" if b280() else "New Group"                      # display name in the interface.
-    bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
+    """Create new group/collection for animation containing selected objects"""
+    bl_idname = "assemblme.new_group_from_selection"
+    bl_label = "New Collection" if b280() else "New Group"
+    bl_options = {"REGISTER", "UNDO"}
 
     ################################################
     # Blender Operator methods

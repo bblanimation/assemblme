@@ -30,7 +30,7 @@ import bpy
 from bpy.props import *
 props = bpy.props
 
-# Addon imports
+# Module imports
 from .common import *
 
 
@@ -39,6 +39,10 @@ def get_active_context_info(ag_idx=None):
     ag_idx = ag_idx or scn.aglist_index
     ag = scn.aglist[ag_idx]
     return scn, ag
+
+
+def assemblme_handle_exception():
+    handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")
 
 
 def get_randomized_orient(orient, random_amount):
@@ -296,7 +300,6 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
     if insert_rot:
         insert_keyframes(objects_to_move, "rotation_euler", cur_frame + mult)
 
-
     while len(objects_to_move) > len(objects_moved):
         # print status to terminal
         update_progress_bars(True, True, len(objects_moved) / len(objects_to_move), last_len_objects_moved / len(objects_to_move), "Animating Layers")
@@ -378,9 +381,6 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
 
     return objects_moved, cur_frame
 
-def assemblme_handle_exception():
-    handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")
-
 
 @blender_version_wrapper("<=", "2.79")
 def get_anim_objects(ag, mesh_only:bool=None):
@@ -390,6 +390,7 @@ def get_anim_objects(ag, mesh_only:bool=None):
 def get_anim_objects(ag, mesh_only:bool=None):
     if mesh_only is None: mesh_only = ag.mesh_only
     return [obj for obj in ag.collection.all_objects if obj.type == "MESH" or not mesh_only]
+
 
 def ag_update(self, context):
     """ select and make source or LEGO model active if scn.aglist_index changes """
@@ -402,3 +403,21 @@ def ag_update(self, context):
         if coll is not None and len(coll.objects) > 0:
             select(list(coll.objects), active=coll.objects[0], only=True)
             scn.assemblme_last_active_object_name = obj.name
+
+
+def match_properties(ag_new, ag_old):
+    ag_new.build_speed = ag_old.build_speed
+    ag_new.velocity = ag_old.velocity
+    ag_new.layer_height = ag_old.layer_height
+    ag_new.path_object = ag_old.path_object
+    ag_new.loc_offset = ag_old.loc_offset
+    ag_new.loc_random = ag_old.loc_random
+    ag_new.rot_offset = ag_old.rot_offset
+    ag_new.rot_random = ag_old.rot_random
+    ag_new.loc_interpolation_mode = ag_old.loc_interpolation_mode
+    ag_new.rot_interpolation_mode = ag_old.rot_interpolation_mode
+    ag_new.orient = ag_old.orient
+    ag_new.orient_random = ag_old.orient_random
+    ag_new.build_type = ag_old.build_type
+    ag_new.inverted_build = ag_old.inverted_build
+    ag_new.use_global = ag_old.use_global

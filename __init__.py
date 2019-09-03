@@ -37,11 +37,10 @@ from bpy.utils import register_class, unregister_class
 
 # Addon import
 from .ui import *
-from .functions import get_preset_tuples
-from .functions.general import *
-from .functions.common import *
-from .buttons.presets import *
+from .functions import *
+from .operators.presets import *
 from .lib.classes_to_register import classes
+from .lib.property_groups import *
 from . import addon_updater_ops
 
 
@@ -82,18 +81,17 @@ def register():
         name="Scale",
         description="Scale of layer orientation visualizer",
         subtype="DISTANCE",
-        precision=1,
-        min=0.1, max=16,
+        soft_min=0.1, soft_max=16,
         default=10)
     Scene.visualizer_res = FloatProperty(
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
-        min=0.05, max=1,
+        soft_min=0.05, soft_max=1,
         default=0.25)
 
     # list properties
-    Scene.aglist = CollectionProperty(type=ASSEMBLME_UL_animated_collections)
+    Scene.aglist = CollectionProperty(type=AnimatedCollectionProperties)
     Scene.aglist_index = IntProperty(default=-1, update=ag_update)
 
     # Session properties

@@ -24,7 +24,7 @@ import bpy
 import bmesh
 from mathutils import Matrix, Vector
 
-# Addon imports
+# Module imports
 from .common import *
 
 def make_square(coord1:Vector, coord2:Vector, face:bool=True, flip_normal:bool=False, bme:bmesh=None):

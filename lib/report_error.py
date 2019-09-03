@@ -24,16 +24,17 @@ import bpy
 import addon_utils
 from bpy.props import StringProperty
 
-# Addon imports
-from ..functions import *
+# Module imports
+from .. import bl_info
+from ..functions.common import *
 
 # define addon name (must match name in bl_info)
-addon_name = "AssemblMe"
+addon_name = bl_info["name"]
 
 class SCENE_OT_report_error(bpy.types.Operator):
-    """Report a bug via an automatically generated issue ticket"""              # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "{}.report_error".format(make_bash_safe(addon_name.lower(), replace_with="_"))  # unique identifier for buttons and menu items to reference.
-    bl_label = "Report Error"                                                   # display name in the interface.
+    """Report a bug via an automatically generated issue ticket"""
+    bl_idname = "{}.report_error".format(make_bash_safe(addon_name.lower(), replace_with="_"))
+    bl_label = "Report Error"
     bl_options = {"REGISTER", "UNDO"}
 
     ################################################
@@ -71,9 +72,9 @@ class SCENE_OT_report_error(bpy.types.Operator):
     #############################################
 
 class SCENE_OT_close_report_error(bpy.types.Operator):
-    """Deletes error report from blender's memory (still exists in file system)""" # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "{}.close_report_error".format(make_bash_safe(addon_name.lower(), replace_with="_")) # unique identifier for buttons and menu items to reference.
-    bl_label = "Close Report Error"                                             # display name in the interface.
+    """Deletes error report from blender's memory (still exists in file system)"""
+    bl_idname = "{}.close_report_error".format(make_bash_safe(addon_name.lower(), replace_with="_"))
+    bl_label = "Close Report Error"
     bl_options = {"REGISTER", "UNDO"}
 
     ################################################

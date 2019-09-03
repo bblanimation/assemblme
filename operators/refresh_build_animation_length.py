@@ -22,14 +22,14 @@
 import bpy
 props = bpy.props
 
-# Addon imports
+# Module imports
 from ..functions import *
 
 class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
-    """Refreshes the box in UI with build animation length"""                   # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "assemblme.refresh_anim_length"                                 # unique identifier for buttons and menu items to reference.
-    bl_label = "Refresh Build Animation Length"                                 # display name in the interface.
-    bl_options = {"REGISTER", "UNDO"}                                           # enable undo for the operator.
+    """Refreshes the box in UI with build animation length"""
+    bl_idname = "assemblme.refresh_anim_length"
+    bl_label = "Refresh Build Animation Length"
+    bl_options = {"REGISTER", "UNDO"}
 
     ################################################
     # Blender Operator methods

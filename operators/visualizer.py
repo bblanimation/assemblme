@@ -23,13 +23,13 @@ import bpy
 import bmesh
 props = bpy.props
 
-# Addon imports
+# Module imports
 from ..functions import *
 
 class ASSEMBLME_OT_visualizer(bpy.types.Operator):
-    """Visualize the layer orientation with a plane"""                          # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "assemblme.visualize_layer_orientation"                         # unique identifier for buttons and menu items to reference.
-    bl_label = "Visualize Layer Orientation"                                    # display name in the interface.
+    """Visualize the layer orientation with a plane"""
+    bl_idname = "assemblme.visualize_layer_orientation"
+    bl_label = "Visualize Layer Orientation"
     bl_options = {"REGISTER", "UNDO"}
 
     ################################################

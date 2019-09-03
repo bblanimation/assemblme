@@ -16,32 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
-# NONE!
+from operator import itemgetter
 
 # Blender imports
 import bpy
+from bpy.props import *
 
-# Addon imports
-from ..functions import *
-
-
-
-def match_properties(ag_new, ag_old):
-    ag_new.build_speed = ag_old.build_speed
-    ag_new.velocity = ag_old.velocity
-    ag_new.layer_height = ag_old.layer_height
-    ag_new.path_object = ag_old.path_object
-    ag_new.loc_offset = ag_old.loc_offset
-    ag_new.loc_random = ag_old.loc_random
-    ag_new.rot_offset = ag_old.rot_offset
-    ag_new.rot_random = ag_old.rot_random
-    ag_new.loc_interpolation_mode = ag_old.loc_interpolation_mode
-    ag_new.rot_interpolation_mode = ag_old.rot_interpolation_mode
-    ag_new.orient = ag_old.orient
-    ag_new.orient_random = ag_old.orient_random
-    ag_new.build_type = ag_old.build_type
-    ag_new.inverted_build = ag_old.inverted_build
-    ag_new.use_global = ag_old.use_global
+# Module imports
+from .general import *
 
 
 def uniquify_name(self, context):

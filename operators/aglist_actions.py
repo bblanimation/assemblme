@@ -23,10 +23,9 @@ import bpy
 from bpy.props import *
 from bpy.types import Panel, UIList
 
-# Addon imports
-from .aglist_utils import *
+# Module imports
+from .visualizer import *
 from ..functions import *
-from ..buttons.visualizer import *
 
 # ui list item actions
 class AGLIST_OT_list_action(bpy.types.Operator):
