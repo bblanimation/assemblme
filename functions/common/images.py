@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
-# NONE!
+import numpy as np
 
 # Blender imports
 import bpy
@@ -30,19 +30,32 @@ from .colors import *
 
 
 # reference: https://svn.blender.org/svnroot/bf-extensions/trunk/py/scripts/addons/uv_bake_texture_to_vcols.py
-def get_pixel(pixels, pixel_width, uv_coord, gamma_correction=2.0167):
+def get_pixel(pixels, pixel_width, uv_coord, channels=4):
     """ get RGBA value for specified coordinate in UV image
     pixels    -- list of pixel data from UV texture image
     size      -- image width
     uv_coord  -- UV coordinate of desired pixel value
-    gamma_correction -- raise final RGBA value to this value for gamma correction
     """
-    pixel_number = (pixel_width * int(uv_coord.y) + int(uv_coord.x)) * 4
+    pixel_number = (pixel_width * int(uv_coord.y) + int(uv_coord.x)) * channels
     assert 0 <= pixel_number < len(pixels)
-    rgba = pixels[pixel_number:pixel_number + 4]
-    # gamma correct RGB value
-    rgba = gamma_correct(rgba, gamma_correction)
+    rgba = pixels[pixel_number:pixel_number + channels]
     return rgba
+
+
+def get_1d_pixel_array(pixels, size, channels):
+    pixels_1d = [pixels[i:i + channels] for i in range(0, len(pixels), channels)]
+    return pixels_1d
+
+
+def get_2d_pixel_array(pixels, size, channels):
+    pixels_2d = np.zeros((size[0], size[1], channels)).tolist()
+    for row in range(size[0]):
+        for col in range(size[1]):
+            pixel_number = (col * size[0] + row) * channels
+            pixels_2d[row][col] = pixels[pixel_number:pixel_number + channels]
+
+    return pixels_2d
+
 
 def nearest_uv_coord(loc, img_obj):
     img_size = Vector(img_obj.data.size)
@@ -94,6 +107,63 @@ def get_uv_coord(mesh, face, point, image):
     return Vector(uv_coord)
 
 
+def get_uv_pixel_color(scn, obj, face_idx, point, pixels_getter, uv_image=None):
+    """ get RGBA value for point in UV image at specified face index """
+    if face_idx is None:
+        return None
+    # get closest material using UV map
+    face = obj.data.polygons[face_idx]
+    # get uv_layer image for face
+    image = get_uv_image(scn, obj, face_idx, uv_image)
+    if image is None:
+        return None
+    # get uv coordinate based on nearest face intersection
+    uv_coord = get_uv_coord(obj.data, face, point, image)
+    # retrieve rgba value at uv coordinate
+    pixels = pixels_getter(image)
+    rgba = get_pixel(pixels, image.size[0], uv_coord)
+    # gamma correct color value
+    if image.colorspace_settings.name == "sRGB":
+        rgba = gamma_correct_srgb_to_linear(rgba)
+    return rgba
+
+
 def verify_img(im):
     """ verify image has pixel data """
     return im if im is not None and im.pixels is not None and len(im.pixels) > 0 else None
+
+
+def get_first_img_from_nodes(obj, mat_slot_idx):
+    """ return first image texture found in a material slot """
+    mat = obj.material_slots[mat_slot_idx].material
+    if mat is None or not mat.use_nodes:
+        return None
+    nodes_to_check = list(mat.node_tree.nodes)
+    active_node = mat.node_tree.nodes.active
+    if active_node is not None: nodes_to_check.insert(0, active_node)
+    img = None
+    for node in nodes_to_check:
+        if node.type != "TEX_IMAGE":
+            continue
+        img = verify_img(node.image)
+        if img is not None:
+            break
+    return img
+
+
+def get_uv_image(scn, obj, face_idx, uv_image=None):
+    """ returns UV image (priority to passed image, then face index, then first one found in material nodes) """
+    image = verify_img(uv_image)
+    # TODO: Reinstate this functionality for b280()
+    if not b280() and image is None and obj.data.uv_textures.active:
+        image = verify_img(obj.data.uv_textures.active.data[face_idx].image)
+    if image is None:
+        try:
+            mat_idx = obj.data.polygons[face_idx].material_index
+            image = verify_img(get_first_img_from_nodes(obj, mat_idx))
+        except IndexError:
+            mat_idx = 0
+            while image is None and mat_idx < len(obj.material_slots):
+                image = verify_img(get_first_img_from_nodes(obj, mat_idx))
+                mat_idx += 1
+    return image

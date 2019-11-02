@@ -255,7 +255,7 @@ def clear_animation(objs):
     objs = confirm_iter(objs)
     for obj in objs:
         obj.animation_data_clear()
-    update_depsgraph()
+    depsgraph_update()
 
 
 def created_with_unsupported_version(ag):

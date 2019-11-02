@@ -22,12 +22,15 @@ from math import *
 # Blender imports
 import bpy
 import bmesh
+import mathutils
 from mathutils import Vector, Euler, Matrix
-from bpy.types import Object, Scene
+from bpy_extras import view3d_utils
+from bpy.types import Object, Scene, Event
 try:
-    from bpy.types import ViewLayer
+    from bpy.types import ViewLayer, LayerCollection
 except ImportError:
     ViewLayer = None
+    LayerCollection = None
 
 # Module imports
 from .python_utils import confirm_iter, confirm_list
@@ -147,22 +150,22 @@ def select_all():
 
 
 def select_geom(geom):
-    """ selects verts/edges/faces in list and deselects the rest """
-    # confirm vertList is a list of vertices
-    geom = confirm_list(geom)
+    """ selects verts/edges/faces in 'geom' iterable """
+    # confirm geom is an iterable of vertices
+    geom = confirm_iter(geom)
     # select vertices in list
     for v in geom:
-        if v is not None and not v.select:
+        if v and not v.select:
             v.select = True
 
 
 def deselect_geom(geom):
-    """ deselects verts/edges/faces in list """
-    # confirm vertList is a list of vertices
-    geom = confirm_list(geom)
+    """ deselects verts/edges/faces in 'geom' iterable """
+    # confirm geom is an iterable of vertices
+    geom = confirm_iter(geom)
     # select vertices in list
     for v in geom:
-        if v is not None and v.select:
+        if v and v.select:
             v.select = False
 
 
@@ -241,15 +244,7 @@ def is_obj_visible_in_viewport(obj:Object):
     return any([obj.layers[i] and scn.layers[i] for i in range(20)])
 @blender_version_wrapper(">=","2.80")
 def is_obj_visible_in_viewport(obj:Object):
-    if obj is None:
-        return False
-    obj_visible = not obj.hide_viewport
-    if obj_visible:
-        for cn in obj.users_collection:
-            if cn.hide_viewport:
-                obj_visible = False
-                break
-    return obj_visible
+    return obj.visible_get()
 
 
 @blender_version_wrapper("<=","2.79")
@@ -263,12 +258,16 @@ def link_object(o:Object, scene:Scene=None):
 
 
 @blender_version_wrapper("<=","2.79")
-def unlink_object(o:Object):
+def unlink_object(o:Object, scene:Scene=None, all:bool=False):
     bpy.context.scene.objects.unlink(o)
 @blender_version_wrapper(">=","2.80")
-def unlink_object(o:Object):
-    for coll in o.users_collection:
-        coll.objects.unlink(o)
+def unlink_object(o:Object, scene:Scene=None, all:bool=False):
+    if not all:
+        scene = scene or bpy.context.scene
+        scene.collection.objects.unlink(o)
+    else:
+        for coll in o.users_collection:
+            coll.objects.unlink(o)
 
 
 @blender_version_wrapper("<=","2.79")
@@ -284,7 +283,7 @@ def safe_link(obj:Object, protect:bool=False, collections=None):
     if hasattr(obj, "protected"):
         obj.protected = protect
 @blender_version_wrapper(">=","2.80")
-def safe_link(obj:Object, protect:bool=False, collections=None):
+def safe_link(obj:Object, protect:bool=False, collections=[]):
     # link object to target collections (scene collection by default)
     collections = collections or [bpy.context.scene.collection]
     for coll in collections:
@@ -302,7 +301,7 @@ def safe_link(obj:Object, protect:bool=False, collections=None):
 def safe_unlink(obj:Object, protect:bool=True):
     # unlink object from scene
     try:
-        unlink_object(obj)
+        unlink_object(obj, all=True)
     except RuntimeError:
         pass
     # prevent object data from being tossed on Blender exit
@@ -329,7 +328,7 @@ def copy_animation_data(source:Object, target:Object):
         setattr(ad2, prop, getattr(ad, prop))
 
 
-def insert_keyframes(objs, keyframeType:str, frame:int, if_needed:bool=False):
+def insert_keyframes(objs, keyframe_type:str, frame:int, if_needed:bool=False):
     """ insert key frames for given objects to given frames """
     objs = confirm_iter(objs)
     options = set(["INSERTKEY_NEEDED"] if if_needed else [])
@@ -348,7 +347,7 @@ def new_mesh_from_object(obj:Object):
 
 
 def apply_modifiers(obj:Object):
-    """ apply modifiers to object """
+    """ apply modifiers to object (may require a depsgraph update before running) """
     m = new_mesh_from_object(obj)
     obj.modifiers.clear()
     obj.data = m
@@ -382,6 +381,19 @@ def is_adaptive(ob:Object):
             return True
     return False
 
+def get_vertices_in_group(obj:Object, vertex_group):
+    if isinstance(vertex_group, int):
+        if vertex_group >= len(obj.vertex_groups):
+            raise IndexError("Index out of range!")
+    elif isinstance(vertex_group, str):
+        if vertex_group not in obj.vertex_groups:
+            raise NameError("'{obj}' has no vertex group, '{vg}'!".format(obj=obj.name, vg=vertex_group))
+        vertex_group = obj.vertex_groups[vertex_group].index
+    else:
+        raise ValueError("Expecting second argument to be of type 'str', or 'int'. Got {}".format(type(vertex_group)))
+
+    return [v for v in obj.data.vertices if vertex_group in [vg.group for vg in v.groups]]
+
 
 #################### VIEWPORT ####################
 
@@ -411,6 +423,18 @@ def disable_relationship_lines():
             area.spaces[0].overlay.show_relationship_lines = False
 
 
+@blender_version_wrapper(">=", "2.80")
+def get_layer_collection(name:str, layer_collection:LayerCollection=None):
+    """ recursivly transverse view_layer.layer_collection for a particular name """
+    layer_collection = layer_collection or bpy.context.window.view_layer.layer_collection
+    if (layer_collection.name == name):
+        return layer_collection
+    for lc in layer_collection.children:
+        found_layer_coll = get_layer_collection(name, lc)
+        if found_layer_coll:
+            return found_layer_coll
+
+
 def set_active_scene(scn:Scene):
     """ set active scene in all screens """
     for screen in bpy.data.screens:
@@ -433,12 +457,13 @@ def assemble_override_context(area_type="VIEW_3D"):
     scr      = win.screen
     areas3d  = [area for area in scr.areas if area.type == area_type]
     region   = [region for region in areas3d[0].regions if region.type == "WINDOW"]
-    override = {"window": win,
-                "screen": scr,
-                "area"  : areas3d[0],
-                "region": region[0],
-                "scene" : bpy.context.scene,
-                }
+    override = {
+        "window": win,
+        "screen": scr,
+        "area"  : areas3d[0],
+        "region": region[0],
+        "scene" : bpy.context.scene,
+    }
     return override
 
 
@@ -459,6 +484,10 @@ def open_layer(layer_num:int, scn:Scene=None):
     layer_list = [i == layer_num - 1 for i in range(20)]
     scn.layers = layer_list
     return layer_list
+
+
+def viewport_is_orthographic(r3d, cam=None):
+    return r3d.view_perspective == "ORTHO" or (r3d.view_perspective == "CAMERA" and cam and cam.type == "ORTHO")
 
 
 #################### MESHES ####################
@@ -483,6 +512,62 @@ def smooth_mesh_faces(faces:iter):
         f.use_smooth = True
 
 
+def junk_mesh():
+    """ returns junk mesh (only creates one if necessary) """
+    junk_mesh = bpy.data.meshes.get("Bricker_junk_mesh")
+    if junk_mesh is None:
+        junk_mesh = bpy.data.meshes.new("Bricker_junk_mesh")
+    return junk_mesh
+
+
+#################### RAY CASTING ####################
+
+
+def get_ray_target(x, y, ray_max=1000):
+    region = bpy.context.region
+    rv3d = bpy.context.region_data
+    cam = bpy.context.camera
+    coord = x, y
+    view_vector = view3d_utils.region_2d_to_vector_3d(region, rv3d, coord)
+    ray_origin = view3d_utils.region_2d_to_origin_3d(region, rv3d, coord)
+    if rv3d.view_perspective == "ORTHO" or (rv3d.view_perspective == "CAMERA" and cam and cam.type == "ORTHO"):
+        # move ortho origin back
+        ray_origin = ray_origin - (view_vector * (ray_max / 2.0))
+    ray_target = ray_origin + (view_vector * 1000)
+
+
+def get_position_on_grid(mouse_pos, ray_max=1000):
+    viewport_region = bpy.context.region
+    viewport_r3d = bpy.context.region_data
+    viewport_matrix = viewport_r3d.view_matrix.inverted()
+    cam_obj = bpy.context.space_data.camera
+
+    # Shooting a ray from the camera, through the mouse cursor towards the grid with a length of 100000
+    # If the camera is more than 100000 units away from the grid it won't detect a point
+    ray_start = viewport_matrix.to_translation()
+    ray_depth = viewport_matrix @ Vector((0, 0, -100000))
+
+    # Get the 3D vector position of the mouse
+    ray_end = view3d_utils.region_2d_to_location_3d(viewport_region, viewport_r3d, (mouse_pos[0], mouse_pos[1]), ray_depth)
+
+    # A triangle on the grid plane. We use these 3 points to define a plane on the grid
+    point_1 = Vector((0, 0, 0))
+    point_2 = Vector((0, 1, 0))
+    point_3 = Vector((1, 0, 0))
+
+    # Create a 3D position on the grid under the mouse cursor using the triangle as a grid plane
+    # and the ray cast from the camera
+    position_on_grid = mathutils.geometry.intersect_ray_tri(point_1, point_2, point_3, ray_end, ray_start, False)
+    if position_on_grid is None:
+        return None
+
+    if viewport_is_orthographic(viewport_r3d, None if cam_obj is None else cam_obj.data):
+        # multiply by ray max
+        position_on_grid = position_on_grid * ray_max
+
+    return position_on_grid
+
+
 #################### OTHER ####################
 
 
@@ -495,10 +580,10 @@ def active_render_engine():
 
 
 @blender_version_wrapper("<=","2.79")
-def update_depsgraph():
+def depsgraph_update():
     bpy.context.scene.update()
 @blender_version_wrapper(">=","2.80")
-def update_depsgraph():
+def depsgraph_update():
     bpy.context.view_layer.depsgraph.update()
 
 
@@ -569,6 +654,15 @@ def set_cursor_location(loc:tuple):
     bpy.context.scene.cursor.location = loc
 
 
+def mouse_in_view3d_window(event):
+    regions = dict()
+    for region in bpy.context.area.regions:
+        regions[region.type] = region
+    mouse_pos = Vector((event.mouse_x, event.mouse_y))
+    window_dimensions = Vector((regions["WINDOW"].width - regions["UI"].width, regions["WINDOW"].height - regions["HEADER"].height))
+    return regions["TOOLS"].width < mouse_pos.x < window_dimensions.x and mouse_pos.y < window_dimensions.y
+
+
 @blender_version_wrapper("<=","2.79")
 def make_annotations(cls):
     """Does nothing in Blender 2.79"""
@@ -602,10 +696,106 @@ def get_tool_list(space_type, context_mode):
     return cls._tools[context_mode]
 
 
-def append_from(blendfile_path, data_attr, filenames=None, overwrite_data=False):
+def get_keymap_item(operator:str, keymap:str=None):
+    keymaps = bpy.context.window_manager.keyconfigs.user.keymaps
+    keymap = keymaps[keymap] if keymap else next(km for km in keymaps if operator in km.keymap_items.keys())
+    return keymap.keymap_items[operator]
+
+
+def called_from_shortcut(event:Event, operator:str, keymap:str=None):
+    kmi = get_keymap_item(operator, keymap)
+    return (
+        kmi.type == event.type and \
+        kmi.alt == event.alt and \
+        kmi.ctrl == event.ctrl and \
+        kmi.oskey == event.oskey and \
+        kmi.shift == event.shift and \
+        kmi.value == event.value
+    )
+
+
+def new_window(area_type, width=640, height=480):
+    # Modify scene settings
+    render = bpy.context.scene.render
+    orig_settings = {
+        "resolution_x": render.resolution_x,
+        "resolution_y": render.resolution_y,
+        "resolution_percentage": render.resolution_percentage,
+        "display_mode": render.display_mode,
+    }
+
+    render.resolution_x = width
+    render.resolution_y = height
+    render.resolution_percentage = 100
+    render.display_mode = "WINDOW"  # Call user prefs window
+
+    bpy.ops.render.view_show("INVOKE_DEFAULT")
+
+    # Change area type
+    window = bpy.context.window_manager.windows[-1]
+    area = window.screen.areas[0]
+    area.type = area_type
+
+    # reset scene settings
+    for key in orig_settings:
+        setattr(render, key, orig_settings[key])
+
+    return window
+
+
+def is_navigation_event(event:Event):
+    navigation_events = {
+        'Rotate View': 'view3d.rotate',
+        'Move View': 'view3d.move',
+        'Zoom View': 'view3d.zoom',
+        'Dolly View': 'view3d.dolly',
+        'View Pan': 'view3d.view_pan',
+        'View Orbit': 'view3d.view_orbit',
+        'View Persp/Ortho': 'view3d.view_persportho',
+        'View Numpad': 'view3d.viewnumpad',
+        'NDOF Pan Zoom': 'view2d.ndof',
+        'NDOF Orbit View with Zoom': 'view3d.ndof_orbit_zoom',
+        'NDOF Orbit View': 'view3d.ndof_orbit',
+        'NDOF Pan View': 'view3d.ndof_pan',
+        'NDOF Move View': 'view3d.ndof_all',
+        'View Selected': 'view3d.view_selected',
+        'Center View to Cursor': 'view3d.view_center_cursor',
+        #'View Navigation': 'view3d.navigate',
+    }
+    keyconfig_name = "blender" if b280() else "Blender"
+    # keyconfig_name = "blender user" if b280() else "Blender"
+    if keyconfig_name not in bpy.context.window_manager.keyconfigs:
+        print('No keyconfig named "%s"' % keyconfig_name)
+        return
+    keyconfig = bpy.context.window_manager.keyconfigs[keyconfig_name]
+    def translate(text):
+        return bpy.app.translations.pgettext(text)
+    def get_keymap_items(key):
+        nonlocal keyconfig
+        if key in keyconfig.keymaps:
+            keymap = keyconfig.keymaps[key]
+        else:
+            keymap = keyconfig.keymaps[translate(key)]
+        return keymap.keymap_items
+    #navigation_events = { translate(key): val for key,val in navigation_events.items() }
+    navigation_idnames = navigation_events.values()
+    for kmi in get_keymap_items('3D View'):
+        if kmi.name not in navigation_events and kmi.idname not in navigation_idnames:
+            continue
+        event_type = event.type
+        if event_type == "WHEELUPMOUSE":
+            event_type = "WHEELINMOUSE"
+        if event_type == "WHEELDOWNMOUSE":
+            event_type = "WHEELOUTMOUSE"
+        if event_type == kmi.type and kmi.value in (event.value, "ANY") and kmi.shift == event.shift and kmi.alt == event.alt and kmi.ctrl == event.ctrl and kmi.oskey == event.oskey:
+            return True
+    return False
+
+
+def load_from_library(blendfile_path, data_attr, filenames=None, overwrite_data=False, action="APPEND"):
     data_block_infos = list()
     orig_data_names = lambda: None
-    with bpy.data.libraries.load(blendfile_path) as (data_from, data_to):
+    with bpy.data.libraries.load(blendfile_path, link=action == "LINK") as (data_from, data_to):
         # if only appending some of the filenames
         if filenames is not None:
             # rebuild 'data_attr' of data_from based on filenames in 'filenames' list

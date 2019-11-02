@@ -41,7 +41,8 @@ def make_rectangle(coord1:Vector, coord2:Vector, face:bool=True, flip_normal:boo
     NOTE: if coord1 and coord2 are different on all three axes, z axis will stay consistent at coord1.z
 
     Returns:
-        v_list      -- list of vertices with normal facing in positive direction (right hand rule)
+        bme         -- bmesh object containing created verts
+        verts       -- list of vertices with normal facing in positive direction (right hand rule)
 
     """
     # create new bmesh object
@@ -56,13 +57,17 @@ def make_rectangle(coord1:Vector, coord2:Vector, face:bool=True, flip_normal:boo
     # create square with normal facing +z direction
     else:
         v1, v2, v3, v4 = [bme.verts.new((x, y, coord1.z)) for x in (coord1.x, coord2.x) for y in (coord1.y, coord2.y)]
-    v_list = [v1, v3, v4, v2]
+    verts = [v1, v3, v4, v2]
 
     # create face
     if face:
-        bme.faces.new(v_list[::-1] if flip_normal else v_list)
+        bme.faces.new(verts[::-1] if flip_normal else verts)
+    # create edges
+    else:
+        for i in range(len(verts)):
+            bme.edges.new((verts[i - 1], verts[i]))
 
-    return bme, v_list
+    return bme, verts
 
 
 def make_square(size:float, location:Vector=Vector((0, 0, 0)), face:bool=True, flip_normal:bool=False, bme:bmesh=None):
@@ -77,7 +82,8 @@ def make_square(size:float, location:Vector=Vector((0, 0, 0)), face:bool=True, f
         bme         -- bmesh object in which to create verts
 
     Returns:
-        v_list      -- list of vertices with normal facing in positive direction (right hand rule)
+        bme         -- bmesh object containing created verts
+        verts       -- list of vertices with normal facing in positive direction (right hand rule)
 
     """
     coord1 = location - Vector((size / 2, size / 2, 0))
@@ -98,7 +104,8 @@ def make_cube(coord1:Vector, coord2:Vector, sides:list=[False]*6, flip_normals:b
         bme          -- bmesh object in which to create verts
 
     Returns:
-        v_list       -- list of vertices in the following x,y,z order: [---, -+-, ++-, +--, --+, +-+, +++, -++]
+        bme          -- bmesh object containing created verts
+        verts        -- list of vertices in the following x,y,z order: [---, -+-, ++-, +--, --+, +-+, +++, -++]
 
     """
 
@@ -110,11 +117,11 @@ def make_cube(coord1:Vector, coord2:Vector, sides:list=[False]*6, flip_normals:b
     # create new bmesh object
     bme = bme or bmesh.new()
 
-    # create vertices
+    # create vertices in the following x,y,z order (later reordered): [---, --+, -+-, -++, +--, +-+, ++-, +++]
     v_list = [bme.verts.new((x, y, z)) for x in (coord1.x, coord2.x) for y in (coord1.y, coord2.y) for z in (coord1.z, coord2.z)]
+    v1, v2, v3, v4, v5, v6, v7, v8 = v_list
 
     # create faces
-    v1, v2, v3, v4, v5, v6, v7, v8 = v_list
     new_faces = []
     if sides[0]:
         new_faces.append([v6, v8, v4, v2])
@@ -137,10 +144,14 @@ def make_cube(coord1:Vector, coord2:Vector, sides:list=[False]*6, flip_normals:b
         #     for e in new_f.edges:
         #         e.seam = True
 
-    return bme, [v1, v3, v7, v5, v2, v6, v8, v4]
+    # reorder verts to the following x,y,z order: [---, -+-, ++-, +--, --+, +-+, +++, -++]
+    verts = [v1, v3, v7, v5, v2, v6, v8, v4]
+
+    # return results
+    return bme, verts
 
 
-def make_circle(radius:float, vertices:int, co:tuple=Vector((0, 0, 0)), face:bool=True, flip_normals:bool=False, bme:bmesh=None):
+def make_circle(radius:float, vertices:int, co:tuple=Vector((0, 0, 0)), fill:bool=True, flip_normals:bool=False, select:bool=False, bme:bmesh=None):
     """
     create a circle with bmesh
 
@@ -148,7 +159,7 @@ def make_circle(radius:float, vertices:int, co:tuple=Vector((0, 0, 0)), face:boo
         radius       -- radius of circle
         vertices     -- number of verts on circumference
         co           -- coordinate of cylinder's center
-        face         -- create face between circle verts
+        cill         -- create face between circle verts
         flip_normals -- flip normals of cylinder
         bme          -- bmesh object in which to create verts
 
@@ -165,12 +176,16 @@ def make_circle(radius:float, vertices:int, co:tuple=Vector((0, 0, 0)), face:boo
         coord = co + Vector((x, y, 0))
         verts.append(bme.verts.new(coord))
     # create face
-    if face:
+    if fill:
         bme.faces.new(verts if not flip_normals else verts[::-1])
     # create edges
     else:
         for i in range(len(verts)):
             bme.edges.new((verts[i - 1], verts[i]))
+
+    # select geometry
+    if select:
+        select_geom(verts)
 
     return bme
 
