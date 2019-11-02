@@ -237,13 +237,15 @@ def update_anim_preset(self, context):
                 description="Stored AssemblMe presets",
                 items=preset_names,
                 update=update_anim_preset,
-                default="None")
+                default="None",
+            )
 
             bpy.types.Scene.anim_preset_to_delete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=preset_names,
-                default="None")
+                default="None",
+            )
             scn.anim_preset = "None"
     scn, ag = get_active_context_info()
     ag.cur_preset = scn.anim_preset

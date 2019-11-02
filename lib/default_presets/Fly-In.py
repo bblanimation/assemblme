@@ -17,5 +17,5 @@ def execute():
     ag.inverted_build = 0
     ag.skip_empty_selections = False
     ag.use_global = False
-    ag.mesh_only = False
+    ag.mesh_only = True
     return None

@@ -36,20 +36,23 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         type=bpy.types.Collection if b280() else bpy.types.Group,
         name="Object Collection" if b280() else "Object Group",
         description="Group of objects to animate",
-        update=collection_update)
+        update=collection_update,
+    )
 
     first_frame = IntProperty(
         name="Start",
         description="First frame of the (dis)assembly animation",
         min=0,
         max=500000,
-        default=1)
+        default=1,
+    )
     build_speed = IntProperty(
         name="Step",
         description="Number of frames to skip forward between each object selection",
         min=1,
         soft_max=1000,
-        default=1)
+        default=1,
+    )
     velocity = FloatProperty(
         name="Velocity",
         description="Speed of individual object layers (2^(10 - Velocity) = object animation duration in frames)",
@@ -57,7 +60,8 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=0.001,
         soft_max=100,
         step=1,
-        default=6)
+        default=6,
+    )
     object_velocity = FloatProperty(default=-1)
 
     layer_height = FloatProperty(
@@ -68,12 +72,14 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=0.0001,
         soft_max=1000,
         precision=4,
-        default=.1)
+        default=0.1,
+    )
 
     path_object = StringProperty(
         name="Path",
         description="Path object for animated objects to follow",
-        default="")
+        default="",
+    )
 
     loc_offset = FloatVectorProperty(
         name="Loc Offset",
@@ -81,14 +87,16 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         unit="LENGTH",
         subtype="XYZ",
         size=3,
-        default=(0, 0, 10))
+        default=(0, 0, 10),
+    )
     loc_random = FloatProperty(
         name="Randomize",
         description="Randomize object location offset",
         min=0,
         soft_max=10000,
         precision=1,
-        default=0)
+        default=0,
+    )
 
     rot_offset = FloatVectorProperty(
         name="Z",
@@ -99,14 +107,16 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         soft_max=10000,
         step=20,
         size=3,
-        default=(0, 0, 0))
+        default=(0, 0, 0),
+    )
     rot_random = FloatProperty(
         name="Randomize",
         description="Randomize object rotation offset",
         min=0,
         soft_max=10000,
         precision=1,
-        default=0)
+        default=0,
+    )
 
     interp_str = "Set interpolation mode for each object in assembly animation"
     interpolation_modes = [
@@ -122,20 +132,23 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         ("CIRC", "Circular", interp_str, "IPO_CIRC", 10),
         ("BACK", "Back", interp_str, "IPO_BACK", 11),
         ("BOUNCE", "Bounce", interp_str, "IPO_BOUNCE", 12),
-        ("ELASTIC", "Elastic", interp_str, "IPO_ELASTIC", 13)]
+        ("ELASTIC", "Elastic", interp_str, "IPO_ELASTIC", 13),
+    ]
 
 
     loc_interpolation_mode = EnumProperty(
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolation_modes,
-        default="LINEAR")
+        default="LINEAR",
+    )
 
     rot_interpolation_mode = EnumProperty(
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolation_modes,
-        default="LINEAR")
+        default="LINEAR",
+    )
 
     orient = FloatVectorProperty(
         name="Orientation",
@@ -146,39 +159,48 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=-1.570796, max=1.570796,
         # min=-0.785398, max=0.785398,
         precision=1, step=20,
-        default=(0, 0))
+        default=(0, 0),
+    )
     orient_random = FloatProperty(
         name="Random",
         description="Randomize orientation of the bounding box that selects objects for each frame",
         min=0, max=100,
         precision=1,
-        default=0)
+        default=0,
+    )
 
     build_type = EnumProperty(
         name="Build Type",
         description="Choose whether to assemble or disassemble the objects",
-        items=[("ASSEMBLE", "Assemble", "Assemble the objects to current location"),
-               ("DISASSEMBLE", "Disassemble", "Disassemble objects from current location")],
+        items=[
+            ("ASSEMBLE", "Assemble", "Assemble the objects to current location"),
+            ("DISASSEMBLE", "Disassemble", "Disassemble objects from current location"),
+        ],
         update=handle_outdated_preset,
-        default="ASSEMBLE")
+        default="ASSEMBLE",
+    )
     inverted_build = BoolProperty(
         name="From other direction",
         description="Invert the animation so that the objects start (dis)assembling from the other side",
-        default=False)
+        default=False,
+    )
 
     use_global = BoolProperty(
         name="Use Global Orientation",
         description="Use global object orientation for creating animation (local orientation if disabled)",
-        default=False)
+        default=False,
+    )
     mesh_only = BoolProperty(
         name="Mesh Objects Only",
         description="Non-mesh objects will be excluded from the animation",
         update=set_meshes_only,
-        default=True)
+        default=True,
+    )
     skip_empty_selections = BoolProperty(
         name="Skip Empty Selections",
         description="Skip frames where nothing is selected if checked (Recommended)",
-        default=True)
+        default=True,
+    )
 
     animated = BoolProperty(default=False)
     anim_bounds_start = IntProperty(default=-1)

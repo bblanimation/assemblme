@@ -173,42 +173,27 @@ class ASSEMBLME_PT_settings(Panel):
         box = layout.box()
 
         col = box.column(align=True)
-        row = col.row(align=True)
-        if ag.orient_random > 0.005:
-            approx = "~"
-        else:
-            approx = ""
-        row.operator("assemblme.refresh_anim_length", text="Duration: " + approx + str(ag.anim_length) + " frames", icon="FILE_REFRESH")
-        row = col.row(align=True)
-        row.prop(ag, "first_frame")
-        row = col.row(align=True)
-        row.prop(ag, "build_speed")
-        row = col.row(align=True)
-        row.prop(ag, "velocity")
-        row = col.row(align=True)
+        approx = "~" if ag.orient_random > 0.005 else ""
+        col.operator("assemblme.refresh_anim_length", text="Duration: " + approx + str(ag.anim_length) + " frames", icon="FILE_REFRESH")
+        col.prop(ag, "first_frame")
+        col.prop(ag, "build_speed")
+        col.prop(ag, "velocity")
 
         col = box.column(align=True)
         if scn.anim_preset == "Follow Curve":
-            row = col.row(align=True)
-            row.label(text="Path Object:")
-            row = col.row(align=True)
-            row.prop(ag, "path_object")
+            col.label(text="Path Object:")
+            col.prop(ag, "path_object")
         else:
             split = layout_split(col, align=False, factor=0.5)
             col1 = split.column(align=True)
             col1.prop(ag, "loc_offset", text="Location Offset")
-            row = col1.row(align=True)
-            row.prop(ag, "loc_interpolation_mode", text="")
-            row = col1.row(align=True)
-            row.prop(ag, "loc_random")
-            row = col1.row(align=True)
+            col1.prop(ag, "loc_interpolation_mode", text="")
+            col1.prop(ag, "loc_random")
 
             col1 = split.column(align=True)
             col1.prop(ag, "rot_offset", text="Rotation Offset")
-            row = col1.row(align=True)
-            row.prop(ag, "rot_interpolation_mode", text="")
-            row = col1.row(align=True)
-            row.prop(ag, "rot_random")
+            col1.prop(ag, "rot_interpolation_mode", text="")
+            col1.prop(ag, "rot_random")
 
         col1 = box.column(align=True)
         row = col1.row(align=True)
@@ -234,14 +219,10 @@ class ASSEMBLME_PT_settings(Panel):
         row.prop(ag, "inverted_build")
 
         col = box.column(align=True)
-        row = col.row(align=True)
-        row.label(text="Advanced:")
-        row = col.row(align=True)
-        row.prop(ag, "skip_empty_selections")
-        row = col.row(align=True)
-        row.prop(ag, "use_global")
-        row = col.row(align=True)
-        row.prop(ag, "mesh_only")
+        col.label(text="Advanced:")
+        col.prop(ag, "skip_empty_selections")
+        col.prop(ag, "use_global")
+        col.prop(ag, "mesh_only")
 
 
 class ASSEMBLME_PT_visualizer_settings(Panel):
@@ -268,10 +249,8 @@ class ASSEMBLME_PT_visualizer_settings(Panel):
         scn, ag = get_active_context_info()
 
         col = layout.column(align=True)
-        row = col.row(align=True)
-        row.prop(scn, "visualizer_scale")
-        row = col.row(align=True)
-        row.prop(scn, "visualizer_res")
+        col.prop(scn, "visualizer_scale")
+        col.prop(scn, "visualizer_res")
 
 class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
@@ -305,16 +284,12 @@ class ASSEMBLME_PT_preset_manager(Panel):
             col.active = scn.new_preset_name != ""
             col.operator("assemblme.anim_presets", text="Create", icon="ADD" if b280() else "ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
-        row = col.row(align=True)
-        row.label(text="Remove Existing Preset:")
-        row = col.row(align=True)
-        split = layout_split(row, factor=0.7)
+        col.label(text="Remove Existing Preset:")
+        split = layout_split(col, factor=0.7)
         col = split.column(align=True)
         col.prop(scn, "anim_preset_to_delete", text="")
         col = split.column(align=True)
         col.active = scn.anim_preset_to_delete != "None"
         col.operator("assemblme.anim_presets", text="Remove", icon="X").action = "REMOVE"
         layout.separator()
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        col.operator("assemblme.info_restore_preset", text="Restore Presets", icon="INFO")
+        layout.operator("assemblme.info_restore_preset", text="Restore Presets", icon="INFO")

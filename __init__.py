@@ -63,32 +63,37 @@ def register():
     Scene.new_preset_name = StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
-        default="")
+        default="",
+    )
     preset_names = get_preset_tuples(transfer_defaults=not bpy.app.background)
     Scene.anim_preset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
         items=preset_names,
         update=update_anim_preset,
-        default="None")
+        default="None",
+    )
     Scene.anim_preset_to_delete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
         items=Scene.anim_preset[1]["items"],
-        default="None")
+        default="None",
+    )
 
     Scene.visualizer_scale = FloatProperty(
         name="Scale",
         description="Scale of layer orientation visualizer",
         subtype="DISTANCE",
         soft_min=0.1, soft_max=16,
-        default=10)
+        default=10,
+    )
     Scene.visualizer_res = FloatProperty(
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
         soft_min=0.05, soft_max=1,
-        default=0.25)
+        default=0.25,
+    )
 
     # list properties
     Scene.aglist = CollectionProperty(type=AnimatedCollectionProperties)

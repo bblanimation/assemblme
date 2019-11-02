@@ -83,14 +83,16 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                 description="Stored AssemblMe presets",
                 items=preset_names,
                 update=update_anim_preset,
-                default="None")
+                default="None",
+            )
             scn.anim_preset = selected_preset
 
             bpy.types.Scene.anim_preset_to_delete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=preset_names,
-                default="None")
+                default="None",
+            )
             scn.anim_preset_to_delete = selected_preset
         except:
             assemblme_handle_exception()
