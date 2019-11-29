@@ -71,7 +71,7 @@ def handle_selections(junk=None):
 
 @persistent
 @blender_version_wrapper('>=','2.80')
-def register_assemblme_timers(scn):
+def register_assemblme_timers(scn, junk=None):
     timer_fns = (handle_selections,)
     for timer_fn in timer_fns:
         if not bpy.app.timers.is_registered(timer_fn):

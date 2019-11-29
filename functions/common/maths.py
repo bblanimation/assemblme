@@ -82,10 +82,12 @@ def vec_round(v1:Vector, precision:int=0, round_type:str="ROUND", outer_type:typ
         lst = [round(e1, precision) for e1 in v1]
     elif round_type == "FLOOR":
         prec = 10**precision
-        lst = [(math.floor(e1 * prec)) / prec for e1 in v1]
+        lst = [math.floor(e1 * prec) / prec for e1 in v1] if prec != 1 else [math.floor(e1) for e1 in v1]
     elif round_type in ("CEILING", "CEIL"):
         prec = 10**precision
-        lst = [(math.ceil(e1 * prec)) / prec for e1 in v1]
+        lst = [math.ceil(e1 * prec) / prec for e1 in v1] if prec != 1 else [math.ceil(e1) for e1 in v1]
+    else:
+        raise Exception("Argument passed to 'round_type' parameter invalid: " + str(round_type))
     return outer_type(lst)
 
 

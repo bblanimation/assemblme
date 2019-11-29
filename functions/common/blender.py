@@ -404,8 +404,8 @@ def tag_redraw_areas(area_types:iter=["ALL"]):
     screens = [bpy.context.screen] if bpy.context.screen else bpy.data.screens
     for screen in screens:
         for area in screen.areas:
-            for areaType in area_types:
-                if areaType == "ALL" or area.type == areaType:
+            for area_type in area_types:
+                if area_type == "ALL" or area.type == area_type:
                     area.tag_redraw()
 
 
