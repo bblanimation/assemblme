@@ -59,6 +59,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
                 self.create_anim(scn, ag0)
             # set current_frame to original current_frame
             scn.frame_set(self.orig_frame)
+            ag.visualizer_needs_update = True
         except:
             assemblme_handle_exception()
             return{"CANCELLED"}

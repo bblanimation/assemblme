@@ -191,6 +191,7 @@ def set_bounds_for_visualizer(ag, list_z_values):
             continue
         ag.obj_max_loc = obj.location.copy()
         break
+    print(ag.obj_min_loc.z, ag.obj_max_loc.z)
 
 
 def layers(l):
@@ -368,7 +369,7 @@ def ag_update(self, context):
         coll = ag.collection
         if coll is not None and len(coll.objects) > 0:
             select(list(coll.objects), active=coll.objects[0], only=True)
-            scn.assemblme_last_active_object_name = obj.name
+            scn.assemblme.last_active_object_name = obj.name
 
 
 def match_properties(ag_new, ag_old):

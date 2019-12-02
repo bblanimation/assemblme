@@ -46,6 +46,8 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.full_disable(context)
                 return{"CANCELLED"}
             scn, ag = get_active_context_info()
+            if ag.visualizer_needs_update:
+                self.create_vis_anim()
             try:
                 v_obj = self.visualizer_obj
                 # if the visualizer is has been disabled, stop running modal
@@ -93,7 +95,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.z_orient = None
                 # create timer for modal
                 wm = context.window_manager
-                self._timer = wm.event_timer_add(.02, window=context.window)
+                self._timer = wm.event_timer_add(0.02, window=context.window)
                 wm.modal_handler_add(self)
         except:
             assemblme_handle_exception()
@@ -119,6 +121,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
     def create_vis_anim(self):
         scn, ag = get_active_context_info()
+        ag.visualizer_needs_update = False
         # if first and last location are the same, keep visualizer stationary
         if ag.obj_min_loc == ag.obj_max_loc or ag.orient_random > 0.0025:
             clear_animation(self.visualizer_obj)
@@ -132,14 +135,13 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 clear_animation(self.visualizer_obj)
             # set up vars
             self.visualizer_obj.location = ag.obj_min_loc
-            cur_frame = ag.frame_with_orig_loc
-            idx = -2 if ag.build_type == "ASSEMBLE" else -1
-            mult = 1 if ag.build_type == "ASSEMBLE" else -1
+            start_frame = ag.frame_with_orig_loc
             # insert keyframe and iterate current frame, and set another
-            insert_keyframes(self.visualizer_obj, "location", cur_frame)
+            insert_keyframes(self.visualizer_obj, "location", start_frame)
             self.visualizer_obj.location = ag.obj_max_loc
-            cur_frame -= (ag.anim_length - ag.last_layer_velocity) * mult
-            insert_keyframes(self.visualizer_obj, "location", cur_frame, if_needed=True)
+            mult = 1 if ag.build_type == "ASSEMBLE" else -1
+            end_frame = start_frame - (ag.anim_length - ag.last_layer_velocity) * mult
+            insert_keyframes(self.visualizer_obj, "location", end_frame, if_needed=True)
             ag.visualizer_animated = True
             set_interpolation(self.visualizer_obj, "loc", "LINEAR")
 
@@ -147,7 +149,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
     def load_lattice_mesh(self, context):
         scn = bpy.context.scene
-        visualizer_bm = make_lattice(Vector((scn.assemblme.visualizer_res, scn.assemblme.visualizer_res, 1)), Vector([scn.assemblme.visualizer_scale]*2 + [1]))
+        visualizer_bm = generate_lattice(Vector((scn.assemblme.visualizer_res, scn.assemblme.visualizer_res, 1)), Vector([scn.assemblme.visualizer_scale]*2 + [1]), offset=Vector((0, 0, 1)))
         self.visualizer_res = scn.assemblme.visualizer_res
         self.visualizer_scale = scn.assemblme.visualizer_scale
         visualizer_bm.to_mesh(self.visualizer_obj.data)
