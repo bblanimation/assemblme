@@ -53,58 +53,11 @@ def register():
     bpy.props.assemblme_module_name = __name__
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
 
-    Scene.assemblme_copy_from_id = IntProperty(default=-1)
-
-    # items used by selection app handler
-    Scene.assemblMe_runningOperation = BoolProperty(default=False)
-    Scene.assemblme_last_layers = StringProperty(default="")
-    Scene.assemblMe_active_object_name = StringProperty(default="")
-    Scene.assemblme_last_active_object_name = StringProperty(default="")
-
-    Scene.new_preset_name = StringProperty(
-        name="Name of New Preset",
-        description="Full name of new custom preset",
-        default="",
-    )
-    preset_names = get_preset_tuples(transfer_defaults=not bpy.app.background)
-    Scene.anim_preset = EnumProperty(
-        name="Presets",
-        description="Stored AssemblMe presets",
-        items=preset_names,
-        update=update_anim_preset,
-        default="None",
-    )
-    Scene.anim_preset_to_delete = EnumProperty(
-        name="Preset to Delete",
-        description="Another list of stored AssemblMe presets",
-        items=Scene.anim_preset[1]["items"],
-        default="None",
-    )
-
-    Scene.visualizer_scale = FloatProperty(
-        name="Scale",
-        description="Scale of layer orientation visualizer",
-        subtype="DISTANCE",
-        soft_min=0.1, soft_max=16,
-        default=10,
-    )
-    Scene.visualizer_res = FloatProperty(
-        name="Resolution",
-        description="Resolution of layer orientation visualizer",
-        precision=2,
-        soft_min=0.05, soft_max=1,
-        default=0.25,
-    )
+    Scene.assemblme = PointerProperty(type=AssemblMeProperties)
 
     # list properties
     Scene.aglist = CollectionProperty(type=AnimatedCollectionProperties)
     Scene.aglist_index = IntProperty(default=-1, update=ag_update)
-
-    # Session properties
-    bpy.props.z_upper_bound = None
-    bpy.props.z_lower_bound = None
-    bpy.props.obj_min_loc = 0
-    bpy.props.obj_max_loc = 0
 
     # register app handlers
     if b280():
@@ -133,27 +86,10 @@ def unregister():
     else:
         bpy.app.handlers.scene_update_pre.remove(handle_selections)
 
-    del bpy.props.z_upper_bound
-    del bpy.props.z_lower_bound
-    del bpy.props.obj_min_loc
-    del bpy.props.obj_max_loc
-
     del Scene.aglist_index
     del Scene.aglist
 
-    del Scene.visualizer_res
-    del Scene.visualizer_scale
-
-    del Scene.anim_preset_to_delete
-    del Scene.anim_preset
-    del Scene.new_preset_name
-
-    del Scene.assemblme_last_active_object_name
-    del Scene.assemblMe_active_object_name
-    del Scene.assemblme_last_layers
-    del Scene.assemblMe_runningOperation
-
-    del Scene.assemblme_copy_from_id
+    del Scene.assemblme
 
     del bpy.props.assemblme_version
     del bpy.props.assemblme_module_name

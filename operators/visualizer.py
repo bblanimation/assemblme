@@ -53,8 +53,8 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                     self.full_disable(context)
                     return{"CANCELLED"}
                 # if new build animation created, update visualizer animation
-                if self.min_and_max != [props.obj_min_loc, props.obj_max_loc]:
-                    self.min_and_max = [props.obj_min_loc, props.obj_max_loc]
+                if self.min_and_max != [ag.obj_min_loc, ag.obj_max_loc]:
+                    self.min_and_max = [ag.obj_min_loc, ag.obj_max_loc]
                     self.create_vis_anim()
                 # set visualizer object rotation
                 if v_obj.rotation_euler.x != ag.orient[0]:
@@ -64,7 +64,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 if v_obj.rotation_euler.z != self.z_orient:
                     v_obj.rotation_euler.z = ag.orient[0] * (cos(ag.orient[1]) * sin(ag.orient[1]))
                     self.z_orient = v_obj.rotation_euler.z
-                if scn.visualizer_scale != self.visualizer_scale or scn.visualizer_res != self.visualizer_res:
+                if scn.assemblme.visualizer_scale != self.visualizer_scale or scn.assemblme.visualizer_res != self.visualizer_res:
                     self.load_lattice_mesh(context)
                     v_obj.data.update()
             except:
@@ -84,7 +84,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 self.visualizer_obj.hide_select = True
                 self.visualizer_obj.hide_render = True
                 # create animation for visualizer if build animation exists
-                self.min_and_max = [props.obj_min_loc, props.obj_max_loc]
+                self.min_and_max = [ag.obj_min_loc, ag.obj_max_loc]
                 if ag.collection is not None:
                     self.create_vis_anim()
                 # enable visualizer
@@ -120,9 +120,9 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     def create_vis_anim(self):
         scn, ag = get_active_context_info()
         # if first and last location are the same, keep visualizer stationary
-        if props.obj_min_loc == props.obj_max_loc or ag.orient_random > 0.0025:
+        if ag.obj_min_loc == ag.obj_max_loc or ag.orient_random > 0.0025:
             clear_animation(self.visualizer_obj)
-            self.visualizer_obj.location = props.obj_min_loc if type(props.obj_min_loc) == type(self.visualizer_obj.location) else (0, 0, 0)
+            self.visualizer_obj.location = ag.obj_min_loc
             ag.visualizer_animated = False
             return "static"
         # else, create animation
@@ -131,13 +131,13 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             if ag.visualizer_animated:
                 clear_animation(self.visualizer_obj)
             # set up vars
-            self.visualizer_obj.location = props.obj_min_loc
+            self.visualizer_obj.location = ag.obj_min_loc
             cur_frame = ag.frame_with_orig_loc
             idx = -2 if ag.build_type == "ASSEMBLE" else -1
             mult = 1 if ag.build_type == "ASSEMBLE" else -1
             # insert keyframe and iterate current frame, and set another
             insert_keyframes(self.visualizer_obj, "location", cur_frame)
-            self.visualizer_obj.location = props.obj_max_loc
+            self.visualizer_obj.location = ag.obj_max_loc
             cur_frame -= (ag.anim_length - ag.last_layer_velocity) * mult
             insert_keyframes(self.visualizer_obj, "location", cur_frame, if_needed=True)
             ag.visualizer_animated = True
@@ -147,9 +147,9 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
     def load_lattice_mesh(self, context):
         scn = bpy.context.scene
-        visualizer_bm = make_lattice(Vector((scn.visualizer_res, scn.visualizer_res, 1)), Vector([scn.visualizer_scale]*2 + [1]))
-        self.visualizer_res = scn.visualizer_res
-        self.visualizer_scale = scn.visualizer_scale
+        visualizer_bm = make_lattice(Vector((scn.assemblme.visualizer_res, scn.assemblme.visualizer_res, 1)), Vector([scn.assemblme.visualizer_scale]*2 + [1]))
+        self.visualizer_res = scn.assemblme.visualizer_res
+        self.visualizer_scale = scn.assemblme.visualizer_scale
         visualizer_bm.to_mesh(self.visualizer_obj.data)
 
     def enable(self, context):

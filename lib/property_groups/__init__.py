@@ -17,3 +17,4 @@
 
 
 from .animated_collection_properties import *
+from .assemblme_properties import *

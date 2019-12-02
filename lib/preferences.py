@@ -33,12 +33,12 @@ class ASSEMBLME_PT_preferences(AddonPreferences):
     bl_idname = __package__[:__package__.index(".lib")]
 
     # file path to assemblMe presets (non-user-editable)
-    addonLibPath = os.path.dirname(os.path.abspath(__file__))
-    defaultPresetsFP = os.path.abspath(os.path.join(addonLibPath, '..', '..', '..', 'presets', 'assemblme'))
+    addon_lib_path = os.path.dirname(os.path.abspath(__file__))
+    default_presets_fp = os.path.abspath(os.path.join(addon_lib_path, '..', '..', '..', 'presets', 'assemblme'))
     presets_filepath = StringProperty(
-        name="Path to assemblMe presets",
+        name="Path to AssemblMe presets",
         subtype='FILE_PATH',
-        default=defaultPresetsFP,
+        default=default_presets_fp,
     )
 
 	# addon updater preferences
@@ -73,7 +73,7 @@ class ASSEMBLME_PT_preferences(AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        col = layout.column(align=True)
+        layout.prop(self, "presets_filepath")
 
         # updater draw function
         addon_updater_ops.update_settings_ui(self,context)

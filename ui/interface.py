@@ -168,7 +168,7 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.prop(scn, "anim_preset", text="Preset")
+        row.prop(scn.assemblme, "anim_preset", text="Preset")
 
         box = layout.box()
 
@@ -180,7 +180,7 @@ class ASSEMBLME_PT_settings(Panel):
         col.prop(ag, "velocity")
 
         col = box.column(align=True)
-        if scn.anim_preset == "Follow Curve":
+        if scn.assemblme.anim_preset == "Follow Curve":
             col.label(text="Path Object:")
             col.prop(ag, "path_object")
         else:
@@ -249,8 +249,8 @@ class ASSEMBLME_PT_visualizer_settings(Panel):
         scn, ag = get_active_context_info()
 
         col = layout.column(align=True)
-        col.prop(scn, "visualizer_scale")
-        col.prop(scn, "visualizer_res")
+        col.prop(scn.assemblme, "visualizer_scale")
+        col.prop(scn.assemblme, "visualizer_res")
 
 class ASSEMBLME_PT_preset_manager(Panel):
     bl_space_type  = "VIEW_3D"
@@ -279,17 +279,17 @@ class ASSEMBLME_PT_preset_manager(Panel):
             row = col.row(align=True)
             split = layout_split(row, factor=0.7)
             col = split.column(align=True)
-            col.prop(scn, "new_preset_name", text="")
+            col.prop(scn.assemblme, "new_preset_name", text="")
             col = split.column(align=True)
-            col.active = scn.new_preset_name != ""
+            col.active = scn.assemblme.new_preset_name != ""
             col.operator("assemblme.anim_presets", text="Create", icon="ADD" if b280() else "ZOOMIN").action = "CREATE"
         col = layout.column(align=True)
         col.label(text="Remove Existing Preset:")
         split = layout_split(col, factor=0.7)
         col = split.column(align=True)
-        col.prop(scn, "anim_preset_to_delete", text="")
+        col.prop(scn.assemblme, "anim_preset_to_delete", text="")
         col = split.column(align=True)
-        col.active = scn.anim_preset_to_delete != "None"
+        col.active = scn.assemblme.anim_preset_to_delete != "None"
         col.operator("assemblme.anim_presets", text="Remove", icon="X").action = "REMOVE"
         layout.separator()
         layout.operator("assemblme.info_restore_preset", text="Restore Presets", icon="INFO")

@@ -26,7 +26,6 @@ props = bpy.props
 # Module imports
 from ...functions import *
 
-# Create custom property group
 class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     name = StringProperty(update=uniquify_name)
     id = IntProperty()
@@ -201,6 +200,10 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         description="Skip frames where nothing is selected if checked (Recommended)",
         default=True,
     )
+
+    # Session properties
+    obj_min_loc = FloatVectorProperty(default=(0, 0, 0))
+    obj_max_loc = FloatVectorProperty(default=(0, 0, 0))
 
     animated = BoolProperty(default=False)
     anim_bounds_start = IntProperty(default=-1)

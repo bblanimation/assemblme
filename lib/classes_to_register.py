@@ -40,8 +40,9 @@ classes = [
     ASSEMBLME_PT_preset_manager,
     ASSEMBLME_UL_items,
     # assemblme/lib
-    AnimatedCollectionProperties,
     ASSEMBLME_PT_preferences,
     SCENE_OT_report_error,
     SCENE_OT_close_report_error,
+    AnimatedCollectionProperties,
+    AssemblMeProperties,
 ]

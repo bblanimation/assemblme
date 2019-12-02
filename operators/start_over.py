@@ -73,7 +73,7 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
         scn.frame_set(all_ags_for_collection[0].frame_with_orig_loc)
 
         # clear obj_min_loc and obj_max_loc
-        props.obj_min_loc, props.obj_max_loc = 0, 0
+        ag.obj_min_loc, ag.obj_max_loc = 0, 0
 
         # clear animation data from all objects in 'AssemblMe_all_objects_moved' group/collection
         if ag.collection is not None:

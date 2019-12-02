@@ -77,3 +77,44 @@ def handle_outdated_preset(self, context):
     scn, ag = get_active_context_info()
     if not ag.build_type.isupper():
         ag.build_type = str(ag.build_type).upper()
+
+
+def update_anim_preset(self, context):
+    scn = bpy.context.scene
+    if scn.assemblme.anim_preset != "None":
+        import importlib.util
+        path_to_file = os.path.join(get_addon_preferences().presets_filepath, scn.assemblme.anim_preset + ".py")
+        if os.path.isfile(path_to_file):
+            spec = importlib.util.spec_from_file_location(scn.assemblme.anim_preset + ".py", path_to_file)
+            foo = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(foo)
+            foo.execute()
+        else:
+            bad_preset = str(scn.assemblme.anim_preset)
+            if bad_preset in get_default_preset_names():
+                error_string = "Preset '%(bad_preset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
+            else:
+                error_string = "Preset '%(bad_preset)s' could not be found." % locals()
+            sys.stderr.write(error_string)
+            print(error_string)
+            preset_names = get_preset_tuples()
+
+            bpy.types.Scene.assemblme.anim_preset = EnumProperty(
+                name="Presets",
+                description="Stored AssemblMe presets",
+                items=preset_names,
+                update=update_anim_preset,
+                default="None",
+            )
+
+            bpy.types.Scene.assemblme.anim_preset_to_delete = EnumProperty(
+                name="Preset to Delete",
+                description="Another list of stored AssemblMe presets",
+                items=preset_names,
+                default="None",
+            )
+            scn.assemblme.anim_preset = "None"
+    scn, ag = get_active_context_info()
+    ag.cur_preset = scn.assemblme.anim_preset
+
+    return None

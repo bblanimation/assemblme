@@ -38,7 +38,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     # @classmethod
     # def poll(cls, context):
     #     """ ensures operator can execute (if not, returns false) """
-    #     if context.scene.new_preset_name != "":
+    #     if context.scene.assemblme.new_preset_name != "":
     #         return True
     #     return False
 
@@ -51,18 +51,18 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
             filenames = get_filenames(path)
             selected_preset = "None"
             if self.action == "CREATE":
-                if scn.new_preset_name + ".py" in filenames:
+                if scn.assemblme.new_preset_name + ".py" in filenames:
                     self.report({"WARNING"}, "Preset already exists with this name. Try another name!")
                     return{"CANCELLED"}
                 # write new preset to file
-                self.write_new_preset(scn.new_preset_name)
-                filenames.append(scn.new_preset_name + ".py")
-                selected_preset = str(scn.new_preset_name)
-                self.report({"INFO"}, "Successfully added new preset '" + scn.new_preset_name + "'")
-                scn.new_preset_name = ""
+                self.write_new_preset(scn.assemblme.new_preset_name)
+                filenames.append(scn.assemblme.new_preset_name + ".py")
+                selected_preset = str(scn.assemblme.new_preset_name)
+                self.report({"INFO"}, "Successfully added new preset '" + scn.assemblme.new_preset_name + "'")
+                scn.assemblme.new_preset_name = ""
             elif self.action == "REMOVE":
                 backup_path = os.path.join(path, "backups")
-                filename = scn.anim_preset_to_delete + ".py"
+                filename = scn.assemblme.anim_preset_to_delete + ".py"
                 filepath = os.path.join(path, filename)
                 backup_filepath = os.path.join(backup_path, filename)
                 if os.path.isfile(filepath):
@@ -71,29 +71,29 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                     if os.path.isfile(backup_filepath):
                         os.remove(backup_filepath)
                     os.rename(filepath, backup_filepath)
-                    filenames.remove(scn.anim_preset_to_delete + ".py")
-                    self.report({"INFO"}, "Successfully removed preset '" + scn.anim_preset_to_delete + "'")
+                    filenames.remove(scn.assemblme.anim_preset_to_delete + ".py")
+                    self.report({"INFO"}, "Successfully removed preset '" + scn.assemblme.anim_preset_to_delete + "'")
                 else:
-                    self.report({"WARNING"}, "Preset '" + scn.anim_preset_to_delete + "' does not exist.")
+                    self.report({"WARNING"}, "Preset '" + scn.assemblme.anim_preset_to_delete + "' does not exist.")
                     return{"CANCELLED"}
 
             preset_names = get_preset_tuples(filenames=filenames)
-            bpy.types.Scene.anim_preset = EnumProperty(
+            bpy.types.Scene.assemblme.anim_preset = EnumProperty(
                 name="Presets",
                 description="Stored AssemblMe presets",
                 items=preset_names,
                 update=update_anim_preset,
                 default="None",
             )
-            scn.anim_preset = selected_preset
+            scn.assemblme.anim_preset = selected_preset
 
-            bpy.types.Scene.anim_preset_to_delete = EnumProperty(
+            bpy.types.Scene.assemblme.anim_preset_to_delete = EnumProperty(
                 name="Preset to Delete",
                 description="Another list of stored AssemblMe presets",
                 items=preset_names,
                 default="None",
             )
-            scn.anim_preset_to_delete = selected_preset
+            scn.assemblme.anim_preset_to_delete = selected_preset
         except:
             assemblme_handle_exception()
 
@@ -144,15 +144,15 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     def can_run(self):
         scn = bpy.context.scene
         if self.action == "CREATE":
-            if scn.new_preset_name == "":
+            if scn.assemblme.new_preset_name == "":
                 self.report({"WARNING"}, "No preset name specified")
                 return False
         if self.action == "REMOVE":
-            if scn.anim_preset_to_delete == "None":
+            if scn.assemblme.anim_preset_to_delete == "None":
                 self.report({"WARNING"}, "No preset name specified")
                 return False
             # # prevent users from deleting default presets
-            # elif scn.anim_preset_to_delete in scn.assemblme_default_presets:
+            # elif scn.assemblme.anim_preset_to_delete in scn.assemblme_default_presets:
             #     self.report({"WARNING"}, "Cannot delete default p")
             #     return False
         return True

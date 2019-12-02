@@ -160,7 +160,7 @@ class AGLIST_OT_copy_settings(bpy.types.Operator):
 
     def execute(self, context):
         scn, ag = get_active_context_info()
-        scn.assemblme_copy_from_id = ag.id
+        scn.assemblme.copy_from_id = ag.id
         return{"FINISHED"}
 
 
@@ -183,7 +183,7 @@ class AGLIST_OT_paste_settings(bpy.types.Operator):
         scn = context.scene
         ag0 = scn.aglist[scn.aglist_index]
         for ag1 in scn.aglist:
-            if ag0 != ag1 and ag1.id == scn.assemblme_copy_from_id:
+            if ag0 != ag1 and ag1.id == scn.assemblme.copy_from_id:
                 match_properties(ag0, ag1)
                 break
         return{"FINISHED"}
