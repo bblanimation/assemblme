@@ -26,7 +26,6 @@ props = bpy.props
 # Module imports
 from ...functions import *
 
-# Create custom property group
 class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     name = StringProperty(update=uniquify_name)
     id = IntProperty()
@@ -202,6 +201,10 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         default=True,
     )
 
+    # Session properties
+    obj_min_loc = FloatVectorProperty(subtype="XYZ", default=(0, 0, 0))
+    obj_max_loc = FloatVectorProperty(subtype="XYZ", default=(0, 0, 0))
+
     animated = BoolProperty(default=False)
     anim_bounds_start = IntProperty(default=-1)
     anim_bounds_end = IntProperty(default=-1)
@@ -213,6 +216,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     last_layer_velocity = IntProperty(default=-1)
     visualizer_animated = BoolProperty(default=False)
     visualizer_active = BoolProperty(default=False)
+    visualizer_needs_update = BoolProperty(default=False)
 
     last_active_object_name = StringProperty(default="")
     active_user_index = IntProperty(default=0)

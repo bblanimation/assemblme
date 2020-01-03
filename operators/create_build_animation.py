@@ -59,6 +59,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
                 self.create_anim(scn, ag0)
             # set current_frame to original current_frame
             scn.frame_set(self.orig_frame)
+            ag.visualizer_needs_update = True
         except:
             assemblme_handle_exception()
             return{"CANCELLED"}
@@ -98,7 +99,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         # populate self.list_z_values
         self.list_z_values,rot_x_l,rot_y_l = get_list_z_values(ag, self.objects_to_move)
 
-        # set props.obj_min_loc and props.obj_max_loc
+        # set obj_min_loc and obj_max_loc
         set_bounds_for_visualizer(ag, self.list_z_values)
 
         # calculate how many frames the animation will last
@@ -110,10 +111,6 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         # set frame_with_orig_loc for 'Start Over' operation
         ag.frame_with_orig_loc = self.cur_frame
 
-        # reset upper and lower bound values
-        props.z_upper_bound = None
-        props.z_lower_bound = None
-
         # animate the objects
         objects_moved, last_frame = animate_objects(ag, self.objects_to_move, self.list_z_values, self.cur_frame, ag.loc_interpolation_mode, ag.rot_interpolation_mode)
 
@@ -124,10 +121,6 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
                 warning_msg += " (Non-mesh objects ignored – see advanced settings)"
             self.report({"WARNING"}, warning_msg)
             return{"FINISHED"}
-
-        # reset upper and lower bound values
-        props.z_upper_bound = None
-        props.z_lower_bound = None
 
         # define animation start and end frames
         ag.anim_bounds_start = ag.first_frame if ag.build_type == "ASSEMBLE" else ag.first_frame

@@ -80,8 +80,10 @@ def get_object_velocity(ag):
 def get_anim_length(ag, objects_to_move, list_z_values, layer_height, inverted_build, skip_empty_selections):
     temp_obj_count = 0
     num_layers = 0
+    last_lower_bound = None
     while len(objects_to_move) > temp_obj_count:
-        num_objs = len(get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections))
+        objs, last_lower_bound = get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections, last_lower_bound)
+        num_objs = len(objs)
         num_layers += 1 if num_objs > 0 or not skip_empty_selections else 0
         temp_obj_count += num_objs
     return (num_layers - 1) * get_build_speed(ag) + get_object_velocity(ag) + 1
@@ -170,27 +172,29 @@ def get_objs_in_bound(list_z_values, z_lower_bound, inverted_build):
     return objs_in_bound
 
 
-def get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections):
+def get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections, last_lower_bound=None):
     """ selects next layer of objects """
     # get new upper and lower bounds
-    props.z_upper_bound = list_z_values[0]["loc"] if skip_empty_selections or props.z_upper_bound is None else props.z_lower_bound
-    props.z_lower_bound = props.z_upper_bound + layer_height * (1 if inverted_build else -1)
+    z_upper_bound = list_z_values[0]["loc"] if skip_empty_selections or last_lower_bound is None else last_lower_bound
+    z_lower_bound = z_upper_bound + layer_height * (1 if inverted_build else -1)
     # select objects in bounds
-    objs_in_bound = get_objs_in_bound(list_z_values, props.z_lower_bound, inverted_build)
-    return objs_in_bound
+    objs_in_bound = get_objs_in_bound(list_z_values, z_lower_bound, inverted_build)
+    return objs_in_bound, z_lower_bound
 
 
 def set_bounds_for_visualizer(ag, list_z_values):
-    for i in range(len(list_z_values)):
-        obj = list_z_values[i]["obj"]
-        if not ag.mesh_only or obj.type == "MESH":
-            props.obj_min_loc = obj.location.copy()
-            break
-    for i in range(len(list_z_values)-1,-1,-1):
-        obj = list_z_values[i]["obj"]
-        if not ag.mesh_only or obj.type == "MESH":
-            props.obj_max_loc = obj.location.copy()
-            break
+    for z_value in list_z_values:
+        obj = z_value["obj"]
+        if ag.mesh_only and obj.type != "MESH":
+            continue
+        ag.obj_min_loc = obj.location.copy()
+        break
+    for z_value in reversed(list_z_values):
+        obj = z_value["obj"]
+        if ag.mesh_only and obj.type != "MESH":
+            continue
+        ag.obj_max_loc = obj.location.copy()
+        break
 
 
 def layers(l):
@@ -214,47 +218,6 @@ def layers(l):
 def get_default_preset_names():
     default_preset_path = os.path.join(get_addon_directory(), "lib", "default_presets")
     return [os.path.splitext(fn)[0] for fn in os.listdir(default_preset_path) if fn.endswith(".py")]
-
-
-def update_anim_preset(self, context):
-    scn = bpy.context.scene
-    if scn.anim_preset != "None":
-        import importlib.util
-        path_to_file = os.path.join(get_presets_filepath(), scn.anim_preset + ".py")
-        if os.path.isfile(path_to_file):
-            spec = importlib.util.spec_from_file_location(scn.anim_preset + ".py", path_to_file)
-            foo = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(foo)
-            foo.execute()
-        else:
-            bad_preset = str(scn.anim_preset)
-            if bad_preset in get_default_preset_names():
-                error_string = "Preset '%(bad_preset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
-            else:
-                error_string = "Preset '%(bad_preset)s' could not be found." % locals()
-            sys.stderr.write(error_string)
-            print(error_string)
-            preset_names = get_preset_tuples()
-
-            bpy.types.Scene.anim_preset = EnumProperty(
-                name="Presets",
-                description="Stored AssemblMe presets",
-                items=preset_names,
-                update=update_anim_preset,
-                default="None",
-            )
-
-            bpy.types.Scene.anim_preset_to_delete = EnumProperty(
-                name="Preset to Delete",
-                description="Another list of stored AssemblMe presets",
-                items=preset_names,
-                default="None",
-            )
-            scn.anim_preset = "None"
-    scn, ag = get_active_context_info()
-    ag.cur_preset = scn.anim_preset
-
-    return None
 
 
 def clear_animation(objs):
@@ -298,6 +261,7 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
     skip_empty_selections = ag.skip_empty_selections
     kf_idx_loc = -1
     kf_idx_rot = -1
+    last_lower_bound = None
 
     # insert first location keyframes
     if insert_loc:
@@ -312,7 +276,7 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
         last_len_objects_moved = len(objects_moved)
 
         # get next objects to animate
-        new_selection = get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections)
+        new_selection, last_lower_bound = get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections, last_lower_bound)
         objects_moved += new_selection
 
         # move selected objects and add keyframes
@@ -408,7 +372,7 @@ def ag_update(self, context):
         coll = ag.collection
         if coll is not None and len(coll.objects) > 0:
             select(list(coll.objects), active=coll.objects[0], only=True)
-            scn.assemblme_last_active_object_name = obj.name
+            scn.assemblme.last_active_object_name = obj.name
 
 
 def match_properties(ag_new, ag_old):

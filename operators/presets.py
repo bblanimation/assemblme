@@ -38,7 +38,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     # @classmethod
     # def poll(cls, context):
     #     """ ensures operator can execute (if not, returns false) """
-    #     if context.scene.new_preset_name != "":
+    #     if context.scene.assemblme.new_preset_name != "":
     #         return True
     #     return False
 
@@ -51,15 +51,15 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
             filenames = get_filenames(path)
             selected_preset = "None"
             if self.action == "CREATE":
-                if scn.new_preset_name + ".py" in filenames:
+                if scn.assemblme.new_preset_name + ".py" in filenames:
                     self.report({"WARNING"}, "Preset already exists with this name. Try another name!")
                     return{"CANCELLED"}
                 # write new preset to file
-                self.write_new_preset(scn.new_preset_name)
-                filenames.append(scn.new_preset_name + ".py")
-                selected_preset = str(scn.new_preset_name)
-                self.report({"INFO"}, "Successfully added new preset '" + scn.new_preset_name + "'")
-                scn.new_preset_name = ""
+                self.write_new_preset(scn.assemblme.new_preset_name)
+                filenames.append(scn.assemblme.new_preset_name + ".py")
+                selected_preset = str(scn.assemblme.new_preset_name)
+                self.report({"INFO"}, "Successfully added new preset '" + scn.assemblme.new_preset_name + "'")
+                scn.assemblme.new_preset_name = ""
             elif self.action == "REMOVE":
                 backup_path = os.path.join(path, "backups")
                 filename = scn.anim_preset_to_delete + ".py"
@@ -144,7 +144,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     def can_run(self):
         scn = bpy.context.scene
         if self.action == "CREATE":
-            if scn.new_preset_name == "":
+            if scn.assemblme.new_preset_name == "":
                 self.report({"WARNING"}, "No preset name specified")
                 return False
         if self.action == "REMOVE":
