@@ -47,7 +47,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn = bpy.context.scene
-            path = get_addon_preferences().presets_filepath
+            path = get_presets_filepath()
             filenames = get_filenames(path)
             selected_preset = "None"
             if self.action == "CREATE":
@@ -114,7 +114,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
 
     def write_new_preset(self, presetName):
         scn, ag = get_active_context_info()
-        presets_filepath = get_addon_preferences().presets_filepath
+        presets_filepath = get_presets_filepath()
         if not os.path.exists(presets_filepath):
             os.makedirs(presets_filepath)
         new_preset_path = os.path.join(presets_filepath, presetName + ".py")

@@ -56,9 +56,7 @@ def register():
     Scene.assemblme_copy_from_id = IntProperty(default=-1)
 
     # items used by selection app handler
-    Scene.assemblMe_runningOperation = BoolProperty(default=False)
     Scene.assemblme_last_layers = StringProperty(default="")
-    Scene.assemblMe_active_object_name = StringProperty(default="")
     Scene.assemblme_last_active_object_name = StringProperty(default="")
 
     Scene.new_preset_name = StringProperty(
@@ -149,9 +147,7 @@ def unregister():
     del Scene.new_preset_name
 
     del Scene.assemblme_last_active_object_name
-    del Scene.assemblMe_active_object_name
     del Scene.assemblme_last_layers
-    del Scene.assemblMe_runningOperation
 
     del Scene.assemblme_copy_from_id
 

@@ -92,10 +92,14 @@ def get_filenames(dir):
     return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and not f.startswith(".")]
 
 
+def get_presets_filepath():
+    return os.path.abspath(os.path.join(get_addon_directory(), "..", "..", "presets", "assemblme"))
+
+
 def get_preset_tuples(filenames=None, transfer_defaults=False):
     if not filenames:
         # initialize presets path
-        path = get_addon_preferences().presets_filepath
+        path = get_presets_filepath()
         # set up presets folder and transfer default presets
         if not os.path.exists(path):
             os.makedirs(path)
@@ -216,7 +220,7 @@ def update_anim_preset(self, context):
     scn = bpy.context.scene
     if scn.anim_preset != "None":
         import importlib.util
-        path_to_file = os.path.join(get_addon_preferences().presets_filepath, scn.anim_preset + ".py")
+        path_to_file = os.path.join(get_presets_filepath(), scn.anim_preset + ".py")
         if os.path.isfile(path_to_file):
             spec = importlib.util.spec_from_file_location(scn.anim_preset + ".py", path_to_file)
             foo = importlib.util.module_from_spec(spec)
