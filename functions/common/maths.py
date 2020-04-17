@@ -96,9 +96,21 @@ def outer_type(v1:Vector, outer_type:type=Vector):
     return outer_type([max(0, min(1, e1)) for e1 in v1])
 
 
-def mean(lst:list):
-    """ mean of a list """
-    return sum(lst)/len(lst)
+def vec_dist(v1:Vector, v2:Vector):
+    """ distance between two points """
+    assert len(v1) == len(v2)
+    lst = [(e1 - e2) ** 2 for e1, e2 in zip(v1, v2)]
+    return math.sqrt(sum(lst))
+
+
+def vec_interp(v1:Vector, v2:Vector, fac:float, outer_type:type=Vector):
+    return outer_type([(e1 * (1 - fac)) + (e2 * fac) for e1, e2 in zip(v1, v2)])
+
+
+# available at: `from statistics import mean`
+# def mean(lst:list):
+#     """ mean of a list """
+#     return sum(lst)/len(lst)
 
 
 def round_nearest(num:float, divisor:int, round_type:str="ROUND"):

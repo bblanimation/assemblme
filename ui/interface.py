@@ -93,6 +93,9 @@ class ASSEMBLME_PT_animations(Panel):
             ag = scn.aglist[scn.aglist_index]
             col1.label(text="Collection Name:" if b280() else "Group Name:")
             if ag.animated:
+                if ag.collection is None:
+                    ag.animated = False
+                    return
                 n = ag.collection.name
                 col1.label(text="%(n)s" % locals())
             else:

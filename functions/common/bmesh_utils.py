@@ -36,6 +36,12 @@ def smooth_bm_faces(faces:iter):
     for f in faces:
         f.smooth = True
 
+def get_shared_edge(v1:BMVert, v2:BMVert):
+    for e in v1.link_edges:
+        if e in v2.link_edges:
+            return e
+    return None
+
 
 # all functions below this line were adapted from code by Patrick Moore
 # https://github.com/patmo141/bmesh_utilities

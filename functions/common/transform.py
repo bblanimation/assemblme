@@ -67,6 +67,12 @@ def parent_clear(objs, apply_transform:bool=True):
             obj.parent = None
 
 
+def children_clear(parent:Object, apply_transform:bool=True):
+    """clear all children of an object"""
+    for obj in parent.children:
+        parent_clear(obj, apply_transform=apply_transform)
+
+
 def get_bounds(obj:Object):
     """ brute force method for obtaining object bounding box """
     # initialize min and max

@@ -190,7 +190,7 @@ def make_circle(radius:float, vertices:int, co:tuple=Vector((0, 0, 0)), fill:boo
     return bme
 
 
-def make_cylinder(radius:float, height:float, vertices:int, co:Vector=Vector((0,0,0)), bot_face:bool=True, top_face:bool=True, flip_normals:bool=False, seams:bool=True, bme:bmesh=None):
+def make_cylinder(radius:float, height:float, vertices:int, co:Vector=Vector((0,0,0)), bot_face:bool=True, top_face:bool=True, flip_normals:bool=False, smooth:bool=True, seams:bool=True, bme:bmesh=None):
     """
     create a cylinder with bmesh
 
@@ -234,14 +234,17 @@ def make_cylinder(radius:float, height:float, vertices:int, co:Vector=Vector((0,
     #     bme.edges.new((top_verts[0], bot_verts[0])).seam = True
 
     # create faces on the sides
-    _, side_faces = connect_circles(top_verts if flip_normals else bot_verts, bot_verts if flip_normals else top_verts, bme)
-    smooth_bm_faces(side_faces)
+    _, created_faces = connect_circles(top_verts if flip_normals else bot_verts, bot_verts if flip_normals else top_verts, bme)
 
     # create top and bottom faces
     if top_face:
-        bme.faces.new(top_verts if not flip_normals else top_verts[::-1])
+        created_faces.append(bme.faces.new(top_verts if not flip_normals else top_verts[::-1]))
     if bot_face:
-        bme.faces.new(bot_verts[::-1] if not flip_normals else bot_verts)
+        created_faces.append(bme.faces.new(bot_verts[::-1] if not flip_normals else bot_verts))
+
+    # smooth faces
+    if smooth:
+        smooth_bm_faces(created_faces)
 
     # return bme & dictionary with lists of top and bottom vertices
     return bme, {"bottom":bot_verts[::-1], "top":top_verts}
@@ -274,9 +277,9 @@ def make_tube(radius:float, height:float, thickness:float, vertices:int, co:Vect
     bme, inner_verts = make_cylinder(radius, height, vertices, co=co, bot_face=False, top_face=False, flip_normals=not flip_normals, bme=bme)
     bme, outer_verts = make_cylinder(radius + thickness, height, vertices, co=co, bot_face=False, top_face=False, flip_normals=flip_normals, bme=bme)
     if top_face:
-        connect_circles(outer_verts["top"], inner_verts["top"], bme, flip_normals=flip_normals, select=False)
+        connect_circles(outer_verts["top"], inner_verts["top"], bme, flip_normals=flip_normals)
     if bot_face:
-        connect_circles(outer_verts["bottom"], inner_verts["bottom"], bme, flip_normals=flip_normals, select=False)
+        connect_circles(outer_verts["bottom"], inner_verts["bottom"], bme, flip_normals=flip_normals)
     if bot_face_inner:
         bme.faces.new(inner_verts["bottom"])
     if top_face_inner:

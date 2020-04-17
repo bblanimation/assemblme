@@ -37,23 +37,23 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
     def modal(self, context, event):
         """ runs as long as visualizer is active """
-        if event.type in {"ESC"}:
-            self.full_disable(context)
-            return{"CANCELLED"}
-
-        if event.type == "TIMER":
-            if context.scene.aglist_index == -1:
+        try:
+            if event.type in {"ESC"}:
                 self.full_disable(context)
-                return{"CANCELLED"}
-            scn, ag = get_active_context_info()
-            if ag.visualizer_needs_update:
-                self.create_vis_anim()
-            try:
+                return {"CANCELLED"}
+
+            if event.type == "TIMER":
+                if context.scene.aglist_index == -1:
+                    self.full_disable(context)
+                    return {"CANCELLED"}
+                scn, ag = get_active_context_info()
+                if ag.visualizer_needs_update:
+                    self.create_vis_anim()
                 v_obj = self.visualizer_obj
                 # if the visualizer is has been disabled, stop running modal
                 if not self.enabled():
                     self.full_disable(context)
-                    return{"CANCELLED"}
+                    return {"CANCELLED"}
                 # if new build animation created, update visualizer animation
                 if self.min_and_max != [ag.obj_min_loc, ag.obj_max_loc]:
                     self.min_and_max = [ag.obj_min_loc, ag.obj_max_loc]
@@ -69,10 +69,10 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
                 if scn.assemblme.visualizer_scale != self.visualizer_scale or scn.assemblme.visualizer_res != self.visualizer_res:
                     self.load_lattice_mesh(context)
                     v_obj.data.update()
-            except:
-                assemblme_handle_exception()
-
-        return{"PASS_THROUGH"}
+            return {"PASS_THROUGH"}
+        except:
+            assemblme_handle_exception()
+            return {"CANCELLED"}
 
     def execute(self, context):
         try:

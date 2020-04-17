@@ -53,7 +53,7 @@ def stopwatch(text:str, start_time:float, end_time:float=None, precision:int=5, 
     return time.time()  # TIP: store this to variable and call 'stopwatch' again later with this as start time
 
 
-def update_progress_bars(print_status:bool, cursor_status:bool, cur_percent:float, old_percent:float, status_type:str, end:bool=False):
+def update_progress_bars(cur_percent:float, old_percent:float, status_type:str, print_status:bool=True, cursor_status:bool=True, end:bool=False):
     """ print updated progress bar and update progress cursor """
     if print_status and cur_percent - old_percent > 0.001 and (cur_percent < 1 or end):
         update_progress(status_type, cur_percent)

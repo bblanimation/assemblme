@@ -20,7 +20,6 @@ from .bmesh_generators import *
 from .bmesh_utils import *
 # try:
 #     from .color_effects import *
-#     from .color_effects_cuda import *
 #     from .data_types import *
 # except ModuleNotFoundError:
 #     print("'numba' python module not installed")

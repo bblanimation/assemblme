@@ -48,21 +48,23 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
         try:
             scn = bpy.context.scene
             path = get_presets_filepath()
-            filenames = get_filenames(path)
+            filenames = get_preset_filenames(path)
             selected_preset = "None"
             if self.action == "CREATE":
-                if scn.assemblme.new_preset_name + ".py" in filenames:
+                new_preset_name = make_bash_safe(scn.assemblme.new_preset_name).lower()
+                if new_preset_name + ".py" in filenames:
                     self.report({"WARNING"}, "Preset already exists with this name. Try another name!")
                     return{"CANCELLED"}
                 # write new preset to file
-                self.write_new_preset(scn.assemblme.new_preset_name)
-                filenames.append(scn.assemblme.new_preset_name + ".py")
-                selected_preset = str(scn.assemblme.new_preset_name)
-                self.report({"INFO"}, "Successfully added new preset '" + scn.assemblme.new_preset_name + "'")
+                self.write_new_preset(new_preset_name)
+                filenames.append(new_preset_name + ".py")
+                selected_preset = str(new_preset_name)
+                self.report({"INFO"}, "Successfully added new preset '" + new_preset_name + "'")
                 scn.assemblme.new_preset_name = ""
             elif self.action == "REMOVE":
+                anim_preset_to_delete = make_bash_safe(scn.anim_preset_to_delete).lower()
                 backup_path = os.path.join(path, "backups")
-                filename = scn.anim_preset_to_delete + ".py"
+                filename = anim_preset_to_delete + ".py"
                 filepath = os.path.join(path, filename)
                 backup_filepath = os.path.join(backup_path, filename)
                 if os.path.isfile(filepath):
@@ -71,10 +73,10 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                     if os.path.isfile(backup_filepath):
                         os.remove(backup_filepath)
                     os.rename(filepath, backup_filepath)
-                    filenames.remove(scn.anim_preset_to_delete + ".py")
-                    self.report({"INFO"}, "Successfully removed preset '" + scn.anim_preset_to_delete + "'")
+                    filenames.remove(anim_preset_to_delete + ".py")
+                    self.report({"INFO"}, "Successfully removed preset '" + anim_preset_to_delete + "'")
                 else:
-                    self.report({"WARNING"}, "Preset '" + scn.anim_preset_to_delete + "' does not exist.")
+                    self.report({"WARNING"}, "Preset '" + anim_preset_to_delete + "' does not exist.")
                     return{"CANCELLED"}
 
             preset_names = get_preset_tuples(filenames=filenames)

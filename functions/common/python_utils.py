@@ -21,6 +21,8 @@ import itertools
 import operator
 import hashlib
 import re
+import os
+import subprocess
 import sys
 import zlib
 import binascii
@@ -190,6 +192,31 @@ def confirm_iter(object):
 def camel_to_snake_case(str):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', str)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def safe_execute(default, exception, function, *args):
+    try:
+        return function(*args)
+    except exception:
+        return default
+
+
+def get_blend_python_path():
+    from os.path import join
+    python_dir = join(os.__file__.split("lib" + os.sep)[0], "bin")
+    python_name = next((f for f in os.listdir(python_dir) if f.startswith("python")), None)
+    assert python_name is not None
+    return join(python_dir, python_name)
+
+
+def install_package(package_name):
+    python_path = get_blend_python_path()
+    subprocess.call([python_path, "-m", "pip", "install", "--user", package_name])
+
+
+def uninstall_package(package_name):
+    python_path = get_blend_python_path()
+    subprocess.call([python_path, "-m", "pip", "uninstall", "-y", package_name])
 
 
 class Suppressor(object):

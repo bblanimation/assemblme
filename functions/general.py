@@ -89,9 +89,9 @@ def get_anim_length(ag, objects_to_move, list_z_values, layer_height, inverted_b
     return (num_layers - 1) * get_build_speed(ag) + get_object_velocity(ag) + 1
 
 
-def get_filenames(dir):
+def get_preset_filenames(dir):
     """ list files in the given directory """
-    return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and not f.startswith(".")]
+    return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and not f.startswith(".") and f.islower()]
 
 
 def get_presets_filepath():
@@ -108,17 +108,17 @@ def get_preset_tuples(filenames=None, transfer_defaults=False):
         if transfer_defaults:
             transfer_defaults_to_preset_folder(path)
         # get list of filenames in presets directory
-        filenames = get_filenames(path)
+        filenames = get_preset_filenames(path)
     # refresh preset names
     filenames.sort()
-    preset_names = [(filenames[i][:-3], filenames[i][:-3], "Select this preset!") for i in range(len(filenames))]
+    preset_names = [(filenames[i][:-3], filenames[i][:-3].replace("_", " ").capitalize(), "Select this preset!") for i in range(len(filenames))]
     preset_names.append(("None", "None", "Don't use a preset"))
     return preset_names
 
 
 def transfer_defaults_to_preset_folder(presets_path):
     default_presets_path = join(dirname(dirname(abspath(__file__))), "lib", "default_presets")
-    filenames = get_filenames(default_presets_path)
+    filenames = get_preset_filenames(default_presets_path)
     if not os.path.exists(presets_path):
         os.mkdir(presets_path)
     for fn in filenames:
