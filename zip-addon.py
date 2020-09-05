@@ -103,21 +103,21 @@ def main():
     branch_name = parse_git_files_for_branch()
     demo_version = branch_name == "demo"
     new_dir_name = current_dir_name
-    if addon_version:
-        new_dir_name += "_v" + addon_version.replace(", ", "-")
+    assert addon_version != "" and isinstance(addon_version, str)
+    new_dir_name += "_v" + addon_version.replace(", ", "-")
     if demo_version:
         new_dir_name += "_demo"
     elif args.alpha:
         new_dir_name += "_alpha"
     elif args.beta:
         new_dir_name += "_beta"
+    # clear out old destination directories
+    new_dir_path = join(parent_dir_path, new_dir_name)
+    if exists(new_dir_path):
+        shutil.rmtree(new_dir_path)
+    if exists(new_dir_path + ".zip"):
+        os.remove(new_dir_path + ".zip")
     # make the destination directory
-    new_dir_name_start = new_dir_name
-    for i in range(1, 10):
-        new_dir_path = join(parent_dir_path, new_dir_name)
-        if not exists(new_dir_path) and not exists(new_dir_path + ".zip"):
-            break
-        new_dir_name = new_dir_name_start + str(i)
     copy_directory(current_dir_path, new_dir_path)
     try:
         # make sure the directory contents copied successfully (just checks for the init file)
@@ -135,7 +135,7 @@ def main():
         # remove unnecessary files/directories
         if demo_version:
             os.remove(join(new_dir_path, "lib", "{}_purchase_verification.txt".format(current_dir_name)))
-        for filename in ("developer-notes.md", "zip_addon.py", "error_log", "{}_updater".format(current_dir_name)):
+        for filename in ("developer-notes.md", "zip_addon.py", "error_log", ".git", ".github", "__pycache__", "{}_updater".format(current_dir_name)):
             filepath = join(new_dir_path, filename)
             if not exists(filepath):
                 continue
