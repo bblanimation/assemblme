@@ -49,11 +49,11 @@ def edit_bl_info_warning_message(filepath, warning_msg=""):
         data = f.readlines()
 
     # make adjustments
-    for line in data:
+    for i, line in enumerate(data):
         if "\"warning\"" in line:
             start_idx = line.find(": \"")
             end_idx = line.find("\",")
-            line = line.replace(line[start_idx + 2:end_idx + 2], "\"" + warning_msg + "\",")
+            data[i] = line.replace(line[start_idx + 2:end_idx + 2], "\"" + warning_msg + "\",")
             break
 
     # write lines
