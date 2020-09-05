@@ -28,6 +28,34 @@ from mathutils import Vector, Euler
 # Module imports
 from ..functions import *
 
+# updater import, import safely
+# Prevents popups for users with invalid python installs e.g. missing libraries
+try:
+	from ..addon_updater import Updater as updater
+except Exception as e:
+	print("ERROR INITIALIZING UPDATER")
+	print(str(e))
+	class Singleton_updater_none(object):
+		def __init__(self):
+			self.addon = None
+			self.verbose = False
+			self.invalidupdater = True # used to distinguish bad install
+			self.error = None
+			self.error_msg = None
+			self.async_checking = None
+		def clear_state(self):
+			self.addon = None
+			self.verbose = False
+			self.invalidupdater = True
+			self.error = None
+			self.error_msg = None
+			self.async_checking = None
+		def run_update(self): pass
+		def check_for_update(self): pass
+	updater = Singleton_updater_none()
+	updater.error = "Error initializing updater module"
+	updater.error_msg = str(e)
+
 
 @persistent
 def convert_velocity_value(scn):
