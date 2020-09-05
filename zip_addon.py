@@ -15,11 +15,16 @@ import zipfile
 # initialize arguments
 parser = argparse.ArgumentParser(description="Zip addon")
 parser.add_argument(
+    "--alpha",
+    help="Bundle as alpha version",
+    dest="alpha",
+    action="store_true",
+)
+parser.add_argument(
     "--beta",
     help="Bundle as beta version",
     dest="beta",
     action="store_true",
-    # action="store_const", const=sum, default=max,
 )
 args = parser.parse_args()
 
@@ -102,6 +107,8 @@ def main():
         new_dir_name += "_v" + addon_version.replace(", ", "-")
     if demo_version:
         new_dir_name += "_demo"
+    elif args.alpha:
+        new_dir_name += "_alpha"
     elif args.beta:
         new_dir_name += "_beta"
     # make the destination directory
@@ -119,6 +126,8 @@ def main():
         # adjust bl_info for beta
         if demo_version:
             edit_bl_info_warning_message(new_init_filepath, "Demo Version - Full version available at the Blender Market!")
+        elif args.alpha:
+            edit_bl_info_warning_message(new_init_filepath, "Unstable Alpha release - update to official release when available")
         elif args.beta:
             edit_bl_info_warning_message(new_init_filepath, "Unstable Beta release - update to official release when available")
         else:
@@ -136,6 +145,7 @@ def main():
                 shutil.rmtree(filepath)
         # zip new directory
         shutil.make_archive(new_dir_path, "zip", new_dir_path)
+        print("Created new archive: '" + split(new_dir_path)[-1] + "'")
     finally:
         # remove new directory
         shutil.rmtree(new_dir_path)
