@@ -118,3 +118,16 @@ def update_anim_preset(self, context):
     ag.cur_preset = scn.anim_preset
 
     return None
+
+
+def ag_update(self, context):
+    """ select and make source or LEGO model active if scn.aglist_index changes """
+    scn = context.scene
+    obj = context.view_layer.objects.active if b280() else scn.objects.active
+    if scn.aglist_index != -1:
+        ag = scn.aglist[scn.aglist_index]
+        scn.anim_preset = ag.cur_preset
+        coll = ag.collection
+        if coll is not None and len(coll.objects) > 0:
+            select(list(coll.objects), active=coll.objects[0], only=True)
+            scn.assemblme.last_active_object_name = obj.name

@@ -38,29 +38,28 @@ from bpy.types import Scene, Keyframe
 from bpy.utils import register_class, unregister_class
 
 # Addon import
-from .ui import *
-from .functions import *
-from .operators.presets import *
+from .functions import common, app_handlers, general, property_callbacks, timers
 from .lib.classes_to_register import classes
-from .lib.property_groups import *
+from .lib import property_groups
 from . import addon_updater_ops
 
 
 def register():
     for cls in classes:
-        make_annotations(cls)
+        common.make_annotations(cls)
         register_class(cls)
 
     bpy.props.assemblme_module_name = __name__
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
+    bpy.props.assemblme_validated = True
 
-    preset_names = get_preset_tuples(transfer_defaults=not bpy.app.background)
+    preset_names = general.get_preset_tuples(transfer_defaults=not bpy.app.background)
     Scene.anim_preset = EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
         # items=[("None", "None", "")],
         items=preset_names,
-        update=update_anim_preset,
+        update=property_callbacks.update_anim_preset,
         default="None",
     )
     Scene.anim_preset_to_delete = EnumProperty(
@@ -71,20 +70,21 @@ def register():
         default="None",
     )
 
-    Scene.assemblme = PointerProperty(type=AssemblMeProperties)
+    Scene.assemblme = PointerProperty(type=property_groups.AssemblMeProperties)
 
     # list properties
-    Scene.aglist = CollectionProperty(type=AnimatedCollectionProperties)
-    Scene.aglist_index = IntProperty(default=-1, update=ag_update)
+    Scene.aglist = CollectionProperty(type=property_groups.AnimatedCollectionProperties)
+    Scene.aglist_index = IntProperty(default=-1, update=property_callbacks.ag_update)
 
     # register app handlers
     if b280():
-        bpy.app.handlers.load_post.append(register_assemblme_timers)
-        bpy.app.timers.register(handle_selections)
+        bpy.app.handlers.load_post.append(timers.register_assemblme_timers)
+        bpy.app.timers.register(timers.handle_selections)
     else:
-        bpy.app.handlers.scene_update_pre.append(handle_selections)
-    bpy.app.handlers.load_post.append(convert_velocity_value)
-    bpy.app.handlers.load_post.append(handle_upconversion)
+        bpy.app.handlers.scene_update_pre.append(app_handlers.handle_selections)
+    bpy.app.handlers.load_post.append(app_handlers.convert_velocity_value)
+    bpy.app.handlers.load_pre.append(app_handlers.validate_assemblme)
+    bpy.app.handlers.load_post.append(app_handlers.handle_upconversion)
 
     # addon updater code and configurations
     addon_updater_ops.register(bl_info)
@@ -95,14 +95,15 @@ def unregister():
     addon_updater_ops.unregister()
 
     # unregister app handlers
-    bpy.app.handlers.load_post.remove(handle_upconversion)
-    bpy.app.handlers.load_post.remove(convert_velocity_value)
+    bpy.app.handlers.load_post.remove(app_handlers.handle_upconversion)
+    bpy.app.handlers.load_pre.remove(app_handlers.validate_assemblme)
+    bpy.app.handlers.load_post.remove(app_handlers.convert_velocity_value)
     if b280():
-        if bpy.app.timers.is_registered(handle_selections):
-            bpy.app.timers.unregister(handle_selections)
-        bpy.app.handlers.load_post.remove(register_assemblme_timers)
+        if bpy.app.timers.is_registered(timers.handle_selections):
+            bpy.app.timers.unregister(timers.handle_selections)
+        bpy.app.handlers.load_post.remove(timers.register_assemblme_timers)
     else:
-        bpy.app.handlers.scene_update_pre.remove(handle_selections)
+        bpy.app.handlers.scene_update_pre.remove(app_handlers.handle_selections)
 
     del Scene.aglist_index
     del Scene.aglist
@@ -112,6 +113,7 @@ def unregister():
     del Scene.anim_preset_to_delete
     del Scene.anim_preset
 
+    del bpy.props.assemblme_validated
     del bpy.props.assemblme_version
     del bpy.props.assemblme_module_name
 

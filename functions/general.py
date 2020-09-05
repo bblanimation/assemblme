@@ -362,19 +362,6 @@ def get_anim_objects(ag, mesh_only:bool=None):
     return [obj for obj in ag.collection.all_objects if obj.type == "MESH" or not mesh_only]
 
 
-def ag_update(self, context):
-    """ select and make source or LEGO model active if scn.aglist_index changes """
-    scn = bpy.context.scene
-    obj = bpy.context.view_layer.objects.active if b280() else scn.objects.active
-    if scn.aglist_index != -1:
-        ag = scn.aglist[scn.aglist_index]
-        scn.anim_preset = ag.cur_preset
-        coll = ag.collection
-        if coll is not None and len(coll.objects) > 0:
-            select(list(coll.objects), active=coll.objects[0], only=True)
-            scn.assemblme.last_active_object_name = obj.name
-
-
 def match_properties(ag_new, ag_old):
     ag_new.build_speed = ag_old.build_speed
     ag_new.velocity = ag_old.velocity

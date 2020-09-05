@@ -17,6 +17,8 @@
 
 # System imports
 import math
+from os.path import join, exists, split
+import codecs
 
 # Blender imports
 import bpy
@@ -37,6 +39,25 @@ def convert_velocity_value(scn):
             target_num_frames = 51 - old_v
             ag.velocity = 10 - (math.log(target_num_frames, 2))
             ag.object_velocity = -1
+
+
+@persistent
+def validate_assemblme(dummy):
+    validated = False
+    validation_file = join(get_addon_directory(), "lib", codecs.encode("nffrzoyzr_chepunfr_irevsvpngvba.gkg", "rot13"))
+    if exists(validation_file):
+        verification_str = "Thank you for supporting my work and ongoing development by purchasing BrickSculpt!\n"
+        with open(validation_file) as f:
+            validated = verification_str == codecs.encode(f.readline(), "rot13")
+    if not validated:
+        res = updater.run_update(
+    		force=False,
+			revert_tag="demo",
+    		# callback=post_update_callback,
+    		clean=False,
+        )
+        folderpath, foldername = split(get_addon_directory())
+        bpy.props.assemblme_validated = False
 
 
 @persistent
