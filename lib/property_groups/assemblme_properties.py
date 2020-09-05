@@ -48,6 +48,7 @@ class AssemblMeProperties(bpy.types.PropertyGroup):
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
-        soft_min=0.05, soft_max=1,
+        min=0.001, soft_min=0.05,
+        soft_max=1,
         default=0.25,
     )

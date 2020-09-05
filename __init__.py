@@ -34,7 +34,7 @@ import os
 # Blender imports
 import bpy
 from bpy.props import *
-from bpy.types import Scene
+from bpy.types import Scene, Keyframe
 from bpy.utils import register_class, unregister_class
 
 # Addon import
