@@ -22,6 +22,7 @@ bl_info = {
     "blender"     : (2, 82, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
+    "warning"     : "",
     "wiki_url"    : "https://www.blendermarket.com/products/assemblme",
     "doc_url"     : "https://www.blendermarket.com/products/assemblme",  # 2.83+
     "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
