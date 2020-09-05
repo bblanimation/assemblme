@@ -147,7 +147,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
         # make sure no objects in this collection are part of another AssemblMe animation
         for i in range(len(scn.aglist)):
             c = scn.aglist[i].collection
-            if i == scn.aglist_index or not scn.aglist[i].animated or c.name == ag.collection.name:
+            if i == scn.aglist_index or not scn.aglist[i].animated or c is None or c.name == ag.collection.name:
                 continue
             for obj in self.objects_to_move:
                 users_collection = obj.users_collection if b280() else obj.users_group
