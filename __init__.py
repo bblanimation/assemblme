@@ -30,6 +30,7 @@ bl_info = {
 
 # System imports
 import os
+import getpass
 
 # Blender imports
 import bpy
@@ -51,6 +52,7 @@ def register():
 
     bpy.props.assemblme_module_name = __name__
     bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
+    bpy.props.assemblme_developer_mode = getpass.getuser().startswith("cgear") and True
     bpy.props.assemblme_validated = True
 
     preset_names = general.get_preset_tuples(transfer_defaults=not bpy.app.background)
@@ -107,13 +109,12 @@ def unregister():
 
     del Scene.aglist_index
     del Scene.aglist
-
     del Scene.assemblme
-
     del Scene.anim_preset_to_delete
     del Scene.anim_preset
 
     del bpy.props.assemblme_validated
+    del bpy.props.assemblme_developer_mode
     del bpy.props.assemblme_version
     del bpy.props.assemblme_module_name
 
