@@ -79,7 +79,7 @@ def register():
     Scene.aglist_index = IntProperty(default=-1, update=property_callbacks.ag_update)
 
     # register app handlers
-    if b280():
+    if common.b280():
         bpy.app.handlers.load_post.append(timers.register_assemblme_timers)
         bpy.app.timers.register(timers.handle_selections)
     else:
@@ -100,7 +100,7 @@ def unregister():
     bpy.app.handlers.load_post.remove(app_handlers.handle_upconversion)
     # bpy.app.handlers.load_pre.remove(app_handlers.validate_assemblme)
     bpy.app.handlers.load_post.remove(app_handlers.convert_velocity_value)
-    if b280():
+    if common.b280():
         if bpy.app.timers.is_registered(timers.handle_selections):
             bpy.app.timers.unregister(timers.handle_selections)
         bpy.app.handlers.load_post.remove(timers.register_assemblme_timers)
