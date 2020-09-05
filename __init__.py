@@ -83,7 +83,7 @@ def register():
     else:
         bpy.app.handlers.scene_update_pre.append(app_handlers.handle_selections)
     bpy.app.handlers.load_post.append(app_handlers.convert_velocity_value)
-    bpy.app.handlers.load_pre.append(app_handlers.validate_assemblme)
+    # bpy.app.handlers.load_pre.append(app_handlers.validate_assemblme)
     bpy.app.handlers.load_post.append(app_handlers.handle_upconversion)
 
     # addon updater code and configurations
@@ -96,7 +96,7 @@ def unregister():
 
     # unregister app handlers
     bpy.app.handlers.load_post.remove(app_handlers.handle_upconversion)
-    bpy.app.handlers.load_pre.remove(app_handlers.validate_assemblme)
+    # bpy.app.handlers.load_pre.remove(app_handlers.validate_assemblme)
     bpy.app.handlers.load_post.remove(app_handlers.convert_velocity_value)
     if b280():
         if bpy.app.timers.is_registered(timers.handle_selections):
