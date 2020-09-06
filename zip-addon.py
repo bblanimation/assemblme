@@ -144,7 +144,7 @@ def main():
             elif isdir(filepath):
                 shutil.rmtree(filepath)
         # zip new directory
-        shutil.make_archive(new_dir_path, "zip", new_dir_path)
+        shutil.make_archive(new_dir_path, "zip", parent_dir_path, new_dir_name)
         print("Created new archive: '" + split(new_dir_path)[-1] + "'")
     finally:
         # remove new directory
