@@ -18,8 +18,8 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 4, 0),
-    "blender"     : (2, 83, 0),
+    "version"     : (1, 5, 0),
+    "blender"     : (2, 93, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     "warning"     : "",
@@ -43,7 +43,6 @@ from bpy.utils import register_class, unregister_class
 from .functions import common, app_handlers, general, property_callbacks, timers
 from .lib.classes_to_register import classes
 from .lib import property_groups
-from . import addon_updater_ops
 
 
 def register():
@@ -78,14 +77,8 @@ def register():
     # bpy.app.handlers.load_pre.append(app_handlers.validate_assemblme)
     bpy.app.handlers.load_post.append(app_handlers.handle_upconversion)
 
-    # addon updater code and configurations
-    addon_updater_ops.register(bl_info)
-
 
 def unregister():
-    # addon updater unregister
-    addon_updater_ops.unregister()
-
     # unregister app handlers
     bpy.app.handlers.load_post.remove(app_handlers.handle_upconversion)
     # bpy.app.handlers.load_pre.remove(app_handlers.validate_assemblme)
