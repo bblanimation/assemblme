@@ -98,21 +98,20 @@ def get_presets_filepath():
     return os.path.abspath(os.path.join(get_addon_directory(), "..", "..", "presets", "assemblme"))
 
 
-def get_preset_tuples(filenames=None, transfer_defaults=False):
-    if not filenames:
-        # initialize presets path
-        path = get_presets_filepath()
-        # set up presets folder and transfer default presets
-        if not os.path.exists(path):
-            os.makedirs(path)
-        if transfer_defaults:
-            transfer_defaults_to_preset_folder(path)
-        # get list of filenames in presets directory
-        filenames = get_preset_filenames(path)
+def get_preset_tuples(self, context):
+    # initialize presets path
+    path = get_presets_filepath()
+    # set up presets folder and transfer default presets
+    if not os.path.exists(path):
+        os.makedirs(path)
+    if not bpy.app.background:
+        transfer_defaults_to_preset_folder(path)
+    # get list of filenames in presets directory
+    filenames = get_preset_filenames(path)
     # refresh preset names
     filenames.sort()
-    preset_names = [(filenames[i][:-3], filenames[i][:-3].replace("_", " ").capitalize(), "Select this preset!") for i in range(len(filenames))]
-    preset_names.append(("None", "None", "Don't use a preset"))
+    preset_names = [("None", "None", "Don't use a preset")]
+    preset_names += [(filenames[i][:-3], filenames[i][:-3].replace("_", " ").capitalize(), "Select this preset!") for i in range(len(filenames))]
     return preset_names
 
 

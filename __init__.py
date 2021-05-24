@@ -56,21 +56,10 @@ def register():
     bpy.props.assemblme_developer_mode = getpass.getuser().startswith("cgear") and True
     bpy.props.assemblme_validated = True
 
-    preset_names = general.get_preset_tuples(transfer_defaults=not bpy.app.background)
-    Scene.anim_preset = EnumProperty(
-        name="Presets",
-        description="Stored AssemblMe presets",
-        # items=[("None", "None", "")],
-        items=preset_names,
-        update=property_callbacks.update_anim_preset,
-        default="None",
-    )
     Scene.anim_preset_to_delete = EnumProperty(
         name="Preset to Delete",
         description="Another list of stored AssemblMe presets",
-        # items=[("None", "None", "")],
-        items=preset_names,
-        default="None",
+        items=general.get_preset_tuples,
     )
 
     Scene.assemblme = PointerProperty(type=property_groups.AssemblMeProperties)
@@ -112,7 +101,7 @@ def unregister():
     del Scene.aglist
     del Scene.assemblme
     del Scene.anim_preset_to_delete
-    del Scene.anim_preset
+    # del Scene.anim_preset
 
     del bpy.props.assemblme_validated
     del bpy.props.assemblme_developer_mode

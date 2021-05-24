@@ -60,6 +60,7 @@ def collection_update(self, context):
 
 def set_meshes_only(self, context):
     scn, ag = get_active_context_info()
+    clear_preset(self, context)
     objs_to_clear = []
     if ag.collection is not None and ag.mesh_only:
         objs_to_clear = [obj for obj in get_anim_objects(ag, mesh_only=False) if obj.type != "MESH"]
@@ -73,49 +74,39 @@ def set_meshes_only(self, context):
         scn.frame_set(orig_frame)
 
 
+def clear_preset(self, context):
+    # scn, ag = get_active_context_info()
+    # ag.anim_preset = "None"
+    pass
+
+
 def handle_outdated_preset(self, context):
     scn, ag = get_active_context_info()
+    clear_preset(self, context)
     if not ag.build_type.isupper():
         ag.build_type = str(ag.build_type).upper()
 
 
 def update_anim_preset(self, context):
-    scn = bpy.context.scene
-    if scn.anim_preset != "None":
+    scn, ag = get_active_context_info()
+    if ag.anim_preset != "None":
         import importlib.util
-        path_to_file = os.path.join(get_presets_filepath(), scn.anim_preset + ".py")
+        path_to_file = os.path.join(get_presets_filepath(), ag.anim_preset + ".py")
         if os.path.isfile(path_to_file):
-            spec = importlib.util.spec_from_file_location(scn.anim_preset + ".py", path_to_file)
+            spec = importlib.util.spec_from_file_location(ag.anim_preset + ".py", path_to_file)
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
             foo.execute()
         else:
-            bad_preset = str(scn.anim_preset)
+            bad_preset = str(ag.anim_preset)
             if bad_preset in get_default_preset_names():
                 error_string = "Preset '%(bad_preset)s' could not be found. This is a default preset – try reinstalling the addon to restore it." % locals()
             else:
                 error_string = "Preset '%(bad_preset)s' could not be found." % locals()
             sys.stderr.write(error_string)
             print(error_string)
-            preset_names = get_preset_tuples()
-
-            bpy.types.Scene.anim_preset = EnumProperty(
-                name="Presets",
-                description="Stored AssemblMe presets",
-                items=preset_names,
-                update=update_anim_preset,
-                default="None",
-            )
-
-            bpy.types.Scene.anim_preset_to_delete = EnumProperty(
-                name="Preset to Delete",
-                description="Another list of stored AssemblMe presets",
-                items=preset_names,
-                default="None",
-            )
-            scn.anim_preset = "None"
-    scn, ag = get_active_context_info()
-    ag.cur_preset = scn.anim_preset
+            ag.anim_preset = "None"
+    ag.cur_preset = ag.anim_preset
 
     return None
 
@@ -126,7 +117,7 @@ def ag_update(self, context):
     obj = context.view_layer.objects.active if b280() else scn.objects.active
     if scn.aglist_index != -1:
         ag = scn.aglist[scn.aglist_index]
-        scn.anim_preset = ag.cur_preset
+        # ag.anim_preset = ag.cur_preset
         coll = ag.collection
         if coll is not None and len(coll.objects) > 0:
             select(list(coll.objects), active=coll.objects[0], only=True)

@@ -35,18 +35,20 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     ################################################
     # Blender Operator methods
 
-    # @classmethod
-    # def poll(cls, context):
-    #     """ ensures operator can execute (if not, returns false) """
-    #     if context.scene.assemblme.new_preset_name != "":
-    #         return True
-    #     return False
+    @classmethod
+    def poll(cls, context):
+        """ ensures operator can execute (if not, returns false) """
+        scn = context.scene
+        if len(scn.aglist) == 0:
+            return False
+        # return context.scene.assemblme.new_preset_name != ""
+        return True
 
     def execute(self, context):
         if not self.can_run():
             return{"CANCELLED"}
         try:
-            scn = bpy.context.scene
+            scn, ag = get_active_context_info()
             path = get_presets_filepath()
             filenames = get_preset_filenames(path)
             selected_preset = "None"
@@ -79,22 +81,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
                     self.report({"WARNING"}, "Preset '" + anim_preset_to_delete + "' does not exist.")
                     return{"CANCELLED"}
 
-            preset_names = get_preset_tuples(filenames=filenames)
-            bpy.types.Scene.anim_preset = EnumProperty(
-                name="Presets",
-                description="Stored AssemblMe presets",
-                items=preset_names,
-                update=update_anim_preset,
-                default="None",
-            )
-            scn.anim_preset = selected_preset
-
-            bpy.types.Scene.anim_preset_to_delete = EnumProperty(
-                name="Preset to Delete",
-                description="Another list of stored AssemblMe presets",
-                items=preset_names,
-                default="None",
-            )
+            ag.anim_preset = selected_preset
             scn.anim_preset_to_delete = selected_preset
         except:
             assemblme_handle_exception()

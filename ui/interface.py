@@ -171,7 +171,7 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.prop(scn, "anim_preset", text="Preset")
+        row.prop(ag, "anim_preset", text="Preset")
 
         box = layout.box()
 
@@ -183,7 +183,7 @@ class ASSEMBLME_PT_settings(Panel):
         col.prop(ag, "velocity")
 
         col = box.column(align=True)
-        if scn.anim_preset == "Follow Curve":
+        if ag.anim_preset == "Follow Curve":
             col.label(text="Path Object:")
             col.prop(ag, "path_object")
         else:

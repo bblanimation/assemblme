@@ -38,11 +38,19 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=collection_update,
     )
 
+    anim_preset = EnumProperty(
+        name="Presets",
+        description="Stored AssemblMe presets",
+        items=get_preset_tuples,
+        update=update_anim_preset,
+    )
+
     first_frame = IntProperty(
         name="Start",
         description="First frame of the (dis)assembly animation",
         min=0,
         max=500000,
+        update=clear_preset,
         default=1,
     )
     build_speed = IntProperty(
@@ -50,6 +58,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         description="Number of frames to skip forward between each object selection",
         min=1,
         soft_max=1000,
+        update=clear_preset,
         default=1,
     )
     velocity = FloatProperty(
@@ -59,6 +68,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=0.001,
         soft_max=100,
         step=1,
+        update=clear_preset,
         default=6,
     )
     object_velocity = FloatProperty(default=-1)
@@ -71,6 +81,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=0.0001,
         soft_max=1000,
         precision=4,
+        update=clear_preset,
         default=0.1,
     )
 
@@ -86,6 +97,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         unit="LENGTH",
         subtype="XYZ",
         size=3,
+        update=clear_preset,
         default=(0, 0, 10),
     )
     loc_random = FloatProperty(
@@ -94,6 +106,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=0,
         soft_max=10000,
         precision=1,
+        update=clear_preset,
         default=0,
     )
 
@@ -106,6 +119,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         soft_max=10000,
         step=20,
         size=3,
+        update=clear_preset,
         default=(0, 0, 0),
     )
     rot_random = FloatProperty(
@@ -114,6 +128,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=0,
         soft_max=10000,
         precision=1,
+        update=clear_preset,
         default=0,
     )
 
@@ -139,6 +154,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolation_modes,
+        update=clear_preset,
         default="LINEAR",
     )
 
@@ -146,6 +162,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolation_modes,
+        update=clear_preset,
         default="LINEAR",
     )
 
@@ -158,6 +175,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         min=-1.570796, max=1.570796,
         # min=-0.785398, max=0.785398,
         precision=1, step=20,
+        update=clear_preset,
         default=(0, 0),
     )
     orient_random = FloatProperty(
@@ -165,6 +183,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         description="Randomize orientation of the bounding box that selects objects for each frame",
         min=0, max=100,
         precision=1,
+        update=clear_preset,
         default=0,
     )
 
@@ -181,12 +200,14 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     inverted_build = BoolProperty(
         name="From other direction",
         description="Invert the animation so that the objects start (dis)assembling from the other side",
+        update=clear_preset,
         default=False,
     )
 
     use_global = BoolProperty(
         name="Use Global Orientation",
         description="Use global object orientation for creating animation (local orientation if disabled)",
+        update=clear_preset,
         default=False,
     )
     mesh_only = BoolProperty(
@@ -198,6 +219,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     skip_empty_selections = BoolProperty(
         name="Skip Empty Selections",
         description="Skip frames where nothing is selected if checked (Recommended)",
+        update=clear_preset,
         default=True,
     )
 
