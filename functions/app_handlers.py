@@ -50,13 +50,6 @@ def validate_assemblme(dummy):
         with open(validation_file) as f:
             validated = verification_str == codecs.encode(f.readline(), "rot13")
     if not validated:
-        res = updater.run_update(
-    		force=False,
-			revert_tag="demo",
-    		# callback=post_update_callback,
-    		clean=False,
-        )
-        folderpath, foldername = split(get_addon_directory())
         bpy.props.assemblme_validated = False
 
 
