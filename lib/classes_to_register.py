@@ -12,7 +12,6 @@ from .report_error import *
 from .property_groups import *
 from ..ui import *
 from ..operators import *
-from .. import addon_updater_ops
 
 
 classes = [
