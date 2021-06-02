@@ -27,25 +27,25 @@ props = bpy.props
 from ...functions import *
 
 class AnimatedCollectionProperties(bpy.types.PropertyGroup):
-    name = StringProperty(update=uniquify_name)
-    id = IntProperty()
-    idx = IntProperty()
+    name: StringProperty(update=uniquify_name)
+    id: IntProperty()
+    idx: IntProperty()
 
-    collection = PointerProperty(
+    collection: PointerProperty(
         type=bpy.types.Collection if b280() else bpy.types.Group,
         name="Object Collection" if b280() else "Object Group",
         description="Group of objects to animate",
         update=collection_update,
     )
 
-    anim_preset = EnumProperty(
+    anim_preset: EnumProperty(
         name="Presets",
         description="Stored AssemblMe presets",
         items=get_preset_tuples,
         update=update_anim_preset,
     )
 
-    first_frame = IntProperty(
+    first_frame: IntProperty(
         name="Start",
         description="First frame of the (dis)assembly animation",
         min=0,
@@ -53,7 +53,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=clear_preset,
         default=1,
     )
-    build_speed = IntProperty(
+    build_speed: IntProperty(
         name="Step",
         description="Number of frames to skip forward between each object selection",
         min=1,
@@ -61,7 +61,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=clear_preset,
         default=1,
     )
-    velocity = FloatProperty(
+    velocity: FloatProperty(
         name="Velocity",
         description="Speed of individual object layers (2^(10 - Velocity) = object animation duration in frames)",
         unit="VELOCITY",
@@ -71,9 +71,9 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=clear_preset,
         default=6,
     )
-    object_velocity = FloatProperty(default=-1)
+    object_velocity: FloatProperty(default=-1)
 
-    layer_height = FloatProperty(
+    layer_height: FloatProperty(
         name="Layer Height",
         description="Height of the bounding box that selects objects for each layer in animation",
         unit="LENGTH",
@@ -85,13 +85,13 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         default=0.1,
     )
 
-    path_object = StringProperty(
+    path_object: StringProperty(
         name="Path",
         description="Path object for animated objects to follow",
         default="",
     )
 
-    loc_offset = FloatVectorProperty(
+    loc_offset: FloatVectorProperty(
         name="Loc Offset",
         description="Move objects by this value",
         unit="LENGTH",
@@ -100,7 +100,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=clear_preset,
         default=(0, 0, 10),
     )
-    loc_random = FloatProperty(
+    loc_random: FloatProperty(
         name="Randomize",
         description="Randomize object location offset",
         min=0,
@@ -110,7 +110,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         default=0,
     )
 
-    rot_offset = FloatVectorProperty(
+    rot_offset: FloatVectorProperty(
         name="Z",
         description="Rotate objects by this z value (local space only)",
         unit="ROTATION",
@@ -122,7 +122,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=clear_preset,
         default=(0, 0, 0),
     )
-    rot_random = FloatProperty(
+    rot_random: FloatProperty(
         name="Randomize",
         description="Randomize object rotation offset",
         min=0,
@@ -150,7 +150,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     ]
 
 
-    loc_interpolation_mode = EnumProperty(
+    loc_interpolation_mode: EnumProperty(
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolation_modes,
@@ -158,7 +158,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         default="LINEAR",
     )
 
-    rot_interpolation_mode = EnumProperty(
+    rot_interpolation_mode: EnumProperty(
         name="Interpolation",
         description="Choose the interpolation mode for each objects' animation",
         items=interpolation_modes,
@@ -166,7 +166,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         default="LINEAR",
     )
 
-    orient = FloatVectorProperty(
+    orient: FloatVectorProperty(
         name="Orientation",
         description="Orientation of the bounding box that selects objects for each layer in animation",
         unit="ROTATION",
@@ -178,7 +178,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=clear_preset,
         default=(0, 0),
     )
-    orient_random = FloatProperty(
+    orient_random: FloatProperty(
         name="Random",
         description="Randomize orientation of the bounding box that selects objects for each frame",
         min=0, max=100,
@@ -187,7 +187,7 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         default=0,
     )
 
-    build_type = EnumProperty(
+    build_type: EnumProperty(
         name="Build Type",
         description="Choose whether to assemble or disassemble the objects",
         items=[
@@ -197,26 +197,26 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
         update=handle_outdated_preset,
         default="ASSEMBLE",
     )
-    inverted_build = BoolProperty(
+    inverted_build: BoolProperty(
         name="From other direction",
         description="Invert the animation so that the objects start (dis)assembling from the other side",
         update=clear_preset,
         default=False,
     )
 
-    use_global = BoolProperty(
+    use_global: BoolProperty(
         name="Use Global Orientation",
         description="Use global object orientation for creating animation (local orientation if disabled)",
         update=clear_preset,
         default=False,
     )
-    mesh_only = BoolProperty(
+    mesh_only: BoolProperty(
         name="Mesh Objects Only",
         description="Non-mesh objects will be excluded from the animation",
         update=set_meshes_only,
         default=True,
     )
-    skip_empty_selections = BoolProperty(
+    skip_empty_selections: BoolProperty(
         name="Skip Empty Selections",
         description="Skip frames where nothing is selected if checked (Recommended)",
         update=clear_preset,
@@ -224,45 +224,45 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     )
 
     # Session properties
-    obj_min_loc = FloatVectorProperty(subtype="XYZ", default=(0, 0, 0))
-    obj_max_loc = FloatVectorProperty(subtype="XYZ", default=(0, 0, 0))
+    obj_min_loc: FloatVectorProperty(subtype="XYZ", default=(0, 0, 0))
+    obj_max_loc: FloatVectorProperty(subtype="XYZ", default=(0, 0, 0))
 
-    animated = BoolProperty(default=False)
-    anim_bounds_start = IntProperty(default=-1)
-    anim_bounds_end = IntProperty(default=-1)
-    time_created = FloatProperty(default=float("inf"))
-    cur_preset = StringProperty(default="None")
+    animated: BoolProperty(default=False)
+    anim_bounds_start: IntProperty(default=-1)
+    anim_bounds_end: IntProperty(default=-1)
+    time_created: FloatProperty(default=float("inf"))
+    cur_preset: StringProperty(default="None")
 
-    frame_with_orig_loc = IntProperty(default=-1)
-    anim_length = IntProperty(default=0)
-    last_layer_velocity = IntProperty(default=-1)
-    visualizer_animated = BoolProperty(default=False)
-    visualizer_active = BoolProperty(default=False)
-    visualizer_needs_update = BoolProperty(default=False)
+    frame_with_orig_loc: IntProperty(default=-1)
+    anim_length: IntProperty(default=0)
+    last_layer_velocity: IntProperty(default=-1)
+    visualizer_animated: BoolProperty(default=False)
+    visualizer_active: BoolProperty(default=False)
+    visualizer_needs_update: BoolProperty(default=False)
 
-    last_active_object_name = StringProperty(default="")
-    active_user_index = IntProperty(default=0)
-    version = StringProperty(default="1.1.6")
+    last_active_object_name: StringProperty(default="")
+    active_user_index: IntProperty(default=0)
+    version: StringProperty(default="1.1.6")
 
     ### BACKWARDS COMPATIBILITY
     # v1.2
-    firstFrame = IntProperty()
-    buildSpeed = FloatProperty()
-    objectVelocity = FloatProperty()
-    layerHeight = FloatProperty()
-    pathObject = StringProperty()
-    locInterpolationMode = StringProperty(default="LINEAR")
-    rotInterpolationMode = StringProperty(default="LINEAR")
-    orientRandom = FloatProperty()
-    buildType = StringProperty(default="ASSEMBLE")
-    invertBuild = BoolProperty()
-    useGlobal = BoolProperty()
-    meshOnly = BoolProperty()
-    skipEmptySelections = BoolProperty()
-    frameWithOrigLoc = IntProperty()
-    animLength = IntProperty()
-    lastLayerVelocity = IntProperty()
-    visualizerAnimated = BoolProperty()
-    visualizerActive = BoolProperty()
-    lastActiveObjectName = StringProperty()
-    activeUserIndex = IntProperty()
+    firstFrame: IntProperty()
+    buildSpeed: FloatProperty()
+    objectVelocity: FloatProperty()
+    layerHeight: FloatProperty()
+    pathObject: StringProperty()
+    locInterpolationMode: StringProperty(default="LINEAR")
+    rotInterpolationMode: StringProperty(default="LINEAR")
+    orientRandom: FloatProperty()
+    buildType: StringProperty(default="ASSEMBLE")
+    invertBuild: BoolProperty()
+    useGlobal: BoolProperty()
+    meshOnly: BoolProperty()
+    skipEmptySelections: BoolProperty()
+    frameWithOrigLoc: IntProperty()
+    animLength: IntProperty()
+    lastLayerVelocity: IntProperty()
+    visualizerAnimated: BoolProperty()
+    visualizerActive: BoolProperty()
+    lastActiveObjectName: StringProperty()
+    activeUserIndex: IntProperty()

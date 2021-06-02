@@ -91,7 +91,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     ###################################################
     # class variables
 
-    action = EnumProperty(
+    action: EnumProperty(
         items=(
             ("CREATE", "Create", ""),
             ("REMOVE", "Remove", ""),

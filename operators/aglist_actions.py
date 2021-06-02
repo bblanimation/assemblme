@@ -32,7 +32,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
     bl_idname = "aglist.list_action"
     bl_label = "List Action"
 
-    action = EnumProperty(
+    action: EnumProperty(
         items=(
             ("UP", "Up", ""),
             ("DOWN", "Down", ""),

@@ -28,23 +28,23 @@ from ...functions import *
 
 
 class AssemblMeProperties(bpy.types.PropertyGroup):
-    copy_from_id = IntProperty(default=-1)
-    last_active_object_name = StringProperty(default="")
+    copy_from_id: IntProperty(default=-1)
+    last_active_object_name: StringProperty(default="")
 
-    new_preset_name = StringProperty(
+    new_preset_name: StringProperty(
         name="Name of New Preset",
         description="Full name of new custom preset",
         default="",
     )
 
-    visualizer_scale = FloatProperty(
+    visualizer_scale: FloatProperty(
         name="Scale",
         description="Scale of layer orientation visualizer",
         subtype="DISTANCE",
         soft_min=0.1, soft_max=16,
         default=10,
     )
-    visualizer_res = FloatProperty(
+    visualizer_res: FloatProperty(
         name="Resolution",
         description="Resolution of layer orientation visualizer",
         precision=2,
