@@ -19,12 +19,11 @@ bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
     "version"     : (1, 6, 0),
-    "blender"     : (2, 93, 0),
+    "blender"     : (3, 3, 1),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     "warning"     : "",
-    "wiki_url"    : "https://www.blendermarket.com/products/assemblme",
-    "doc_url"     : "https://www.blendermarket.com/products/assemblme",  # 2.83+
+    "doc_url"     : "https://www.blendermarket.com/products/assemblme",
     "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
     "category"    : "Animation",
 }

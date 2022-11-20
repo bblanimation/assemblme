@@ -52,17 +52,23 @@ def get_randomized_orient(orient, random_amount):
 
 def get_offset_location(ag, loc):
     """ returns randomized location offset """
-    X = loc.x + random.uniform(-ag.loc_random, ag.loc_random) + ag.loc_offset.x
-    Y = loc.y + random.uniform(-ag.loc_random, ag.loc_random) + ag.loc_offset.y
-    Z = loc.z + random.uniform(-ag.loc_random, ag.loc_random) + ag.loc_offset.z
+    loc_random = ag.loc_random
+    loc_offset = ag.loc_offset
+    sum_loc_offset = max(sum(loc_offset), 0.00001)
+    X = loc.x + random.uniform(-loc_random, loc_random) * (loc_offset.x / sum_loc_offset) + loc_offset.x
+    Y = loc.y + random.uniform(-loc_random, loc_random) * (loc_offset.y / sum_loc_offset) + loc_offset.y
+    Z = loc.z + random.uniform(-loc_random, loc_random) * (loc_offset.z / sum_loc_offset) + loc_offset.z
     return (X, Y, Z)
 
 
 def get_offset_rotation(ag, rot):
     """ returns randomized rotation offset """
-    x = rot.x + (random.uniform(-ag.rot_random, ag.rot_random) + ag.rot_offset.x)
-    y = rot.y + (random.uniform(-ag.rot_random, ag.rot_random) + ag.rot_offset.y)
-    z = rot.z + (random.uniform(-ag.rot_random, ag.rot_random) + ag.rot_offset.z)
+    rot_random = ag.rot_random
+    rot_offset = ag.rot_offset
+    sum_rot_offset = max(sum(rot_offset), 0.00001)
+    x = rot.x + random.uniform(-rot_random, rot_random) * (rot_offset.x / sum_rot_offset) + rot_offset.x
+    y = rot.y + random.uniform(-rot_random, rot_random) * (rot_offset.y / sum_rot_offset) + rot_offset.y
+    z = rot.z + random.uniform(-rot_random, rot_random) * (rot_offset.z / sum_rot_offset) + rot_offset.z
     return (x, y, z)
 
 
@@ -284,11 +290,13 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
         if len(new_selection) != 0:
             # insert location keyframes
             if insert_loc:
-                insert_keyframes(new_selection, "location", cur_frame)
+                loc_rand = random.uniform(-0.5, 0.5)
+                insert_keyframes(new_selection, "location", cur_frame + loc_rand)
                 kf_idx_loc -= inc
             # insert rotation keyframes
             if insert_rot:
-                insert_keyframes(new_selection, "rotation_euler", cur_frame)
+                rot_rand = random.uniform(-0.5, 0.5)
+                insert_keyframes(new_selection, "rotation_euler", cur_frame + rot_rand)
                 kf_idx_rot -= inc
 
             # step cur_frame backwards
@@ -301,7 +309,7 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
                         obj.matrix_world.translation = get_offset_location(ag, obj.matrix_world.translation)
                     else:
                         obj.location = get_offset_location(ag, obj.location)
-                insert_keyframes(new_selection, "location", cur_frame, if_needed=True)
+                insert_keyframes(new_selection, "location", cur_frame + loc_rand, if_needed=True)
             # rotate object and insert rotation keyframes
             if insert_rot:
                 for obj in new_selection:
@@ -319,7 +327,7 @@ def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpola
                     #     obj.matrix_local = mathutils_mult(z_mat, y_mat, x_mat, obj.matrix_local)
                     # else:
                     obj.rotation_euler = get_offset_rotation(ag, obj.rotation_euler)
-                insert_keyframes(new_selection, "rotation_euler", cur_frame, if_needed=True)
+                insert_keyframes(new_selection, "rotation_euler", cur_frame + rot_rand, if_needed=True)
 
             # step cur_frame forwards
             cur_frame += (velocity - get_build_speed(ag)) * mult
