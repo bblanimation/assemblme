@@ -30,7 +30,8 @@ from ..functions import *
 
 
 @persistent
-def convert_velocity_value(scn):
+def convert_velocity_value(dummy):
+    scn = bpy.context.scene
     if scn is None:
         return
     for ag in scn.aglist:
@@ -54,7 +55,8 @@ def validate_assemblme(dummy):
 
 
 @persistent
-def handle_upconversion(scn):
+def handle_upconversion(dummy):
+    scn = bpy.context.scene
     if scn is None:
         return
     # update storage scene name

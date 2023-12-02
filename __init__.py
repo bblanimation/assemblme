@@ -18,8 +18,8 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <chris@bblanimation.com>",
-    "version"     : (1, 6, 1),
-    "blender"     : (3, 3, 1),
+    "version"     : (1, 7, 0),
+    "blender"     : (4, 0, 1),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     "warning"     : "",

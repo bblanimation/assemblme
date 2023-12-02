@@ -2,7 +2,7 @@ import bpy
 def execute():
     scn = bpy.context.scene
     ag = scn.aglist[scn.aglist_index]
-    ag.build_speed = 5.0
+    ag.build_speed = 5
     ag.velocity = 5.0
     ag.loc_offset = (0, 0, 3)
     ag.loc_interpolation_mode = "BOUNCE"
