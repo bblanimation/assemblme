@@ -8,7 +8,7 @@ import shutil
 import argparse
 import zipfile
 
-# TO RUN: python zip_addon --beta --demo
+# TO RUN: python zip_addon [--beta] [--demo]
 # NOTE: only send the resulting zip file to verified customers
 
 
@@ -35,10 +35,10 @@ def copy_directory(src, dest):
         shutil.copytree(src, dest)
     # Directories are the same
     except shutil.Error as e:
-        print("Directory not copied. Error: {}".format(e))
+        print(f"Directory not copied. Error: {e}")
     # Any error saying that the directory doesn"t exist
     except OSError as e:
-        print("Directory not copied. Error: {}".format(e))
+        print(f"Directory not copied. Error: {e}")
 
 
 def zipdir(path, ziph):
@@ -58,7 +58,7 @@ def edit_bl_info_warning_message(filepath, warning_msg=""):
         if "\"warning\"" in line:
             start_idx = line.find(": \"")
             end_idx = line.find("\",")
-            data[i] = line.replace(line[start_idx + 2:end_idx + 2], "\"" + warning_msg + "\",")
+            data[i] = line.replace(line[start_idx + 2:end_idx + 2], f"\"{warning_msg}\",")
             break
 
     # write lines
@@ -101,7 +101,7 @@ def main():
     parent_dir_path, current_dir_name = split(current_dir_path)
     addon_version = parse_file_for_bl_info_version(join(current_dir_path, "__init__.py"))
     branch_name = parse_git_files_for_branch()
-    demo_version = branch_name == "demo"
+    demo_version = branch_name.startswith("demo")
     new_dir_name = current_dir_name
     assert addon_version != "" and isinstance(addon_version, str)
     new_dir_name += "_v" + addon_version.replace(", ", "-")
@@ -115,8 +115,8 @@ def main():
     new_dir_path = join(parent_dir_path, new_dir_name)
     if exists(new_dir_path):
         shutil.rmtree(new_dir_path)
-    if exists(new_dir_path + ".zip"):
-        os.remove(new_dir_path + ".zip")
+    if exists(f"{new_dir_path}.zip"):
+        os.remove(f"{new_dir_path}.zip")
     # make the destination directory
     copy_directory(current_dir_path, new_dir_path)
     try:
@@ -134,8 +134,8 @@ def main():
             edit_bl_info_warning_message(new_init_filepath, "")
         # remove unnecessary files/directories
         if demo_version:
-            os.remove(join(new_dir_path, "lib", "{}_purchase_verification.txt".format(current_dir_name)))
-        for filename in ("developer-notes.md", "zip_addon.py", "error_log", ".git", ".github", "__pycache__", "{}_updater".format(current_dir_name)):
+            os.remove(join(new_dir_path, "lib", f"{current_dir_name}_purchase_verification.txt"))
+        for filename in ("developer-notes.md", "zip-addon.py", "zip_addon.py", "error_log", ".git", ".gitignore", ".github", "__pycache__", f"{current_dir_name}_updater"):
             filepath = join(new_dir_path, filename)
             if not exists(filepath):
                 continue
@@ -145,7 +145,7 @@ def main():
                 shutil.rmtree(filepath)
         # zip new directory
         shutil.make_archive(new_dir_path, "zip", parent_dir_path, new_dir_name)
-        print("Created new archive: '" + split(new_dir_path)[-1] + "'")
+        print(f"Created new archive: '{split(new_dir_path)[-1]}'")
     finally:
         # remove new directory
         shutil.rmtree(new_dir_path)
