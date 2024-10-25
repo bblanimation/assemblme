@@ -26,7 +26,8 @@ from bpy.app.handlers import persistent
 from mathutils import Vector, Euler
 
 # Module imports
-from ..functions import *
+from .general import *
+from .common import *
 
 
 @persistent
