@@ -32,8 +32,8 @@ class AnimatedCollectionProperties(bpy.types.PropertyGroup):
     idx: IntProperty()
 
     collection: PointerProperty(
-        type=bpy.types.Collection if b280() else bpy.types.Group,
-        name="Object Collection" if b280() else "Object Group",
+        type=bpy.types.Collection,
+        name="Object Collection",
         description="Group of objects to animate",
         update=collection_update,
     )

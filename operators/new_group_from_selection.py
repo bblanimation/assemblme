@@ -27,7 +27,7 @@ from ..functions import *
 class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
     """Create new group/collection for animation containing selected objects"""
     bl_idname = "assemblme.new_group_from_selection"
-    bl_label = "New Collection" if b280() else "New Group"
+    bl_label = "New Collection"
     bl_options = {"REGISTER", "UNDO"}
 
     ################################################
@@ -46,13 +46,12 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn, ag = get_active_context_info()
-            collections = bpy.data.collections if b280() else bpy.data.groups
             # create new animated collection
             new_coll_name = "AssemblMe_{}_collection".format(ag.name)
-            overwrite_coll = collections.get(new_coll_name)
+            overwrite_coll = bpy.data.collections.get(new_coll_name)
             if overwrite_coll is not None:
-                collections.remove(overwrite_coll)
-            ag.collection = collections.new(new_coll_name)
+                bpy.data.collections.remove(overwrite_coll)
+            ag.collection = bpy.data.collections.new(new_coll_name)
             # add selected objects to new group
             for obj in self.objs_to_move:
                 ag.collection.objects.link(obj)

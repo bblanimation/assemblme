@@ -76,8 +76,7 @@ def handle_upconversion(dummy):
                     ag.collection.name = "AssemblMe_{}_group".format(ag.name)
             # convert from v1_2 to v1_3
             if int(ag.version[2]) < 2:
-                collections = bpy.data.collections if b280() else bpy.data.groups
-                ag.collection = collections.get(ag.group_name)
+                ag.collection = bpy.data.collections.get(ag.group_name)
                 # transfer props from 1_2 (camel to snake case)
                 for prop in get_annotations(ag):
                     if prop.islower():
