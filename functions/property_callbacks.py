@@ -46,7 +46,7 @@ def uniquify_name(self, context):
 def collection_update(self, context):
     scn, ag0 = get_active_context_info()
     # get rid of unused groups created by AssemblMe
-    collections = bpy.data.collections if b280() else bpy.data.groups
+    collections = bpy.data.collections
     for c in collections:
         if c.name.startswith("AssemblMe_"):
             success = False
@@ -114,7 +114,7 @@ def update_anim_preset(self, context):
 def ag_update(self, context):
     """ select and make source or LEGO model active if scn.aglist_index changes """
     scn = context.scene
-    obj = context.view_layer.objects.active if b280() else scn.objects.active
+    obj = context.view_layer.objects.active
     if scn.aglist_index != -1:
         ag = scn.aglist[scn.aglist_index]
         # ag.anim_preset = ag.cur_preset

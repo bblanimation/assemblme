@@ -27,7 +27,7 @@ from ..functions import *
 class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
     """Create new group/collection for animation containing selected objects"""
     bl_idname = "assemblme.new_group_from_selection"
-    bl_label = "New Collection" if b280() else "New Group"
+    bl_label = "New Collection"
     bl_options = {"REGISTER", "UNDO"}
 
     ################################################
@@ -46,7 +46,7 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
             return{"CANCELLED"}
         try:
             scn, ag = get_active_context_info()
-            collections = bpy.data.collections if b280() else bpy.data.groups
+            collections = bpy.data.collections
             # create new animated collection
             new_coll_name = "AssemblMe_{}_collection".format(ag.name)
             overwrite_coll = collections.get(new_coll_name)

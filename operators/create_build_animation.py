@@ -133,10 +133,10 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
 
     def is_valid(self, scn, ag):
         if ag.collection is None:
-            self.report({"WARNING"}, "No collection name specified" if b280() else "No group name specified")
+            self.report({"WARNING"}, "No collection name specified")
             return False
         if len(get_anim_objects(ag)) == 0:
-            self.report({"WARNING"}, "Collection contains no objects!" if b280() else "Group contains no objects!")
+            self.report({"WARNING"}, "Collection contains no objects!")
             return False
         # check if this would overlap with other animations
         other_anim_ags = [ag0 for ag0 in scn.aglist if ag0 != ag and ag0.collection == ag.collection and ag0.animated]
@@ -150,7 +150,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
             if i == scn.aglist_index or not scn.aglist[i].animated or c is None or c.name == ag.collection.name:
                 continue
             for obj in self.objects_to_move:
-                users_collection = obj.users_collection if b280() else obj.users_group
+                users_collection = obj.users_collection
                 if c in users_collection:
                     self.report({"ERROR"}, "Some objects in this collection are part of another AssemblMe animation")
                     return False

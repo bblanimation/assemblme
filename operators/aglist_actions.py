@@ -193,7 +193,7 @@ class AGLIST_OT_paste_settings(bpy.types.Operator):
 class AGLIST_OT_set_to_active(bpy.types.Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
-    bl_description = "Set to next collection containing active object" if b280() else "Set to next group containing active object"
+    bl_description = "Set to next collection containing active object"
 
     @classmethod
     def poll(cls, context):
@@ -208,9 +208,9 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
     def execute(self, context):
         scn, ag = get_active_context_info()
         active_object = bpy.context.active_object
-        obj_users = active_object.users_collection if b280() else active_object.users_group
+        obj_users = active_object.users_collection
         if len(obj_users) == 0:
-            self.report({"INFO"}, "Active object has no parent collections" if b280() else "Active object has no linked groups.")
+            self.report({"INFO"}, "Active object has no parent collections")
             return {"CANCELLED"}
         if ag.last_active_object_name == active_object.name:
             ag.active_user_index = (ag.active_user_index + 1) % len(obj_users)
