@@ -91,7 +91,7 @@ class ASSEMBLME_PT_animations(Panel):
                 n = ag.collection.name
                 col1.label(text="%(n)s" % locals())
             else:
-                split = layout_split(col1, factor=0.85)
+                split = col1.split(factor=0.85)
                 col = split.column(align=True)
                 col.prop_search(ag, "collection", bpy.data, "collections", text="")
                 col = split.column(align=True)
@@ -131,7 +131,7 @@ class ASSEMBLME_PT_actions(Panel):
         row = col.row(align=True)
         row.operator("assemblme.start_over", text="Start Over", icon="RECOVER_LAST")
         if bpy.data.texts.find("AssemblMe log") >= 0:
-            split = layout_split(layout, factor=0.9)
+            split = layout.split(factor=0.9)
             col = split.column(align=True)
             row = col.row(align=True)
             row.operator("assemblme.report_error", text="Report Error", icon="URL")
@@ -179,7 +179,7 @@ class ASSEMBLME_PT_settings(Panel):
             col.label(text="Path Object:")
             col.prop(ag, "path_object")
         else:
-            split = layout_split(col, align=False, factor=0.5)
+            split = col.split(align=False, factor=0.5)
             col1 = split.column(align=True)
             col1.prop(ag, "loc_offset", text="Location Offset")
             col1.prop(ag, "loc_interpolation_mode", text="")
@@ -194,7 +194,7 @@ class ASSEMBLME_PT_settings(Panel):
         row = col1.row(align=True)
         row.label(text="Layer Orientation:")
         row = col1.row(align=True)
-        split = layout_split(row, factor=0.9)
+        split = row.split(factor=0.9)
         row = split.row(align=True)
         row.prop(ag, "orient", text="")
         col = split.column(align=True)
@@ -272,7 +272,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
             row = col.row(align=True)
             row.label(text="Create New Preset:")
             row = col.row(align=True)
-            split = layout_split(row, factor=0.7)
+            split = row.split(factor=0.7)
             col = split.column(align=True)
             col.prop(scn.assemblme, "new_preset_name", text="")
             col = split.column(align=True)
@@ -280,7 +280,7 @@ class ASSEMBLME_PT_preset_manager(Panel):
             col.operator("assemblme.anim_presets", text="Create", icon="ADD").action = "CREATE"
         col = layout.column(align=True)
         col.label(text="Remove Existing Preset:")
-        split = layout_split(col, factor=0.7)
+        split = col.split(factor=0.7)
         col = split.column(align=True)
         col.prop(scn, "anim_preset_to_delete", text="")
         col = split.column(align=True)

@@ -8,7 +8,7 @@ import shutil
 import argparse
 import zipfile
 
-# TO RUN: python zip_addon [--beta] [--demo]
+# TO RUN: python zip_addon --beta
 # NOTE: only send the resulting zip file to verified customers
 
 
@@ -102,11 +102,14 @@ def main():
     addon_version = parse_file_for_bl_info_version(join(current_dir_path, "__init__.py"))
     branch_name = parse_git_files_for_branch()
     demo_version = branch_name.startswith("demo")
+    master_version = branch_name == "master"
     new_dir_name = current_dir_name
     assert addon_version != "" and isinstance(addon_version, str)
     new_dir_name += "_v" + addon_version.replace(", ", "-")
     if demo_version:
         new_dir_name += "_demo"
+    elif master_version:
+        new_dir_name += "_master"
     elif args.alpha:
         new_dir_name += "_alpha"
     elif args.beta:
