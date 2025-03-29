@@ -1,7 +1,7 @@
 """
 Copyright (C) 2017 Bricks Brought to Life
-http://bblanimation.com/
-chris@bblanimation.com
+http://bricksbroughttolife.com/
+chris@bricksbroughttolife.com
 
 Created by Christopher Gearhart
 
@@ -24,6 +24,7 @@ Created by Christopher Gearhart
 
 # Blender imports
 import bpy
+from bpy.types import Scene
 from bpy.app.handlers import persistent
 
 # Module imports
@@ -53,7 +54,7 @@ def handle_selections(junk=None):
 
 @persistent
 @blender_version_wrapper('>=','2.80')
-def register_assemblme_timers(scn, junk=None):
+def register_assemblme_timers(scn:Scene, junk=None):
     timer_fns = (handle_selections,)
     for timer_fn in timer_fns:
         if not bpy.app.timers.is_registered(timer_fn):

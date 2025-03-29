@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@ import time
 
 # Blender imports
 import bpy
-props = bpy.props
+from bpy.types import Operator, Context
 
 # Module imports
 from ..functions import *
 
-class ASSEMBLME_OT_start_over(bpy.types.Operator):
+class ASSEMBLME_OT_start_over(Operator):
     """Clear animation from objects moved in last 'Create Build Animation' action"""
     bl_idname = "assemblme.start_over"
     bl_label = "Start Over"
@@ -35,7 +35,7 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
     # Blender Operator methods
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = bpy.context.scene
         if scn.aglist_index == -1:
@@ -45,7 +45,7 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
             return True
         return False
 
-    def execute(self, context):
+    def execute(self, context:Context):
         try:
             self.start_over()
         except:
@@ -55,7 +55,9 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
     ###################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.orig_frame = bpy.context.scene.frame_current
 
     ###################################################

@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ from bpy.props import EnumProperty
 # Module imports
 from ..functions import *
 
-class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
+class ASSEMBLME_OT_anim_presets(Operator):
     """Create new preset with current animation settings"""
     bl_idname = "assemblme.anim_presets"
     bl_label = "Animation Presets"
@@ -36,7 +36,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     # Blender Operator methods
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = context.scene
         if len(scn.aglist) == 0:
@@ -44,7 +44,7 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
         # return context.scene.assemblme.new_preset_name != ""
         return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         if not self.can_run():
             return{"CANCELLED"}
         try:
@@ -101,12 +101,12 @@ class ASSEMBLME_OT_anim_presets(bpy.types.Operator):
     ###################################################
     # class methods
 
-    def write_new_preset(self, presetName):
+    def write_new_preset(self, preset_name:str):
         scn, ag = get_active_context_info()
         presets_filepath = get_presets_filepath()
         if not os.path.exists(presets_filepath):
             os.makedirs(presets_filepath)
-        new_preset_path = os.path.join(presets_filepath, presetName + ".py")
+        new_preset_path = os.path.join(presets_filepath, preset_name + ".py")
         f = open(new_preset_path, "w")
         f.write("import bpy")
         f.write("\ndef execute():")

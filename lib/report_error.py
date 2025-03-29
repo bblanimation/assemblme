@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,7 +60,9 @@ class SCENE_OT_report_error(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
         # get version and github_path
         for mod in addon_utils.modules():
             if mod.bl_info.get("name", "") == addon_name:

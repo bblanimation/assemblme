@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,14 +27,14 @@ from math import *
 
 # Blender imports
 import bpy
+from bpy.types import Object, Context
 from bpy.props import *
-props = bpy.props
 
 # Module imports
 from .common import *
 
 
-def get_active_context_info(ag_idx=None):
+def get_active_context_info(ag_idx:int=None):
     scn = bpy.context.scene
     ag_idx = ag_idx or scn.aglist_index
     ag = scn.aglist[ag_idx]
@@ -45,12 +45,12 @@ def assemblme_handle_exception():
     handle_exception(log_name="AssemblMe log", report_button_loc="AssemblMe > Animations > Report Error")
 
 
-def get_randomized_orient(orient, random_amount):
+def get_randomized_orient(orient:float, random_amount:float):
     """ returns randomized orientation based on user settings """
     return orient + random.uniform(-random_amount, random_amount)
 
 
-def get_offset_location(ag, loc):
+def get_offset_location(ag, loc:Vector):
     """ returns randomized location offset """
     loc_random = ag.loc_random
     loc_offset = ag.loc_offset
@@ -61,7 +61,7 @@ def get_offset_location(ag, loc):
     return (X, Y, Z)
 
 
-def get_offset_rotation(ag, rot):
+def get_offset_rotation(ag, rot:Vector):
     """ returns randomized rotation offset """
     rot_random = ag.rot_random
     rot_offset = ag.rot_offset
@@ -83,7 +83,7 @@ def get_object_velocity(ag):
     return frameVelocity
 
 
-def get_anim_length(ag, objects_to_move, list_z_values, layer_height, inverted_build, skip_empty_selections):
+def get_anim_length(ag, objects_to_move:list[Object], list_z_values:list[dict[str, int|Object]], layer_height, inverted_build:bool, skip_empty_selections:bool):
     temp_obj_count = 0
     num_layers = 0
     last_lower_bound = None
@@ -95,7 +95,7 @@ def get_anim_length(ag, objects_to_move, list_z_values, layer_height, inverted_b
     return (num_layers - 1) * get_build_speed(ag) + get_object_velocity(ag) + 1
 
 
-def get_preset_filenames(dir):
+def get_preset_filenames(dir:str):
     """ list files in the given directory """
     return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and not f.startswith(".") and f.islower()]
 
@@ -104,7 +104,7 @@ def get_presets_filepath():
     return os.path.abspath(os.path.join(get_addon_directory(), "..", "..", "presets", "assemblme"))
 
 
-def get_preset_tuples(self, context):
+def get_preset_tuples(self, context:Context):
     # initialize presets path
     path = get_presets_filepath()
     # set up presets folder and transfer default presets
@@ -121,7 +121,7 @@ def get_preset_tuples(self, context):
     return preset_names
 
 
-def transfer_defaults_to_preset_folder(presets_path):
+def transfer_defaults_to_preset_folder(presets_path:str):
     default_presets_path = join(dirname(dirname(abspath(__file__))), "lib", "default_presets")
     filenames = get_preset_filenames(default_presets_path)
     if not os.path.exists(presets_path):
@@ -137,7 +137,7 @@ def transfer_defaults_to_preset_folder(presets_path):
         copyfile(src, dst)
 
 
-def get_list_z_values(ag, objects, rot_x_l=False, rot_y_l=False):
+def get_list_z_values(ag, objects:list[Object], rot_x_l:bool=False, rot_y_l:bool=False):
     """ returns list of dicts containing objects and ther z locations relative to layer orientation """
     # assemble list of dictionaries into 'list_z_values'
     list_z_values = []
@@ -158,7 +158,7 @@ def get_list_z_values(ag, objects, rot_x_l=False, rot_y_l=False):
     return list_z_values, rot_x_l, rot_y_l
 
 
-def get_objs_in_bound(list_z_values, z_lower_bound, inverted_build):
+def get_objs_in_bound(list_z_values:list[dict[str, int|Object]], z_lower_bound:int, inverted_build:bool):
     """ select objects in bounds from list_z_values """
     objs_in_bound = []
     # iterate through objects in list_z_values (breaks when outside range)
@@ -177,7 +177,7 @@ def get_objs_in_bound(list_z_values, z_lower_bound, inverted_build):
     return objs_in_bound
 
 
-def get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_selections, last_lower_bound=None):
+def get_new_selection(list_z_values:list[dict[str, int|Object]], layer_height:int, inverted_build:bool, skip_empty_selections:bool, last_lower_bound:int=None):
     """ selects next layer of objects """
     # get new upper and lower bounds
     z_upper_bound = list_z_values[0]["loc"] if skip_empty_selections or last_lower_bound is None else last_lower_bound
@@ -187,7 +187,7 @@ def get_new_selection(list_z_values, layer_height, inverted_build, skip_empty_se
     return objs_in_bound, z_lower_bound
 
 
-def set_bounds_for_visualizer(ag, list_z_values):
+def set_bounds_for_visualizer(ag, list_z_values:list[dict[str, int|Object]]):
     for z_value in list_z_values:
         obj = z_value["obj"]
         if ag.mesh_only and obj.type != "MESH":
@@ -225,7 +225,7 @@ def get_default_preset_names():
     return [os.path.splitext(fn)[0] for fn in os.listdir(default_preset_path) if fn.endswith(".py")]
 
 
-def clear_animation(objs):
+def clear_animation(objs:list[Object]):
     objs = confirm_iter(objs)
     for obj in objs:
         obj.animation_data_clear()
@@ -236,12 +236,16 @@ def created_with_unsupported_version(ag):
     return ag.version[:3] != bpy.props.assemblme_version[:3]
 
 
-def set_interpolation(objs, data_path, mode, start_frame=0, end_frame=1048574):
+def set_interpolation(objs:list[Object], data_path:str, mode:str, start_frame:int=0, end_frame:int=1048574):
     objs = confirm_iter(objs)
     for obj in objs:
         if obj.animation_data is None:
             continue
-        for fcurve in obj.animation_data.action.fcurves:
+        if bpy.app.version[:2] < (4, 4):
+            fcurves = obj.animation_data.action.fcurves
+        else:
+            fcurves = obj.animation_data.action.layers[0].strips[0].channelbag(action.slots[0]).fcurves
+        for fcurve in fcurves:
             if fcurve is None or not fcurve.data_path.startswith(data_path):
                 continue
             for kf in fcurve.keyframe_points:
@@ -249,7 +253,7 @@ def set_interpolation(objs, data_path, mode, start_frame=0, end_frame=1048574):
                     kf.interpolation = mode
 
 
-def animate_objects(ag, objects_to_move, list_z_values, cur_frame, loc_interpolation_mode='LINEAR', rot_interpolation_mode='LINEAR'):
+def animate_objects(ag, objects_to_move:list[Object], list_z_values:list[dict[str, int|Object]], cur_frame:int, loc_interpolation_mode:str="LINEAR", rot_interpolation_mode:str="LINEAR"):
     """ animates objects """
 
     # initialize variables for use in while loop

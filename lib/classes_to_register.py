@@ -1,7 +1,7 @@
 """
 Copyright (C) 2017 Bricks Brought to Life
-http://bblanimation.com/
-chris@bblanimation.com
+http://bricksbroughttolife.com/
+chris@bricksbroughttolife.com
 
 Created by Christopher Gearhart
 """

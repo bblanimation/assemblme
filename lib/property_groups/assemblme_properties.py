@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,13 +21,13 @@
 # Blender imports
 import bpy
 from bpy.props import *
-props = bpy.props
+from bpy.types import PropertyGroup
 
 # Module imports
 from ...functions import *
 
 
-class AssemblMeProperties(bpy.types.PropertyGroup):
+class AssemblMeProperties(PropertyGroup):
     copy_from_id: IntProperty(default=-1)
     last_active_object_name: StringProperty(default="")
 

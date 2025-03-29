@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,14 +21,14 @@
 # Blender imports
 import bpy
 from bpy.props import *
-from bpy.types import Panel, UIList
+from bpy.types import Panel, UIList, Operator, Context, Event
 
 # Module imports
 from .visualizer import *
 from ..functions import *
 
 # ui list item actions
-class AGLIST_OT_list_action(bpy.types.Operator):
+class AGLIST_OT_list_action(Operator):
     bl_idname = "aglist.list_action"
     bl_label = "List Action"
 
@@ -42,7 +42,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
     )
 
     # @classmethod
-    # def poll(cls, context):
+    # def poll(cls, context:Context):
     #     """ ensures operator can execute (if not, returns false) """
     #     scn = context.scene
     #     for ag in scn.aglist:
@@ -50,7 +50,7 @@ class AGLIST_OT_list_action(bpy.types.Operator):
     #             return False
     #     return True
 
-    def invoke(self, context, event):
+    def invoke(self, context:Context, event:Event):
 
         scn = context.scene
         idx = scn.aglist_index
@@ -119,14 +119,14 @@ class AGLIST_OT_list_action(bpy.types.Operator):
         return {"FINISHED"}
 
 # copy settings from current index to all other indices
-class AGLIST_OT_copy_settings_to_others(bpy.types.Operator):
+class AGLIST_OT_copy_settings_to_others(Operator):
     bl_idname = "aglist.copy_settings_to_others"
     bl_label = "Copy Settings to Other Animations"
     bl_description = "Copies the settings from the current animation to all other animations"
     bl_options = {"UNDO"}
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = context.scene
         if scn.aglist_index == -1:
@@ -135,7 +135,7 @@ class AGLIST_OT_copy_settings_to_others(bpy.types.Operator):
             return False
         return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         scn = context.scene
         ag0 = scn.aglist[scn.aglist_index]
         for ag1 in scn.aglist:
@@ -145,41 +145,41 @@ class AGLIST_OT_copy_settings_to_others(bpy.types.Operator):
 
 
 # copy settings from current index to memory
-class AGLIST_OT_copy_settings(bpy.types.Operator):
+class AGLIST_OT_copy_settings(Operator):
     bl_idname = "aglist.copy_settings"
     bl_label = "Copy Settings from Current Animation"
     bl_description = "Stores the ID of the current animation for pasting"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = context.scene
         if scn.aglist_index == -1:
             return False
         return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         scn, ag = get_active_context_info()
         scn.assemblme.copy_from_id = ag.id
         return{"FINISHED"}
 
 
 # paste settings from index in memory to current index
-class AGLIST_OT_paste_settings(bpy.types.Operator):
+class AGLIST_OT_paste_settings(Operator):
     bl_idname = "aglist.paste_settings"
     bl_label = "Paste Settings to Current animation"
     bl_description = "Pastes the settings from stored animation ID to the current index"
     bl_options = {"UNDO"}
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = context.scene
         if scn.aglist_index == -1:
             return False
         return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         scn = context.scene
         ag0 = scn.aglist[scn.aglist_index]
         for ag1 in scn.aglist:
@@ -190,13 +190,13 @@ class AGLIST_OT_paste_settings(bpy.types.Operator):
 
 
 # set source to active button
-class AGLIST_OT_set_to_active(bpy.types.Operator):
+class AGLIST_OT_set_to_active(Operator):
     bl_idname = "aglist.set_to_active"
     bl_label = "Set to Active"
     bl_description = "Set to next collection containing active object"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = context.scene
         if scn.aglist_index == -1:
@@ -205,7 +205,7 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
             return False
         return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         scn, ag = get_active_context_info()
         active_object = bpy.context.active_object
         obj_users = active_object.users_collection
@@ -223,12 +223,12 @@ class AGLIST_OT_set_to_active(bpy.types.Operator):
 
 
 # print button
-class AGLIST_OT_print_all_items(bpy.types.Operator):
+class AGLIST_OT_print_all_items(Operator):
     bl_idname = "aglist.print_all_items"
     bl_label = "Print List"
     bl_description = "Print all items to the console"
 
-    def execute(self, context):
+    def execute(self, context:Context):
         scn = context.scene
         for i in scn.aglist:
             print (i.source_name, i.id)
@@ -236,12 +236,12 @@ class AGLIST_OT_print_all_items(bpy.types.Operator):
 
 
 # clear button
-class AGLIST_OT_clear_all_items(bpy.types.Operator):
+class AGLIST_OT_clear_all_items(Operator):
     bl_idname = "aglist.clear_all_items"
     bl_label = "Clear List"
     bl_description = "Clear all items in the list"
 
-    def execute(self, context):
+    def execute(self, context:Context):
         scn = context.scene
         ag = scn.aglist
         current_index = scn.aglist_index
@@ -264,12 +264,12 @@ class AGLIST_OT_clear_all_items(bpy.types.Operator):
 
 class ASSEMBLME_UL_items(UIList):
 
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+    def draw_item(self, context:Context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types
         if self.layout_type in {"GRID"}:
             layout.alignment = "CENTER"
         split = layout.split(align=False, factor=0.9)
         split.prop(item, "name", text="", emboss=False, translate=False, icon="MOD_BUILD")
 
-    def invoke(self, context, event):
+    def invoke(self, context:Context, event:Event):
         pass

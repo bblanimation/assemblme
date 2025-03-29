@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,19 +21,19 @@
 # Blender imports
 import bpy
 from bpy.props import *
-from bpy.types import Panel, UIList
+from bpy.types import Panel, UIList, Context
 
 # Module imports
 from ..functions.common import *
 
 class ASSEMBLME_UL_items(UIList):
 
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+    def draw_item(self, context:Context, layout, data, item, icon, active_data, active_propname, index):
         # Make sure your code supports all 3 layout types
         if self.layout_type in {"GRID"}:
             layout.alignment = "CENTER"
         split = layout.split(align=False, factor=0.9)
         split.prop(item, "name", text="", emboss=False, translate=False, icon="MOD_BUILD")
 
-    def invoke(self, context, event):
+    def invoke(self, context:Context, event):
         pass

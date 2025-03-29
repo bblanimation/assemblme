@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,13 +20,13 @@ import math
 
 # Blender imports
 import bpy
+from bpy.types import Operator, Context, Event
 import bmesh
-props = bpy.props
 
 # Module imports
 from ..functions import *
 
-class ASSEMBLME_OT_visualizer(bpy.types.Operator):
+class ASSEMBLME_OT_visualizer(Operator):
     """Visualize the layer orientation with a plane"""
     bl_idname = "assemblme.visualize_layer_orientation"
     bl_label = "Visualize Layer Orientation"
@@ -35,7 +35,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     ################################################
     # Blender Operator methods
 
-    def modal(self, context, event):
+    def modal(self, context:Context, event:Event):
         """ runs as long as visualizer is active """
         try:
             if event.type in {"ESC"}:
@@ -74,7 +74,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
             assemblme_handle_exception()
             return {"CANCELLED"}
 
-    def execute(self, context):
+    def execute(self, context:Context):
         try:
             scn, ag = get_active_context_info()
             # if enabled, all we do is disable it
@@ -109,7 +109,9 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.visualizer_obj = bpy.data.objects.get("AssemblMe_visualizer")
         if self.visualizer_obj is None:
             # create visualizer object
@@ -147,14 +149,14 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
 
             return "animated"
 
-    def load_lattice_mesh(self, context):
+    def load_lattice_mesh(self, context:Context):
         scn = bpy.context.scene
         visualizer_bm = generate_lattice(Vector((scn.assemblme.visualizer_res, scn.assemblme.visualizer_res, 1)), Vector([scn.assemblme.visualizer_scale]*2 + [1]), offset=Vector((0, 0, 1)))
         self.visualizer_res = scn.assemblme.visualizer_res
         self.visualizer_scale = scn.assemblme.visualizer_scale
         visualizer_bm.to_mesh(self.visualizer_obj.data)
 
-    def enable(self, context):
+    def enable(self, context:Context):
         """ enables visualizer """
         scn, ag = get_active_context_info()
         # alert user that visualizer is enabled
@@ -166,7 +168,7 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
         unhide(self.visualizer_obj)
         ag.visualizer_active = True
 
-    def full_disable(self, context):
+    def full_disable(self, context:Context):
         """ disables visualizer """
         # alert user that visualizer is disabled
         self.report({"INFO"}, "Visualizer disabled")

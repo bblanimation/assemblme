@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,13 +20,13 @@ import time
 
 # Blender imports
 import bpy
-props = bpy.props
+from bpy.types import Operator, Context
 
 # Module imports
 from ..functions import *
 
 
-class ASSEMBLME_OT_info_restore_preset(bpy.types.Operator):
+class ASSEMBLME_OT_info_restore_preset(Operator):
     """Clear animation from objects moved in last 'Create Build Animation' action"""
     bl_idname = "assemblme.info_restore_preset"
     bl_label = "Info Restore Preset"
@@ -36,11 +36,11 @@ class ASSEMBLME_OT_info_restore_preset(bpy.types.Operator):
     # Blender Operator methods
 
     # @classmethod
-    # def poll(cls, context):
+    # def poll(cls, context:Context):
     #     """ ensures operator can execute (if not, returns false) """
     #     return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         try:
             txt = bpy.data.texts.new("INFO: Restoring Removed Presets")
             txt.write("\nFollow these steps to restore a removed preset:")

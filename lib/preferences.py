@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import os
 # Blender imports
 import bpy
 from bpy.props import *
-from bpy.types import AddonPreferences
+from bpy.types import AddonPreferences, Context
 
 # Module imports
 from ..ui import *
@@ -32,5 +32,5 @@ class ASSEMBLME_PT_preferences(AddonPreferences):
     bl_idname = __package__[:__package__.index(".lib")]
 
 
-    def draw(self, context):
+    def draw(self, context:Context):
         layout = self.layout

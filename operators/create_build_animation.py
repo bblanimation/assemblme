@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,11 +21,12 @@ import time
 # Blender imports
 import bpy
 from bpy.props import *
+from bpy.types import Operator
 
 # Module imports
 from ..functions import *
 
-class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
+class ASSEMBLME_OT_create_build_animation(Operator):
     """Select objects layer by layer and shift by given values"""
     bl_idname = "assemblme.create_build_animation"
     bl_label = "Create Build Animation"
@@ -35,14 +36,14 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     # Blender Operator methods
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = bpy.context.scene
         if scn.aglist_index == -1:
             return False
         return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         try:
             scn, ag = get_active_context_info()
             all_ags_for_collection = [ag0 for ag0 in scn.aglist if ag0 == ag or (ag0.collection == ag.collection and ag0.animated)]
@@ -68,7 +69,9 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         scn, ag = get_active_context_info()
         if ag.collection is not None:
             self.objects_to_move = [obj for obj in get_anim_objects(ag) if not ag.mesh_only or obj.type == "MESH"]
@@ -83,7 +86,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     # class methods
 
     @timed_call("Time Elapsed")
-    def create_anim(self, scn, ag):
+    def create_anim(self, scn:Scene, ag):
         print("\ncreating build animation...")
 
         # initialize vars
@@ -131,7 +134,7 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
             disable_relationship_lines()
             ag.animated = True
 
-    def is_valid(self, scn, ag):
+    def is_valid(self, scn:Scene, ag):
         if ag.collection is None:
             self.report({"WARNING"}, "No collection name specified")
             return False

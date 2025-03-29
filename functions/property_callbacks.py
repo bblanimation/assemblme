@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,13 +20,14 @@ from operator import itemgetter
 
 # Blender imports
 import bpy
+from bpy.types import Context
 from bpy.props import *
 
 # Module imports
 from .general import *
 
 
-def uniquify_name(self, context):
+def uniquify_name(self, context:Context):
     """ if LEGO model exists with name, add '.###' to the end """
     scn, ag = get_active_context_info()
     name = ag.name
@@ -43,7 +44,7 @@ def uniquify_name(self, context):
         ag.name = name
 
 
-def collection_update(self, context):
+def collection_update(self, context:Context):
     scn, ag0 = get_active_context_info()
     # get rid of unused groups created by AssemblMe
     collections = bpy.data.collections
@@ -58,7 +59,7 @@ def collection_update(self, context):
                 collections.remove(c, do_unlink=True)
 
 
-def set_meshes_only(self, context):
+def set_meshes_only(self, context:Context):
     scn, ag = get_active_context_info()
     clear_preset(self, context)
     objs_to_clear = []
@@ -74,20 +75,20 @@ def set_meshes_only(self, context):
         scn.frame_set(orig_frame)
 
 
-def clear_preset(self, context):
+def clear_preset(self, context:Context):
     # scn, ag = get_active_context_info()
     # ag.anim_preset = "None"
     pass
 
 
-def handle_outdated_preset(self, context):
+def handle_outdated_preset(self, context:Context):
     scn, ag = get_active_context_info()
     clear_preset(self, context)
     if not ag.build_type.isupper():
         ag.build_type = str(ag.build_type).upper()
 
 
-def update_anim_preset(self, context):
+def update_anim_preset(self, context:Context):
     scn, ag = get_active_context_info()
     if ag.anim_preset != "None":
         import importlib.util
@@ -111,7 +112,7 @@ def update_anim_preset(self, context):
     return None
 
 
-def ag_update(self, context):
+def ag_update(self, context:Context):
     """ select and make source or LEGO model active if scn.aglist_index changes """
     scn = context.scene
     obj = context.view_layer.objects.active

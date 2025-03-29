@@ -48,7 +48,7 @@ def zipdir(path, ziph):
             ziph.write(os.path.join(root, file))
 
 
-def edit_bl_info_warning_message(filepath, warning_msg=""):
+def edit_bl_info_warning_message(filepath:str, warning_msg:str=""):
     # read lines
     with open(filepath, "r") as f:
         data = f.readlines()
@@ -66,7 +66,7 @@ def edit_bl_info_warning_message(filepath, warning_msg=""):
         f.writelines(data)
 
 
-def parse_file_for_bl_info_version(filepath):
+def parse_file_for_bl_info_version(filepath:str):
     version = ""
     line = None
     with open(filepath, "r") as f:

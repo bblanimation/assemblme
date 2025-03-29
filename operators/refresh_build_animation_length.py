@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,12 +20,11 @@
 
 # Blender imports
 import bpy
-props = bpy.props
 
 # Module imports
 from ..functions import *
 
-class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
+class ASSEMBLME_OT_refresh_anim_length(Operator):
     """Refreshes the box in UI with build animation length"""
     bl_idname = "assemblme.refresh_anim_length"
     bl_label = "Refresh Build Animation Length"
@@ -35,7 +34,7 @@ class ASSEMBLME_OT_refresh_anim_length(bpy.types.Operator):
     # Blender Operator methods
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = bpy.context.scene
         if scn.aglist_index == -1:

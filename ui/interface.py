@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,17 +20,17 @@
 
 # Blender imports
 import bpy
-from bpy.types import Panel
+from bpy.types import Panel, Menu, Context
 from bpy.props import *
 
 # Module imports
 from ..functions import *
 
-class ASSEMBLME_MT_copy_paste_menu(bpy.types.Menu):
+class ASSEMBLME_MT_copy_paste_menu(Menu):
     bl_idname = "ASSEMBLME_MT_copy_paste_menu"
     bl_label = "Select"
 
-    def draw(self, context):
+    def draw(self, context:Context):
         layout = self.layout
 
         layout.operator("aglist.copy_settings_to_others", icon="COPY_ID", text="Copy Settings to Others")
@@ -46,11 +46,11 @@ class ASSEMBLME_PT_animations(Panel):
     bl_category    = "AssemblMe"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         return True
 
-    def draw(self, context):
+    def draw(self, context:Context):
         layout = self.layout
         scn = bpy.context.scene
 
@@ -110,7 +110,7 @@ class ASSEMBLME_PT_actions(Panel):
     bl_category    = "AssemblMe"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         if bpy.app.version[:2] < (2, 79):
             return False
@@ -119,7 +119,7 @@ class ASSEMBLME_PT_actions(Panel):
             return False
         return True
 
-    def draw(self, context):
+    def draw(self, context:Context):
         layout = self.layout
         scn, ag = get_active_context_info()
 
@@ -148,7 +148,7 @@ class ASSEMBLME_PT_settings(Panel):
     bl_category    = "AssemblMe"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         if bpy.app.version[:2] < (2, 79):
             return False
@@ -157,7 +157,7 @@ class ASSEMBLME_PT_settings(Panel):
             return False
         return True
 
-    def draw(self, context):
+    def draw(self, context:Context):
         layout = self.layout
         scn, ag = get_active_context_info()
 
@@ -230,7 +230,7 @@ class ASSEMBLME_PT_visualizer_settings(Panel):
     bl_options     = {"DEFAULT_CLOSED"}
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         if bpy.app.version[:2] < (2, 79):
             return False
@@ -239,7 +239,7 @@ class ASSEMBLME_PT_visualizer_settings(Panel):
             return False
         return True
 
-    def draw(self, context):
+    def draw(self, context:Context):
         layout = self.layout
         scn, ag = get_active_context_info()
 
@@ -257,13 +257,13 @@ class ASSEMBLME_PT_preset_manager(Panel):
     bl_options     = {"DEFAULT_CLOSED"}
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         if bpy.app.version[:2] < (2, 79):
             return False
         return True
 
-    def draw(self, context):
+    def draw(self, context:Context):
         layout = self.layout
         scn = context.scene
 

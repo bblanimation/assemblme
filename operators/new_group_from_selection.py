@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2025 Christopher Gearhart
+# chris@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 # System imports
 import bpy
+from bpy.types import Operator, Context
 
 # Blender imports
 import time
@@ -24,7 +25,7 @@ import time
 # Module imports
 from ..functions import *
 
-class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
+class ASSEMBLME_OT_new_group_from_selection(Operator):
     """Create new group/collection for animation containing selected objects"""
     bl_idname = "assemblme.new_group_from_selection"
     bl_label = "New Collection"
@@ -34,14 +35,14 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
     # Blender Operator methods
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context:Context):
         """ ensures operator can execute (if not, returns false) """
         scn = bpy.context.scene
         if scn.aglist_index == -1:
             return False
         return True
 
-    def execute(self, context):
+    def execute(self, context:Context):
         if not self.can_run():
             return{"CANCELLED"}
         try:
@@ -63,7 +64,9 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         scn, ag = get_active_context_info()
         self.objs_to_move = [obj for obj in bpy.context.selected_objects if not ag.mesh_only or obj.type == "MESH"]
 
