@@ -20,6 +20,7 @@
 
 # Blender imports
 import bpy
+from bpy.types import Operator
 
 # Module imports
 from ..functions import *

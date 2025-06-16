@@ -47,7 +47,7 @@ def generate_lattice(vert_dist:Vector, scale:Vector, offset:Vector=Vector((0, 0,
     res = Vector(round_up(round(val), 2) for val in res)
     h_res = res / 2
     # populate coord matrix
-    nx, ny, nz = round(res.x) - 1 + extra_res, round(res.y) - 1 + extra_res, round(res.z) - 1 + extra_res
+    nx, ny, nz = round(res[0]) - 1 + extra_res, round(res[1]) - 1 + extra_res, round(res[2]) - 1 + extra_res
     create_coord = lambda v: vec_mult(v - h_res, vert_dist) + offset
     coord_matrix = [[[create_coord(Vector((x, y, z))) for z in range(nz)] for y in range(ny)] for x in range(nx)]
 

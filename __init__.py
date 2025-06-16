@@ -1,150 +1,100 @@
-#!/usr/bin/env python
-# Author: Christopher Gearhart
+# Copyright (C) 2019 Christopher Gearhart
+# chris@bblanimation.com
+# http://bblanimation.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+bl_info = {
+    "name"        : "AssemblMe",
+    "author"      : "Christopher Gearhart <christopher@bricksbroughttolife.com>",
+    "version"     : (1, 8, 0),
+    "blender"     : (4, 2, 2),
+    "description" : "Iterative object assembly animations made simple",
+    "location"    : "View3D > Tools > AssemblMe",
+    "warning"     : "",
+    "doc_url"     : "https://www.blendermarket.com/products/assemblme",
+    "tracker_url" : "https://github.com/bblanimation/assemblme/issues",
+    "category"    : "Animation",
+}
 
 # System imports
 import os
-from os.path import join, split, exists, dirname, realpath, isfile, isdir
-import shutil
-import argparse
-import zipfile
+import getpass
 
-# TO RUN: python zip_addon --beta
-# NOTE: only send the resulting zip file to verified customers
+# Blender imports
+import bpy
+from bpy.props import *
+from bpy.types import Scene, Keyframe
+from bpy.utils import register_class, unregister_class
 
-
-# initialize arguments
-parser = argparse.ArgumentParser(description="Zip addon")
-parser.add_argument(
-    "--alpha",
-    help="Bundle as alpha version",
-    dest="alpha",
-    action="store_true",
-)
-parser.add_argument(
-    "--beta",
-    help="Bundle as beta version",
-    dest="beta",
-    action="store_true",
-)
-args = parser.parse_args()
+# Addon import
+from .functions import app_handlers, general, property_callbacks, timers
+from .lib.classes_to_register import classes
+from .lib import property_groups
 
 
-# helper functions
-def copy_directory(src:str, dest:str):
-    try:
-        shutil.copytree(src, dest)
-    # Directories are the same
-    except shutil.Error as e:
-        print(f"Directory not copied. Error: {e}")
-    # Any error saying that the directory doesn"t exist
-    except OSError as e:
-        print(f"Directory not copied. Error: {e}")
+def register():
+    for cls in classes:
+        register_class(cls)
+
+    bpy.props.assemblme_module_name = __name__
+    bpy.props.assemblme_version = str(bl_info["version"])[1:-1]
+    bpy.props.assemblme_developer_mode = getpass.getuser().startswith("cgear") and True
+    bpy.props.assemblme_validated = True
+
+    Scene.anim_preset_to_delete = EnumProperty(
+        name="Preset to Delete",
+        description="Another list of stored AssemblMe presets",
+        items=general.get_preset_tuples,
+    )
+
+    Scene.assemblme = PointerProperty(type=property_groups.AssemblMeProperties)
+
+    # list properties
+    Scene.aglist = CollectionProperty(type=property_groups.AnimatedCollectionProperties)
+    Scene.aglist_index = IntProperty(default=-1, update=property_callbacks.ag_update)
+
+    # register app handlers
+    bpy.app.handlers.load_post.append(timers.register_assemblme_timers)
+    bpy.app.timers.register(timers.handle_selections)
+    bpy.app.handlers.load_post.append(app_handlers.convert_velocity_value)
+    # bpy.app.handlers.load_pre.append(app_handlers.validate_assemblme)
+    bpy.app.handlers.load_post.append(app_handlers.handle_upconversion)
 
 
-def edit_bl_info_warning_message(filepath:str, warning_msg:str=""):
-    # read lines
-    with open(filepath, "r") as f:
-        data = f.readlines()
+def unregister():
+    # unregister app handlers
+    bpy.app.handlers.load_post.remove(app_handlers.handle_upconversion)
+    # bpy.app.handlers.load_pre.remove(app_handlers.validate_assemblme)
+    bpy.app.handlers.load_post.remove(app_handlers.convert_velocity_value)
+    if bpy.app.timers.is_registered(timers.handle_selections):
+        bpy.app.timers.unregister(timers.handle_selections)
+    bpy.app.handlers.load_post.remove(timers.register_assemblme_timers)
 
-    # make adjustments
-    for i, line in enumerate(data):
-        if "\"warning\"" in line:
-            start_idx = line.find(": \"")
-            end_idx = line.find("\",")
-            data[i] = line.replace(line[start_idx + 2:end_idx + 2], f"\"{warning_msg}\",")
-            break
+    del Scene.aglist_index
+    del Scene.aglist
+    del Scene.assemblme
+    del Scene.anim_preset_to_delete
+    # del Scene.anim_preset
 
-    # write lines
-    with open(filepath, "w") as f:
-        f.writelines(data)
+    del bpy.props.assemblme_validated
+    del bpy.props.assemblme_developer_mode
+    del bpy.props.assemblme_version
+    del bpy.props.assemblme_module_name
 
+    for cls in reversed(classes):
+        unregister_class(cls)
 
-def parse_file_for_bl_info_version(filepath:str):
-    version = ""
-    line = None
-    with open(filepath, "r") as f:
-        while line != "":
-            line = f.readline()
-            if "\"version\"" in line:
-                start_idx = line.find(": (")
-                end_idx = line.find(")")
-                version = line[start_idx + 3:end_idx]
-                break
-    return version
-
-
-def get_addon_directory():
-    return dirname(realpath(__file__))
-
-
-def parse_git_files_for_branch():
-    head_dir = join(get_addon_directory(), ".git", "HEAD")
-    with open(head_dir, "r") as f:
-        content = f.read().splitlines()
-
-    for line in content:
-        if line[0:4] == "ref:":
-            return line.partition("refs/heads/")[2]
-
-
-
-# main functionality
-def main():
-    current_dir_path = get_addon_directory()
-    parent_dir_path, current_dir_name = split(current_dir_path)
-    addon_version = parse_file_for_bl_info_version(join(current_dir_path, "__init__.py"))
-    branch_name = parse_git_files_for_branch()
-    demo_version = branch_name.startswith("demo")
-    master_version = branch_name == "master"
-    new_dir_name = current_dir_name
-    assert addon_version != "" and isinstance(addon_version, str)
-    new_dir_name += "_v" + addon_version.replace(", ", "-")
-    if demo_version:
-        new_dir_name += "_demo"
-    elif master_version:
-        new_dir_name += "_master"
-    elif args.alpha:
-        new_dir_name += "_alpha"
-    elif args.beta:
-        new_dir_name += "_beta"
-    # clear out old destination directories
-    new_dir_path = join(parent_dir_path, new_dir_name)
-    if exists(new_dir_path):
-        shutil.rmtree(new_dir_path)
-    if exists(f"{new_dir_path}.zip"):
-        os.remove(f"{new_dir_path}.zip")
-    # make the destination directory
-    copy_directory(current_dir_path, new_dir_path)
-    try:
-        # make sure the directory contents copied successfully (just checks for the init file)
-        new_init_filepath = join(new_dir_path, "__init__.py")
-        assert exists(new_init_filepath)
-        # adjust bl_info for beta
-        if demo_version:
-            edit_bl_info_warning_message(new_init_filepath, "Demo Version - Full version available at the Blender Market!")
-        elif args.alpha:
-            edit_bl_info_warning_message(new_init_filepath, "Unstable Alpha release - update to official release when available")
-        elif args.beta:
-            edit_bl_info_warning_message(new_init_filepath, "Unstable Beta release - update to official release when available")
-        else:
-            edit_bl_info_warning_message(new_init_filepath, "")
-        # remove unnecessary files/directories
-        if demo_version:
-            os.remove(join(new_dir_path, "lib", f"{current_dir_name}_purchase_verification.txt"))
-        for filename in ("developer-notes.md", "zip-addon.py", "zip_addon.py", "error_log", ".git", ".gitignore", ".github", "__pycache__", f"{current_dir_name}_updater"):
-            filepath = join(new_dir_path, filename)
-            if not exists(filepath):
-                continue
-            elif isfile(filepath):
-                os.remove(filepath)
-            elif isdir(filepath):
-                shutil.rmtree(filepath)
-        # zip new directory
-        shutil.make_archive(new_dir_path, "zip", parent_dir_path, new_dir_name)
-        print(f"Created new archive: '{split(new_dir_path)[-1]}'")
-    finally:
-        # remove new directory
-        shutil.rmtree(new_dir_path)
-
-
-main()
+if __name__ == "__main__":
+    register()

@@ -165,7 +165,7 @@ class ASSEMBLME_OT_visualizer(Operator):
         self.load_lattice_mesh(context)
         # link visualizer object to scene
         safe_link(self.visualizer_obj)
-        unhide(self.visualizer_obj)
+        self.visualizer_obj.hide_set(False)
         ag.visualizer_active = True
 
     def full_disable(self, context:Context):

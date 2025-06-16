@@ -16,11 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # System imports
-import bpy
-from bpy.types import Operator, Context
+import time
 
 # Blender imports
-import time
+import bpy
+from bpy.types import Operator, Context
 
 # Module imports
 from ..functions import *

@@ -21,6 +21,7 @@ from shutil import copyfile
 
 # Blender imports
 import bpy
+from bpy.types import Operator
 from bpy.props import EnumProperty
 
 # Module imports

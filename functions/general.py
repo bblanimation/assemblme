@@ -28,10 +28,12 @@ from math import *
 # Blender imports
 import bpy
 from bpy.types import Object, Context
+from mathutils import Vector
 from bpy.props import *
 
 # Module imports
 from .common import *
+from .common.blender import *
 
 
 def get_active_context_info(ag_idx:int=None):
@@ -55,9 +57,9 @@ def get_offset_location(ag, loc:Vector):
     loc_random = ag.loc_random
     loc_offset = ag.loc_offset
     sum_loc_offset = max(sum(loc_offset), 0.00001)
-    X = loc.x + random.uniform(-loc_random, loc_random) * (loc_offset.x / sum_loc_offset) + loc_offset.x
-    Y = loc.y + random.uniform(-loc_random, loc_random) * (loc_offset.y / sum_loc_offset) + loc_offset.y
-    Z = loc.z + random.uniform(-loc_random, loc_random) * (loc_offset.z / sum_loc_offset) + loc_offset.z
+    X = loc[0] + random.uniform(-loc_random, loc_random) * (loc_offset.x / sum_loc_offset) + loc_offset.x
+    Y = loc[1] + random.uniform(-loc_random, loc_random) * (loc_offset.y / sum_loc_offset) + loc_offset.y
+    Z = loc[2] + random.uniform(-loc_random, loc_random) * (loc_offset.z / sum_loc_offset) + loc_offset.z
     return (X, Y, Z)
 
 
@@ -66,9 +68,9 @@ def get_offset_rotation(ag, rot:Vector):
     rot_random = ag.rot_random
     rot_offset = ag.rot_offset
     sum_rot_offset = max(sum(rot_offset), 0.00001)
-    x = rot.x + random.uniform(-rot_random, rot_random) * (rot_offset.x / sum_rot_offset) + rot_offset.x
-    y = rot.y + random.uniform(-rot_random, rot_random) * (rot_offset.y / sum_rot_offset) + rot_offset.y
-    z = rot.z + random.uniform(-rot_random, rot_random) * (rot_offset.z / sum_rot_offset) + rot_offset.z
+    x = rot[0] + random.uniform(-rot_random, rot_random) * (rot_offset.x / sum_rot_offset) + rot_offset.x
+    y = rot[1] + random.uniform(-rot_random, rot_random) * (rot_offset.y / sum_rot_offset) + rot_offset.y
+    z = rot[2] + random.uniform(-rot_random, rot_random) * (rot_offset.z / sum_rot_offset) + rot_offset.z
     return (x, y, z)
 
 

@@ -30,7 +30,7 @@ args = parser.parse_args()
 
 
 # helper functions
-def copy_directory(src, dest):
+def copy_directory(src:str, dest:str):
     try:
         shutil.copytree(src, dest)
     # Directories are the same
@@ -39,13 +39,6 @@ def copy_directory(src, dest):
     # Any error saying that the directory doesn"t exist
     except OSError as e:
         print(f"Directory not copied. Error: {e}")
-
-
-def zipdir(path, ziph):
-    # ziph is zipfile handle
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            ziph.write(os.path.join(root, file))
 
 
 def edit_bl_info_warning_message(filepath:str, warning_msg:str=""):
