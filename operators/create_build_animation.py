@@ -68,7 +68,8 @@ class ASSEMBLME_OT_create_build_animation(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         scn, ag = get_active_context_info()
         if ag.collection is not None:
             self.objects_to_move = [obj for obj in get_anim_objects(ag) if not ag.mesh_only or obj.type == "MESH"]

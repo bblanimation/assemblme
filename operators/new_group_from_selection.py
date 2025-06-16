@@ -64,7 +64,8 @@ class ASSEMBLME_OT_new_group_from_selection(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         scn, ag = get_active_context_info()
         self.objs_to_move = [obj for obj in bpy.context.selected_objects if not ag.mesh_only or obj.type == "MESH"]
 

@@ -55,7 +55,8 @@ class ASSEMBLME_OT_start_over(bpy.types.Operator):
     ###################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.orig_frame = bpy.context.scene.frame_current
 
     ###################################################

@@ -60,7 +60,8 @@ class SCENE_OT_report_error(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # get version and github_path
         for mod in addon_utils.modules():
             if mod.bl_info.get("name", "") == addon_name:

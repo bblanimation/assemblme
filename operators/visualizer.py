@@ -109,7 +109,8 @@ class ASSEMBLME_OT_visualizer(bpy.types.Operator):
     ################################################
     # initialization method
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.visualizer_obj = bpy.data.objects.get("AssemblMe_visualizer")
         if self.visualizer_obj is None:
             # create visualizer object
