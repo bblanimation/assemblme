@@ -238,16 +238,26 @@ def created_with_unsupported_version(ag):
     return ag.version[:3] != bpy.props.assemblme_version[:3]
 
 
-def set_interpolation(objs:list[Object], data_path:str, mode:str, start_frame:int=0, end_frame:int=1048574):
+@blender_version_wrapper(">=", "5.0")
+def set_interpolation(objs, data_path, mode, start_frame=0, end_frame=1048574):
     objs = confirm_iter(objs)
     for obj in objs:
         if obj.animation_data is None:
             continue
-        if bpy.app.version[:2] < (4, 4):
-            fcurves = obj.animation_data.action.fcurves
-        else:
-            fcurves = obj.animation_data.action.layers[0].strips[0].channelbag(action.slots[0]).fcurves
-        for fcurve in fcurves:
+        action = obj.animation_data.action
+        for fcurve in action.layers[0].strips[0].channelbag(action.slots[0]).fcurves:
+            if fcurve is None or not fcurve.data_path.startswith(data_path):
+                continue
+            for kf in fcurve.keyframe_points:
+                if start_frame <= kf.co[0] <= end_frame:
+                    kf.interpolation = mode
+@blender_version_wrapper("<", "5.0")
+def set_interpolation(objs, data_path, mode, start_frame=0, end_frame=1048574):
+    objs = confirm_iter(objs)
+    for obj in objs:
+        if obj.animation_data is None:
+            continue
+        for fcurve in obj.animation_data.action.fcurves:
             if fcurve is None or not fcurve.data_path.startswith(data_path):
                 continue
             for kf in fcurve.keyframe_points:

@@ -1,6 +1,6 @@
-# Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# Copyright (C) 2026 Christopher Gearhart
+# christopher@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 bl_info = {
     "name"        : "AssemblMe",
     "author"      : "Christopher Gearhart <christopher@bricksbroughttolife.com>",
-    "version"     : (1, 9, 0),
-    "blender"     : (4, 5, 0),
+    "version"     : (2, 0, 0),
+    "blender"     : (5, 0, 0),
     "description" : "Iterative object assembly animations made simple",
     "location"    : "View3D > Tools > AssemblMe",
     "warning"     : "",
