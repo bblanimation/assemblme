@@ -70,19 +70,16 @@ def get_material_color(mat_name):
     mat = bpy.data.materials.get(mat_name)
     if mat is None:
         return None
-    if mat.use_nodes:
-        node = get_first_bsdf_node(mat)
-        if not node:
-            return None
-        r, g, b = node.inputs[0].default_value[:3]
-        if node.type in ("BSDF_GLASS", "BSDF_TRANSPARENT", "BSDF_REFRACTION"):
-            a = 0.25
-        elif node.type in ("VOLUME_SCATTER", "VOLUME_ABSORPTION", "PRINCIPLED_VOLUME"):
-            a = node.inputs["Density"].default_value
-        else:
-            a = node.inputs[0].default_value[3]
+    node = get_first_bsdf_node(mat)
+    if not node:
+        return None
+    r, g, b = node.inputs[0].default_value[:3]
+    if node.type in ("BSDF_GLASS", "BSDF_TRANSPARENT", "BSDF_REFRACTION"):
+        a = 0.25
+    elif node.type in ("VOLUME_SCATTER", "VOLUME_ABSORPTION", "PRINCIPLED_VOLUME"):
+        a = node.inputs["Density"].default_value
     else:
-        r, g, b, a = mat.diffuse_color
+        a = node.inputs[0].default_value[3]
     return [round(v, 5) for v in [r, g, b, a]]
 
 

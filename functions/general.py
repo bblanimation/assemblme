@@ -1,6 +1,6 @@
 # Copyright (C) 2019 Christopher Gearhart
-# chris@bblanimation.com
-# http://bblanimation.com/
+# christopher@bricksbroughttolife.com
+# http://bricksbroughttolife.com/
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -230,6 +230,20 @@ def created_with_unsupported_version(ag):
     return ag.version[:3] != bpy.props.assemblme_version[:3]
 
 
+@blender_version_wrapper(">=", "5.0")
+def set_interpolation(objs, data_path, mode, start_frame=0, end_frame=1048574):
+    objs = confirm_iter(objs)
+    for obj in objs:
+        if obj.animation_data is None:
+            continue
+        action = obj.animation_data.action
+        for fcurve in action.layers[0].strips[0].channelbag(action.slots[0]).fcurves:
+            if fcurve is None or not fcurve.data_path.startswith(data_path):
+                continue
+            for kf in fcurve.keyframe_points:
+                if start_frame <= kf.co[0] <= end_frame:
+                    kf.interpolation = mode
+@blender_version_wrapper("<", "5.0")
 def set_interpolation(objs, data_path, mode, start_frame=0, end_frame=1048574):
     objs = confirm_iter(objs)
     for obj in objs:

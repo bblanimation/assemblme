@@ -50,8 +50,7 @@ def get_pixels(image:Image, color_depth=0, blur_radius=0):
 def get_pixels_from_render(scene:Scene):
     """ get image pixels from a rendered image not yet saved to disk """
     # ensure nodes are on
-    scene.use_nodes = True
-    tree = scene.node_tree
+    tree = scene.node_tree if bpy.app.version < (5, 0, 0) else scene.compositing_node_group
     links = tree.links
 
     # create render layer and viewer nodes
@@ -202,7 +201,7 @@ def get_uv_image(obj:Object, face_idx:int, uv_image:Image=None):
 def get_first_img_from_nodes(obj:Object, mat_slot_idx:int, verify_image:bool=True):
     """ return first image texture found in a material slot """
     mat = obj.material_slots[mat_slot_idx].material
-    if mat is None or not mat.use_nodes:
+    if mat is None:
         return None
     nodes_to_check = list(mat.node_tree.nodes)
     active_node = mat.node_tree.nodes.active
@@ -305,7 +304,7 @@ def get_uv_layer_data(obj, mat=None):
     """ returns data of active uv texture for object """
     obj_uv_layers = obj.data.uv_layers
     # get uv layer from node in material's node tree
-    if mat is not None and mat.use_nodes:
+    if mat is not None:
         mat_nodes = mat.node_tree.nodes
         uv_name_from_node = next((node.uv_map for node in mat_nodes if node.type == "UVMAP"), None)
         if uv_name_from_node is not None and uv_name_from_node in obj_uv_layers:
