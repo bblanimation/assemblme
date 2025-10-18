@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Christopher Gearhart
+# Copyright (C) 2026 Christopher Gearhart
 # christopher@bricksbroughttolife.com
 # http://bricksbroughttolife.com/
 #
@@ -45,7 +45,7 @@ class ASSEMBLME_OT_info_restore_preset(bpy.types.Operator):
             txt = bpy.data.texts.new("INFO: Restoring Removed Presets")
             txt.write("\nFollow these steps to restore a removed preset:")
             txt.write("\n\n- Navigate to the AssemblMe presets folder in your Blender scripts directory")
-            txt.write("\n      (e.g. ~/Library/Application Support/Blender/2.80/scripts/presets/assemblme)")
+            txt.write("\n      (e.g. ~/Library/Application Support/Blender/5.0/scripts/presets/assemblme)")
             txt.write("\n- From this directory, navigate to the 'backups' folder")
             txt.write("\n- Select and copy the preset files you would like to restore")
             txt.write("\n- Paste the copied preset files into the parent directory '...scripts/presets/assemblme'")

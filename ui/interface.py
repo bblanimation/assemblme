@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Christopher Gearhart
+# Copyright (C) 2026 Christopher Gearhart
 # christopher@bricksbroughttolife.com
 # http://bricksbroughttolife.com/
 #
