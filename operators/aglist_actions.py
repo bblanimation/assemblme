@@ -265,9 +265,6 @@ class AGLIST_OT_clear_all_items(Operator):
 class ASSEMBLME_UL_items(UIList):
 
     def draw_item(self, context:Context, layout, data, item, icon, active_data, active_propname, index):
-        # Make sure your code supports all 3 layout types
-        if self.layout_type in {"GRID"}:
-            layout.alignment = "CENTER"
         split = layout.split(align=False, factor=0.9)
         split.prop(item, "name", text="", emboss=False, translate=False, icon="MOD_BUILD")
 
