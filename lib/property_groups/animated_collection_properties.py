@@ -85,6 +85,42 @@ class AnimatedCollectionProperties(PropertyGroup):
         default=0.1,
     )
 
+    order_mode: EnumProperty(
+        name="Order",
+        description="Choose how objects are grouped for animation timing",
+        items=[
+            ("LAYER", "Layer Height", "Animate objects by spatial layers"),
+            ("BUILD_ORDER", "Build Order", "Animate objects by Bricker/LDraw step, submodel, bag, or object build metadata"),
+        ],
+        update=clear_preset,
+        default="LAYER",
+    )
+    build_order_grouping: EnumProperty(
+        name="Grouping",
+        description="Choose how Bricker/LDraw build data is grouped",
+        items=[
+            ("STEP", "Steps", "Animate each instruction step"),
+            ("SUBMODEL", "Submodels", "Animate each submodel or bag as a reveal"),
+            ("SUBMODEL_STEP", "Submodel Steps", "Animate submodel or bag steps in order"),
+        ],
+        update=clear_preset,
+        default="STEP",
+    )
+    build_order_hero_final_count: IntProperty(
+        name="Hero Final",
+        description="Split the last N objects into final one-by-one connection moments",
+        min=0,
+        soft_max=20,
+        update=clear_preset,
+        default=1,
+    )
+    build_order_fallback_layers: BoolProperty(
+        name="Fallback to Layers",
+        description="Use layer-height ordering when no Bricker/LDraw build order data can be found",
+        update=clear_preset,
+        default=True,
+    )
+
     path_object: StringProperty(
         name="Path",
         description="Path object for animated objects to follow",

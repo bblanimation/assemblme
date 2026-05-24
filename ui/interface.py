@@ -173,11 +173,13 @@ class ASSEMBLME_PT_settings(Panel):
         col.prop(ag, "first_frame")
         col.prop(ag, "build_speed")
         col.prop(ag, "velocity")
+        col.prop(ag, "order_mode")
 
         col = box.column(align=True)
-        if ag.anim_preset == "Follow Curve":
-            col.label(text="Path Object:")
-            col.prop(ag, "path_object")
+        col.label(text="Curve Path:")
+        col.prop_search(ag, "path_object", bpy.data, "objects", text="")
+        if is_follow_curve_enabled(ag):
+            pass
         else:
             split = col.split(align=False, factor=0.5)
             col1 = split.column(align=True)
@@ -202,8 +204,13 @@ class ASSEMBLME_PT_settings(Panel):
         row = col1.row(align=True)
         row.prop(ag, "orient_random")
         col1 = box.column(align=True)
-        row = col1.row(align=True)
-        row.prop(ag, "layer_height")
+        if ag.order_mode == "BUILD_ORDER":
+            col1.prop(ag, "build_order_grouping")
+            col1.prop(ag, "build_order_hero_final_count")
+            col1.prop(ag, "build_order_fallback_layers")
+        else:
+            row = col1.row(align=True)
+            row.prop(ag, "layer_height")
 
         col = box.column(align=True)
         row = col.row(align=True)

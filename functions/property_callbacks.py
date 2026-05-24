@@ -91,8 +91,14 @@ def handle_outdated_preset(self, context:Context):
 def update_anim_preset(self, context:Context):
     scn, ag = get_active_context_info()
     if ag.anim_preset != "None":
+        if ag.anim_preset in REMOVED_DEFAULT_PRESETS:
+            ag.anim_preset = "None"
+            ag.cur_preset = "None"
+            return None
         import importlib.util
-        path_to_file = os.path.join(get_presets_filepath(), ag.anim_preset + ".py")
+        default_path_to_file = os.path.join(get_addon_directory(), "lib", "default_presets", ag.anim_preset + ".py")
+        user_path_to_file = os.path.join(get_presets_filepath(), ag.anim_preset + ".py")
+        path_to_file = default_path_to_file if os.path.isfile(default_path_to_file) else user_path_to_file
         if os.path.isfile(path_to_file):
             spec = importlib.util.spec_from_file_location(ag.anim_preset + ".py", path_to_file)
             foo = importlib.util.module_from_spec(spec)

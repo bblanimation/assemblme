@@ -62,12 +62,13 @@ class ASSEMBLME_OT_refresh_anim_length(Operator):
 
             # populate self.list_z_values
             self.list_z_values,_,_ = get_list_z_values(ag, self.objects_to_move)
+            object_groups = get_animation_object_groups(ag, self.objects_to_move, self.list_z_values)
 
             # set obj_min_loc and obj_max_loc
             set_bounds_for_visualizer(ag, self.list_z_values)
 
-            # calculate how many frames the animation will last (depletes self.list_z_values)
-            ag.anim_length = get_anim_length(ag, self.objects_to_move, self.list_z_values, ag.layer_height, ag.inverted_build, ag.skip_empty_selections)
+            # calculate how many frames the animation will last
+            ag.anim_length = get_anim_length_from_groups(ag, object_groups)
 
             if ag.collection:
                 # set current_frame to original current_frame

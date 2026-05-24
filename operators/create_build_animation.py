@@ -101,12 +101,16 @@ class ASSEMBLME_OT_create_build_animation(Operator):
         ### BEGIN ANIMATION GENERATION ###
         # populate self.list_z_values
         self.list_z_values,rot_x_l,rot_y_l = get_list_z_values(ag, self.objects_to_move)
+        object_groups = get_animation_object_groups(ag, self.objects_to_move, self.list_z_values)
+        if len(object_groups) == 0:
+            self.report({"WARNING"}, "No valid build groups found")
+            return{"FINISHED"}
 
         # set obj_min_loc and obj_max_loc
         set_bounds_for_visualizer(ag, self.list_z_values)
 
         # calculate how many frames the animation will last
-        ag.anim_length = get_anim_length(ag, self.objects_to_move, self.list_z_values.copy(), ag.layer_height, ag.inverted_build, ag.skip_empty_selections)
+        ag.anim_length = get_anim_length_from_groups(ag, object_groups)
 
         # set first frame to animate from
         self.cur_frame = ag.first_frame + (ag.anim_length if ag.build_type == "ASSEMBLE" else 0)
@@ -115,7 +119,7 @@ class ASSEMBLME_OT_create_build_animation(Operator):
         ag.frame_with_orig_loc = self.cur_frame
 
         # animate the objects
-        objects_moved, last_frame = animate_objects(ag, self.objects_to_move, self.list_z_values, self.cur_frame, ag.loc_interpolation_mode, ag.rot_interpolation_mode)
+        objects_moved, last_frame = animate_objects(ag, self.objects_to_move, self.list_z_values, self.cur_frame, ag.loc_interpolation_mode, ag.rot_interpolation_mode, object_groups=object_groups)
 
         # handle case where no object was ever selected (e.g. only camera passed to function).
         if action == "CREATE" and ag.frame_with_orig_loc == last_frame:
@@ -141,6 +145,22 @@ class ASSEMBLME_OT_create_build_animation(Operator):
         if len(get_anim_objects(ag)) == 0:
             self.report({"WARNING"}, "Collection contains no objects!")
             return False
+        if ag.order_mode == "BUILD_ORDER" and not ag.build_order_fallback_layers:
+            list_z_values,_,_ = get_list_z_values(ag, self.objects_to_move)
+            if len(get_animation_object_groups(ag, self.objects_to_move, list_z_values)) == 0:
+                self.report({"WARNING"}, "No Bricker/LDraw build order data found")
+                return False
+        if is_follow_curve_enabled(ag):
+            path_obj = get_path_object(ag)
+            if path_obj is None:
+                self.report({"WARNING"}, "No curve path selected")
+                return False
+            if path_obj.type != "CURVE":
+                self.report({"WARNING"}, "Follow Curve path must be a curve object")
+                return False
+            if len(get_curve_path_points(path_obj)) < 2:
+                self.report({"WARNING"}, "Follow Curve path needs at least two points")
+                return False
         # check if this would overlap with other animations
         other_anim_ags = [ag0 for ag0 in scn.aglist if ag0 != ag and ag0.collection == ag.collection and ag0.animated]
         for ag1 in other_anim_ags:
