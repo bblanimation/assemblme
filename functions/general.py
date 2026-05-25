@@ -383,6 +383,70 @@ def get_animation_object_groups(ag, objects_to_move:list[Object], list_z_values:
     return get_layer_object_groups(list_z_values, ag.layer_height, ag.inverted_build, ag.skip_empty_selections)
 
 
+def get_anim_length_settings_signature(ag) -> str:
+    """Return a compact signature for settings that affect duration."""
+    collection_name = ag.collection.name if ag.collection is not None else ""
+    object_count = len(get_anim_objects(ag)) if ag.collection is not None else 0
+    return "|".join((
+        collection_name,
+        str(object_count),
+        str(ag.mesh_only),
+        str(ag.build_speed),
+        str(ag.velocity),
+        str(ag.order_mode),
+        str(ag.build_order_grouping),
+        str(ag.build_order_hero_final_count),
+        str(ag.build_order_fallback_layers),
+        str(ag.layer_height),
+        str(ag.inverted_build),
+        str(ag.skip_empty_selections),
+    ))
+
+
+def anim_length_needs_refresh(ag) -> bool:
+    """Return True when the displayed duration may be out of date."""
+    return ag.anim_length > 0 and ag.anim_length_signature != get_anim_length_settings_signature(ag)
+
+
+def format_anim_duration(ag, scn=None) -> str:
+    """Return animation length as frames plus seconds at the scene frame rate."""
+    scn = scn or bpy.context.scene
+    fps = scn.render.fps / scn.render.fps_base if scn.render.fps_base else scn.render.fps
+    seconds = ag.anim_length / fps if fps else 0
+    return f"Duration: {ag.anim_length} frames / {seconds:.1f}s"
+
+
+def collection_status_messages(ag) -> list[tuple[str, str]]:
+    """Return UI-ready validation messages for the selected animation collection."""
+    if ag.collection is None:
+        return [("ERROR", "No collection selected")]
+    all_objects = list(ag.collection.all_objects)
+    if len(all_objects) == 0:
+        return [("ERROR", "Collection is empty")]
+    if ag.mesh_only and not any(obj.type == "MESH" for obj in all_objects):
+        return [("ERROR", "Mesh Objects Only is on, but this collection has no meshes")]
+    return []
+
+
+def has_build_order_data(ag, objects_to_move:list[Object]=None) -> bool:
+    """Return True when Build Order mode can find step/submodel metadata."""
+    if ag.collection is None:
+        return False
+    objects_to_move = objects_to_move if objects_to_move is not None else get_anim_objects(ag)
+    return len(get_build_order_groups(ag, objects_to_move)) > 0
+
+
+def build_order_status_message(ag) -> tuple[str, str] | None:
+    """Return a UI note when Build Order is selected but no data is available."""
+    if ag.order_mode != "BUILD_ORDER" or ag.collection is None:
+        return None
+    if has_build_order_data(ag):
+        return None
+    if ag.build_order_fallback_layers:
+        return ("INFO", "No build-order data found; fallback will use Layer Height")
+    return ("ERROR", "No build-order data found")
+
+
 def is_follow_curve_enabled(ag) -> bool:
     """Return True when a selected curve should drive object location.
 
@@ -402,7 +466,21 @@ def get_path_object(ag) -> Object | None:
     """Return the Blender object selected as the follow-curve path."""
     if not ag.path_object:
         return None
+    if hasattr(ag.path_object, "type"):
+        return ag.path_object
     return bpy.data.objects.get(ag.path_object)
+
+
+def curve_status_message(ag) -> tuple[str, str] | None:
+    """Return the inline status for the curve path picker, when useful."""
+    path_obj = get_path_object(ag)
+    if path_obj is None:
+        return None
+    if path_obj.type != "CURVE":
+        return ("ERROR", "Selected object is not a curve")
+    if len(get_curve_path_points(path_obj)) < 2:
+        return ("ERROR", "Curve needs at least two usable points")
+    return ("CURVE_DATA", f"Following curve: {path_obj.name}")
 
 
 def get_bezier_point(p0:Vector, h0:Vector, h1:Vector, p1:Vector, t:float) -> Vector:

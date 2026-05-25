@@ -54,15 +54,15 @@ class AnimatedCollectionProperties(PropertyGroup):
         default=1,
     )
     build_speed: IntProperty(
-        name="Step",
-        description="Number of frames to skip forward between each object selection",
+        name="Build Spacing",
+        description="Number of frames between each layer, step, or object group",
         min=1,
         soft_max=1000,
         update=clear_preset,
         default=1,
     )
     velocity: FloatProperty(
-        name="Velocity",
+        name="Part Speed",
         description="Speed of individual object layers (2^(10 - Velocity) = object animation duration in frames)",
         unit="VELOCITY",
         min=0.001,
@@ -121,10 +121,10 @@ class AnimatedCollectionProperties(PropertyGroup):
         default=True,
     )
 
-    path_object: StringProperty(
+    path_object: PointerProperty(
+        type=bpy.types.Object,
         name="Path",
         description="Curve object that animated objects follow when selected",
-        default="",
     )
 
     loc_offset: FloatVectorProperty(
@@ -271,6 +271,7 @@ class AnimatedCollectionProperties(PropertyGroup):
 
     frame_with_orig_loc: IntProperty(default=-1)
     anim_length: IntProperty(default=0)
+    anim_length_signature: StringProperty(default="")
     last_layer_velocity: IntProperty(default=-1)
     visualizer_animated: BoolProperty(default=False)
     visualizer_active: BoolProperty(default=False)

@@ -69,6 +69,7 @@ class ASSEMBLME_OT_refresh_anim_length(Operator):
 
             # calculate how many frames the animation will last
             ag.anim_length = get_anim_length_from_groups(ag, object_groups)
+            ag.anim_length_signature = get_anim_length_settings_signature(ag)
 
             if ag.collection:
                 # set current_frame to original current_frame

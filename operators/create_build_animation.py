@@ -150,8 +150,8 @@ class ASSEMBLME_OT_create_build_animation(Operator):
             if len(get_animation_object_groups(ag, self.objects_to_move, list_z_values)) == 0:
                 self.report({"WARNING"}, "No Bricker/LDraw build order data found")
                 return False
-        if is_follow_curve_enabled(ag):
-            path_obj = get_path_object(ag)
+        path_obj = get_path_object(ag)
+        if is_follow_curve_enabled(ag) or path_obj is not None:
             if path_obj is None:
                 self.report({"WARNING"}, "No curve path selected")
                 return False

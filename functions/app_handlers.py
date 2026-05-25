@@ -121,5 +121,8 @@ def handle_upconversion(dummy):
                         val = getattr(ag, prop)
                         if snake_prop == "build_speed":
                             val = max(1, int(round(val)))
-                        setattr(ag, snake_prop, val)
+                        if snake_prop == "path_object" and isinstance(val, str):
+                            val = bpy.data.objects.get(val)
+                        if val is not None:
+                            setattr(ag, snake_prop, val)
             ag.version = bpy.props.assemblme_version

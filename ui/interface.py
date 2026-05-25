@@ -96,6 +96,8 @@ class ASSEMBLME_PT_animations(Panel):
                 col.prop_search(ag, "collection", bpy.data, "collections", text="")
                 col = split.column(align=True)
                 col.operator("aglist.set_to_active", text="", icon="GROUP")
+                for icon, message in collection_status_messages(ag):
+                    col1.label(text=message, icon=icon)
                 if ag.collection is None:
                     row = col1.row(align=True)
                     row.active = len(bpy.context.selected_objects) != 0
@@ -169,7 +171,9 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = box.column(align=True)
         approx = "~" if ag.orient_random > 0.005 else ""
-        col.operator("assemblme.refresh_anim_length", text="Duration: " + approx + str(ag.anim_length) + " frames", icon="FILE_REFRESH")
+        col.operator("assemblme.refresh_anim_length", text=approx + format_anim_duration(ag, scn), icon="FILE_REFRESH")
+        if anim_length_needs_refresh(ag):
+            col.label(text="Duration may need refresh", icon="INFO")
         col.prop(ag, "first_frame")
         col.prop(ag, "build_speed")
         col.prop(ag, "velocity")
@@ -177,18 +181,24 @@ class ASSEMBLME_PT_settings(Panel):
 
         col = box.column(align=True)
         col.label(text="Curve Path:")
-        col.prop_search(ag, "path_object", bpy.data, "objects", text="")
-        if not is_follow_curve_enabled(ag):
-            split = col.split(align=False, factor=0.5)
-            col1 = split.column(align=True)
-            col1.prop(ag, "loc_offset", text="Location Offset")
-            col1.prop(ag, "loc_interpolation_mode", text="")
-            col1.prop(ag, "loc_random")
+        col.prop_search(ag, "path_object", scn, "objects", text="")
+        curve_message = curve_status_message(ag)
+        if curve_message is not None:
+            icon, message = curve_message
+            col.label(text=message, icon=icon)
+        split = col.split(align=False, factor=0.5)
+        split.active = not is_follow_curve_enabled(ag)
+        col1 = split.column(align=True)
+        col1.prop(ag, "loc_offset", text="Location Offset")
+        col1.prop(ag, "loc_interpolation_mode", text="")
+        col1.prop(ag, "loc_random")
 
-            col1 = split.column(align=True)
-            col1.prop(ag, "rot_offset", text="Rotation Offset")
-            col1.prop(ag, "rot_interpolation_mode", text="")
-            col1.prop(ag, "rot_random")
+        col1 = split.column(align=True)
+        col1.prop(ag, "rot_offset", text="Rotation Offset")
+        col1.prop(ag, "rot_interpolation_mode", text="")
+        col1.prop(ag, "rot_random")
+        if is_follow_curve_enabled(ag):
+            col.label(text="Curve path controls travel; offsets are disabled", icon="INFO")
 
         col1 = box.column(align=True)
         row = col1.row(align=True)
@@ -206,6 +216,10 @@ class ASSEMBLME_PT_settings(Panel):
             col1.prop(ag, "build_order_grouping")
             col1.prop(ag, "build_order_hero_final_count")
             col1.prop(ag, "build_order_fallback_layers")
+            build_order_message = build_order_status_message(ag)
+            if build_order_message is not None:
+                icon, message = build_order_message
+                col1.label(text=message, icon=icon)
         else:
             row = col1.row(align=True)
             row.prop(ag, "layer_height")
