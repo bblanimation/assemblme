@@ -178,9 +178,7 @@ class ASSEMBLME_PT_settings(Panel):
         col = box.column(align=True)
         col.label(text="Curve Path:")
         col.prop_search(ag, "path_object", bpy.data, "objects", text="")
-        if is_follow_curve_enabled(ag):
-            pass
-        else:
+        if not is_follow_curve_enabled(ag):
             split = col.split(align=False, factor=0.5)
             col1 = split.column(align=True)
             col1.prop(ag, "loc_offset", text="Location Offset")

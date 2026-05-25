@@ -30,6 +30,36 @@ from .general import *
 from .common import *
 
 
+def get_saved_minor_version(version:str) -> int:
+    """Return the middle version number from old dot or current comma versions."""
+    version_parts = str(version).replace(",", ".").split(".")
+    if len(version_parts) < 2:
+        return 0
+    try:
+        return int(version_parts[1].strip())
+    except ValueError:
+        return 0
+
+
+def get_legacy_collection_name(ag) -> str:
+    """Return the old stored collection name, if this file still has one."""
+    for attr_name in ("group_name", "groupName"):
+        try:
+            value = getattr(ag, attr_name)
+        except AttributeError:
+            value = ""
+        if value:
+            return value
+    for key in ("group_name", "groupName"):
+        try:
+            value = ag.get(key, "")
+        except Exception:
+            value = ""
+        if value:
+            return value
+    return ag.collection.name if ag.collection is not None else ""
+
+
 @persistent
 def convert_velocity_value(dummy):
     scn = bpy.context.scene
@@ -70,17 +100,26 @@ def handle_upconversion(dummy):
     # update storage scene name
     for ag in scn.aglist:
         if created_with_unsupported_version(ag):
+            minor_version = get_saved_minor_version(ag.version)
             # convert from v1_1 to v1_2
-            if int(ag.version[2]) < 2:
+            if minor_version < 2:
                 if ag.collection and ag.collection.name.startswith("AssemblMe_animated_group"):
                     ag.collection.name = "AssemblMe_{}_group".format(ag.name)
             # convert from v1_2 to v1_3
-            if int(ag.version[2]) < 2:
-                ag.collection = bpy.data.collections.get(ag.group_name)
+            if minor_version < 3:
+                legacy_collection_name = get_legacy_collection_name(ag)
+                if legacy_collection_name:
+                    legacy_collection = bpy.data.collections.get(legacy_collection_name)
+                    if legacy_collection is not None:
+                        ag.collection = legacy_collection
                 # transfer props from 1_2 (camel to snake case)
                 for prop in get_annotations(ag):
                     if prop.islower():
                         continue
                     snake_prop = camel_to_snake_case(prop)
                     if hasattr(ag, snake_prop):
-                        setattr(ag, snake_prop, getattr(ag, prop))
+                        val = getattr(ag, prop)
+                        if snake_prop == "build_speed":
+                            val = max(1, int(round(val)))
+                        setattr(ag, snake_prop, val)
+            ag.version = bpy.props.assemblme_version

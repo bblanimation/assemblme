@@ -123,7 +123,7 @@ class AnimatedCollectionProperties(PropertyGroup):
 
     path_object: StringProperty(
         name="Path",
-        description="Path object for animated objects to follow",
+        description="Curve object that animated objects follow when selected",
         default="",
     )
 
